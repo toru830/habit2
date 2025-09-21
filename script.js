@@ -268,28 +268,30 @@ class HabitTracker {
                 habitCell.classList.add('completed');
             }
 
-            // クリックイベント
-            habitCell.addEventListener('click', (e) => {
-                console.log('Cell clicked:', habit.id, date.toISOString().split('T')[0]);
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleHabit(habit.id, date, habitCell);
-            });
-
-            // タッチイベント（モバイル対応）
+            // 統合されたタッチ/クリックイベント
+            let isTouching = false;
+            
             habitCell.addEventListener('touchstart', (e) => {
+                isTouching = true;
                 console.log('Cell touched:', habit.id, date.toISOString().split('T')[0]);
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleHabit(habit.id, date, habitCell);
             });
             
-            // タップイベントも追加（より確実なタッチ対応）
-            habitCell.addEventListener('click', (e) => {
-                console.log('Cell clicked:', habit.id, date.toISOString().split('T')[0]);
+            habitCell.addEventListener('touchend', (e) => {
+                isTouching = false;
                 e.preventDefault();
                 e.stopPropagation();
-                this.toggleHabit(habit.id, date, habitCell);
+            });
+            
+            habitCell.addEventListener('click', (e) => {
+                if (!isTouching) {
+                    console.log('Cell clicked:', habit.id, date.toISOString().split('T')[0]);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.toggleHabit(habit.id, date, habitCell);
+                }
             });
 
             habitRow.appendChild(habitCell);
@@ -1438,12 +1440,38 @@ class HabitTracker {
     saveCompletedHabits() {
         localStorage.setItem('habitTrackerData', JSON.stringify(this.completedHabits));
         
-        // 自動同期でクラウド保存
+        // 自動同期でクラウド保存（エラーハンドリング付き）
         if (window.optionalSync && window.optionalSync.isEnabled) {
-            window.optionalSync.saveData({
-                completedHabits: this.completedHabits,
-                lastUpdated: Date.now()
-            });
+            try {
+                console.log('Firebaseにデータを保存中...');
+                window.optionalSync.saveData({
+                    completedHabits: this.completedHabits,
+                    lastUpdated: Date.now()
+                }).then(() => {
+                    console.log('Firebaseにデータを保存完了');
+                }).catch((error) => {
+                    console.error('Firebase保存エラー:', error);
+                    // エラー時は手動同期ボタンを表示
+                    this.showManualSyncButton();
+                });
+            } catch (error) {
+                console.error('同期エラー:', error);
+                this.showManualSyncButton();
+            }
+        } else {
+            console.log('同期機能が無効 - ローカル保存のみ');
+        }
+    }
+    
+    // 手動同期ボタンを表示
+    showManualSyncButton() {
+        const syncStatusBar = document.getElementById('syncStatusBar');
+        if (syncStatusBar) {
+            syncStatusBar.style.display = 'flex';
+            const statusElement = document.getElementById('sync-status');
+            if (statusElement) {
+                statusElement.textContent = '⚠️ 手動同期が必要';
+            }
         }
     }
 
