@@ -268,30 +268,12 @@ class HabitTracker {
                 habitCell.classList.add('completed');
             }
 
-            // 統合されたタッチ/クリックイベント
-            let isTouching = false;
-            
-            habitCell.addEventListener('touchstart', (e) => {
-                isTouching = true;
-                console.log('Cell touched:', habit.id, date.toISOString().split('T')[0]);
+            // クリックイベントのみ（タッチイベントは削除）
+            habitCell.addEventListener('click', (e) => {
+                console.log('Cell clicked:', habit.id, date.toISOString().split('T')[0]);
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleHabit(habit.id, date, habitCell);
-            });
-            
-            habitCell.addEventListener('touchend', (e) => {
-                isTouching = false;
-                e.preventDefault();
-                e.stopPropagation();
-            });
-            
-            habitCell.addEventListener('click', (e) => {
-                if (!isTouching) {
-                    console.log('Cell clicked:', habit.id, date.toISOString().split('T')[0]);
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.toggleHabit(habit.id, date, habitCell);
-                }
             });
 
             habitRow.appendChild(habitCell);

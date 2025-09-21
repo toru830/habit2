@@ -538,9 +538,9 @@ body {
     position: relative;
     z-index: 10;
     height: 32px;
-    /* タッチ操作の改善 */
+    /* クリック操作のみ */
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
+    touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
