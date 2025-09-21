@@ -513,6 +513,7 @@ class HabitTracker {
 
     // 習慣の完了状態を切り替え
     toggleHabit(habitId, date, cell) {
+        console.log('習慣を切り替え:', { habitId, date: date.toISOString().split('T')[0] });
         const dateStr = date.toISOString().split('T')[0];
         const isCompleted = this.isHabitCompleted(habitId, date);
 
@@ -525,6 +526,7 @@ class HabitTracker {
                 }
             }
             cell.classList.remove('completed');
+            console.log('習慣を未完了に変更');
         } else {
             // 完了に設定
             if (!this.completedHabits[dateStr]) {
@@ -532,8 +534,10 @@ class HabitTracker {
             }
             this.completedHabits[dateStr].push(habitId);
             cell.classList.add('completed');
+            console.log('習慣を完了に変更');
         }
 
+        console.log('現在の完了習慣データ:', this.completedHabits);
         this.saveCompletedHabits();
         
         // 合計を更新
@@ -1187,6 +1191,7 @@ class HabitTracker {
 
     // オプション同期機能の設定
     setupOptionalSync() {
+        console.log('setupOptionalSync呼び出し');
         // 同期機能を完全に無効化する場合は true に設定
         const DISABLE_SYNC = false;
         
@@ -1194,6 +1199,8 @@ class HabitTracker {
             console.log('同期機能は無効化されています');
             return;
         }
+        
+        console.log('同期機能の設定を開始');
         
         // 以下のコードは DISABLE_SYNC = true の場合は実行されない
         // 手動同期ボタンのイベントリスナー
