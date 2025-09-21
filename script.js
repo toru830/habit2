@@ -66,8 +66,7 @@ class HabitTracker {
         this.setupOptionalSync();
         // 手動同期ボタンも有効化
         this.setupManualSyncOnly();
-        // データ更新イベントを監視
-        this.setupDataUpdateListener();
+        // データ更新イベントを監視（メソッドを削除して直接設定）
     }
 
     // 現在の週を取得（月曜日開始）
@@ -1151,7 +1150,7 @@ class HabitTracker {
 
     // 手動同期のみの安全なセットアップ
     setupManualSyncOnly() {
-        console.log('手動同期ボタンのみを有効化します');
+        console.log('手動同期ボタンと自動同期を有効化します');
         
         // 手動同期ボタンのイベントリスナー（データ保存のみ）
         const forceSyncBtn = document.getElementById('forceSyncBtn');
