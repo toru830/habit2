@@ -50,6 +50,7 @@ class OptionalSyncManager {
 
     async enableSync() {
         try {
+            console.log('同期機能を有効化中...');
             // 同期マネージャーを動的インポート
             const syncModule = await import('./sync-manager.js');
             this.syncManager = syncModule.syncManager;
@@ -58,7 +59,11 @@ class OptionalSyncManager {
             
             // 初期接続を試行
             if (this.syncManager) {
+                console.log('同期マネージャーに接続中...');
                 await this.syncManager.connect();
+                console.log('同期マネージャーに接続完了');
+            } else {
+                console.error('同期マネージャーが取得できませんでした');
             }
         } catch (error) {
             console.error('同期機能の有効化に失敗:', error);
@@ -83,12 +88,17 @@ class OptionalSyncManager {
 
     // アプリとの連携メソッド
     async saveData(data) {
+        console.log('saveData呼び出し:', { isEnabled: this.isEnabled, hasSyncManager: !!this.syncManager, data });
         if (this.isEnabled && this.syncManager) {
             try {
+                console.log('Firebaseにデータを保存中...');
                 await this.syncManager.saveAppData(data);
+                console.log('Firebaseにデータを保存完了');
             } catch (error) {
                 console.error('同期保存エラー:', error);
             }
+        } else {
+            console.warn('同期機能が無効または同期マネージャーがありません');
         }
     }
 

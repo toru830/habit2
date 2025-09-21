@@ -53,20 +53,27 @@ class SyncManager {
   }
 
   async connect() {
-    if (!this.isOnline) return;
+    console.log('SyncManager接続開始:', { isOnline: this.isOnline, isAuthenticated: this.isAuthenticated });
+    if (!this.isOnline) {
+      console.log('オフラインのため接続をスキップ');
+      return;
+    }
 
     try {
       this.syncStatus = 'connecting';
       this.updateSyncStatus();
 
       if (!this.isAuthenticated) {
+        console.log('匿名認証を実行中...');
         await this.signInAnonymously();
       } else {
+        console.log('リアルタイム同期を設定中...');
         await this.setupRealtimeSync();
       }
 
       this.syncStatus = 'connected';
       this.updateSyncStatus();
+      console.log('SyncManager接続完了');
     } catch (error) {
       console.error('接続エラー:', error);
       this.syncStatus = 'error';
