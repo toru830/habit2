@@ -66,6 +66,8 @@ class HabitTracker {
         this.setupOptionalSync();
         // 手動同期ボタンも有効化
         this.setupManualSyncOnly();
+        // データ更新イベントを監視
+        this.setupDataUpdateListener();
     }
 
     // 現在の週を取得（月曜日開始）
@@ -1561,7 +1563,17 @@ class HabitTracker {
 
 // アプリの初期化
 document.addEventListener('DOMContentLoaded', () => {
-    new HabitTracker();
+    const app = new HabitTracker();
+    
+    // データ更新イベントの監視
+    window.addEventListener('dataUpdated', (event) => {
+        console.log('データ更新イベントを受信:', event.detail);
+        if (event.detail && event.detail.completedHabits) {
+            app.completedHabits = event.detail.completedHabits;
+            app.renderCalendar();
+            console.log('データが更新されました');
+        }
+    });
 });
 
 // サービスワーカーの登録（PWA対応）

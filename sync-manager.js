@@ -97,6 +97,11 @@ class SyncManager {
         await this.mergeData(remoteData);
         this.lastSyncTime = new Date();
         this.updateSyncStatus();
+        
+        // カスタムイベントでアプリに変更を通知
+        window.dispatchEvent(new CustomEvent('dataUpdated', { 
+          detail: { completedHabits: remoteData.completedHabits } 
+        }));
       }
     }, (error) => {
       console.error('同期エラー:', error);
