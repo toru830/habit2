@@ -55,7 +55,7 @@ class HabitTracker {
         this.habits = habitsData;
         this.completedHabits = this.loadCompletedHabits();
         this.currentWeek = this.getCurrentWeek();
-        this.calendarMonth = new Date(2025, 8, 1); // 2025年9月
+        this.calendarMonth = new Date(); // 現在の月
         this.init();
     }
 
@@ -67,8 +67,8 @@ class HabitTracker {
 
     // 現在の週を取得（月曜日開始）
     getCurrentWeek() {
-        // 2025年9月20日（金曜日）を今日として設定
-        const today = new Date(2025, 8, 20); // 月は0から始まるので8=9月
+        // 実際の今日の日付を使用
+        const today = new Date();
         const dayOfWeek = today.getDay(); // 0=日曜日, 1=月曜日, ..., 6=土曜日
         const monday = new Date(today);
         // 月曜日を週の開始にする（月曜日=1の場合、0日戻る）
@@ -412,8 +412,8 @@ class HabitTracker {
 
     // 習慣の連続日数を計算（今日のチェックのみ）
     calculateStreak(habitId) {
-        // 今日（9月20日）の日付オブジェクトを作成
-        const today = new Date(2025, 8, 20);
+        // 実際の今日の日付オブジェクトを作成
+        const today = new Date();
         const todayStr = today.toISOString().split('T')[0];
         
         // 今日にチェックがあれば1、なければ0
@@ -543,8 +543,8 @@ class HabitTracker {
 
     // 今日かどうかをチェック
     isToday(date) {
-        // 2025年9月20日を今日として設定
-        const today = new Date(2025, 8, 20);
+        // 実際の今日の日付を使用
+        const today = new Date();
         return date.toDateString() === today.toDateString();
     }
 
@@ -840,7 +840,7 @@ class HabitTracker {
     getTotalChartData() {
         const labels = [];
         const values = [];
-        const today = new Date(2025, 8, 20); // 2025年9月20日
+        const today = new Date(); // 実際の今日の日付を使用
         
         // 過去30日分のデータを生成
         let cumulativeTotal = 0;
@@ -1101,7 +1101,7 @@ class HabitTracker {
         }
         
         // 当月の日付を表示
-        const today = new Date(2025, 8, 20); // 固定の今日の日付
+        const today = new Date(); // 実際の今日の日付を使用
         for (let day = 1; day <= daysInMonth; day++) {
             const dayElement = document.createElement('div');
             dayElement.className = 'calendar-day';
