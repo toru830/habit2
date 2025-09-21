@@ -276,8 +276,8 @@ class HabitTracker {
                 this.toggleHabit(habit.id, date, habitCell);
             });
 
-            // タッチイベントも追加（モバイル対応）
-            habitCell.addEventListener('touchstart', (e) => {
+            // タッチイベント（モバイル対応）
+            habitCell.addEventListener('touchend', (e) => {
                 console.log('Cell touched:', habit.id, date.toISOString().split('T')[0]);
                 e.preventDefault();
                 e.stopPropagation();
@@ -1120,8 +1120,8 @@ class HabitTracker {
         document.getElementById('nextWeek').addEventListener('click', () => this.moveToNextWeek());
         document.getElementById('goToToday').addEventListener('click', () => this.goToToday());
         
-        // スワイプイベント（スマホ対応）
-        this.setupSwipeEvents();
+        // スワイプイベントは無効化
+        // this.setupSwipeEvents();
         
         // カレンダーモーダル
         document.querySelector('.dropdown-arrow').addEventListener('click', () => this.showCalendarModal());
