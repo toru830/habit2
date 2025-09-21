@@ -270,14 +270,6 @@ class HabitTracker {
 
             // クリックイベントのみ（タッチイベントは削除）
             habitCell.addEventListener('click', (e) => {
-                console.log('Cell clicked:', {
-                    habitId: habit.id,
-                    habitName: habit.name,
-                    habitType: habitType,
-                    date: date.toISOString().split('T')[0],
-                    className: habitCell.className,
-                    target: e.target
-                });
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleHabit(habit.id, date, habitCell);
@@ -330,9 +322,7 @@ class HabitTracker {
     // 習慣の完了状態をチェック
     isHabitCompleted(habitId, date) {
         const dateStr = date.toISOString().split('T')[0];
-        const result = this.completedHabits[dateStr]?.includes(habitId) || false;
-        console.log('isHabitCompleted:', { habitId, dateStr, completedHabits: this.completedHabits[dateStr], result });
-        return result;
+        return this.completedHabits[dateStr]?.includes(habitId) || false;
     }
 
     // 習慣の一週間の合計を計算
@@ -513,45 +503,29 @@ class HabitTracker {
 
     // 習慣の完了状態を切り替え
     toggleHabit(habitId, date, cell) {
-        console.log('習慣を切り替え:', { 
-            habitId, 
-            date: date.toISOString().split('T')[0],
-            cellClassName: cell.className,
-            cellDataset: cell.dataset
-        });
         const dateStr = date.toISOString().split('T')[0];
-        const isCompleted = this.isHabitCompleted(habitId, date);
-        console.log('現在の完了状態:', isCompleted);
-        console.log('現在のcompletedHabits:', this.completedHabits[dateStr]);
-
-        if (isCompleted) {
+        
+        // 現在の完了状態を直接チェック
+        const isCurrentlyCompleted = this.completedHabits[dateStr]?.includes(habitId) || false;
+        
+        if (isCurrentlyCompleted) {
             // 完了を解除
-            console.log('完了を解除中...');
             if (this.completedHabits[dateStr]) {
-                const beforeFilter = this.completedHabits[dateStr];
                 this.completedHabits[dateStr] = this.completedHabits[dateStr].filter(id => id !== habitId);
-                console.log('フィルタ前:', beforeFilter, 'フィルタ後:', this.completedHabits[dateStr]);
                 if (this.completedHabits[dateStr].length === 0) {
                     delete this.completedHabits[dateStr];
-                    console.log('日付データを削除:', dateStr);
                 }
             }
             cell.classList.remove('completed');
-            console.log('習慣を未完了に変更 - クラス削除完了');
         } else {
             // 完了に設定
-            console.log('完了に設定中...');
             if (!this.completedHabits[dateStr]) {
                 this.completedHabits[dateStr] = [];
-                console.log('新しい日付データを作成:', dateStr);
             }
             this.completedHabits[dateStr].push(habitId);
             cell.classList.add('completed');
-            console.log('習慣を完了に変更 - クラス追加完了');
-            console.log('更新後のcompletedHabits:', this.completedHabits[dateStr]);
         }
 
-        console.log('現在の完了習慣データ:', this.completedHabits);
         this.saveCompletedHabits();
         
         // 合計を更新
