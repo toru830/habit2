@@ -78,6 +78,9 @@ class SyncManager {
       console.error('接続エラー:', error);
       this.syncStatus = 'error';
       this.updateSyncStatus();
+      
+      // エラー時は手動同期のみにフォールバック
+      console.log('自動同期に失敗、手動同期モードに切り替え');
     }
   }
 

@@ -44,6 +44,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Firebase関連のリクエストはキャッシュをスキップ
+  if (event.request.url.includes('firestore.googleapis.com') || 
+      event.request.url.includes('firebase.googleapis.com') ||
+      event.request.url.includes('googleapis.com')) {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
