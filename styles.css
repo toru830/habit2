@@ -1,147 +1,1699 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>習慣化アプリ</title>
-    <meta name="description" content="週間習慣トラッカー">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="習慣化">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMwMDAwMDAiLz4KPHRleHQgeD0iOTYiIHk9IjEwOCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQ4cHgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5L2Z5a6YPC90ZXh0Pgo8L3N2Zz4K">
-    <link rel="stylesheet" href="styles.css?v=5">
-</head>
-<body>
-    <div class="app-container">
-        <!-- メインコンテンツ -->
-        <main class="main-content">
-            <!-- 週間ビュー -->
-            <section class="week-view" id="weekView">
-                <!-- 月選択 -->
-                <div class="month-selector">
-                    <button class="nav-arrow" id="prevWeek">‹</button>
-                    <div class="month-display">
-                        <span id="currentMonth">2025年9月</span>
-                        <span class="dropdown-arrow">▼</span>
-                    </div>
-                    <div class="month-actions">
-                        <button class="nav-arrow" id="nextWeek">›</button>
-                        <button class="action-btn today-btn" id="goToToday">今日</button>
-                    </div>
-                </div>
+/* リセットとベーススタイル */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-                <!-- カレンダーグリッド -->
-                <div class="calendar-container">
-                    <div class="calendar-grid">
-                        <!-- ヘッダー行 -->
-                        <div class="grid-header">
-                            <div class="header-cell no-header">No.</div>
-                            <div class="header-cell item-header">項目</div>
-                            <div class="header-cell day-header">月</div>
-                            <div class="header-cell day-header">火</div>
-                            <div class="header-cell day-header">水</div>
-                            <div class="header-cell day-header">木</div>
-                            <div class="header-cell day-header">金</div>
-                            <div class="header-cell day-header">土</div>
-                            <div class="header-cell day-header">日</div>
-                            <div class="header-cell total-header">週計</div>
-                            <div class="header-cell total-header">合計</div>
-                        </div>
-                        
-                        <!-- 日付行 -->
-                        <div class="date-row" id="dateRow">
-                            <div class="date-cell empty-cell"></div>
-                            <div class="date-cell empty-cell"></div>
-                            <!-- 日付はJavaScriptで動的に生成 -->
-                            <div class="date-cell empty-cell"></div>
-                            <div class="date-cell empty-cell"></div>
-                        </div>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+    min-height: 100vh;
+    color: #fff;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
 
-                        <!-- 習慣グリッド -->
-                        <div class="habits-grid" id="habitsGrid">
-                            <!-- 習慣はJavaScriptで動的に生成 -->
-                        </div>
-                        
-                        <!-- 日計行 -->
-                        <div class="daily-total-row" id="dailyTotalRow">
-                            <!-- 日計はJavaScriptで動的に生成 -->
-                        </div>
-                    </div>
-                </div>
-            </section>
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #000 !important;
+    height: 100vh;
+    position: relative;
+    padding-bottom: 0;
+    overflow-y: auto;
+}
 
-            <!-- 統計ビュー -->
-            <section class="stats-view" id="statsView" style="display: none;">
+/* ヘッダー */
+.header {
+    background: #1a1a1a;
+    color: white;
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #333;
+}
 
-                <!-- 合計値推移グラフ -->
-                <div class="chart-section">
-                    <h3>合計値の推移</h3>
-                    <div class="chart-container">
-                        <canvas id="totalChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-                <!-- 新しいレポートテーブル -->
-                <div class="report-table-section">
-                    <div class="report-table" id="reportTable">
-                        <!-- レポートテーブルはJavaScriptで動的に生成 -->
-                    </div>
-                </div>
-            </section>
+.header h1 {
+    font-size: 20px;
+    font-weight: 600;
+}
 
-            <!-- モンスタービュー -->
-            <section class="monster-view" id="monsterView" style="display: none;">
-                <h2>モンスター図鑑</h2>
-                <div class="monster-grid" id="monsterGrid">
-                    <!-- モンスターはJavaScriptで動的に生成 -->
-                </div>
-            </section>
-            
-            <!-- カレンダーモーダル -->
-            <div class="calendar-modal" id="calendarModal" style="display: none;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>日付を選択</h3>
-                        <button class="close-btn" id="closeCalendar">&times;</button>
-                    </div>
-                    <div class="calendar-container-modal">
-                        <div class="calendar-header">
-                            <button class="month-nav" id="prevMonth">‹</button>
-                            <span id="currentMonthYear">2025年9月</span>
-                            <button class="month-nav" id="nextMonth">›</button>
-                        </div>
-                        <div class="calendar-grid-modal" id="calendarGrid">
-                            <!-- カレンダーはJavaScriptで動的に生成 -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
 
-        <!-- ボトムナビゲーション -->
-        <nav class="bottom-nav">
-            <button class="nav-btn active" id="homeBtn">
-                <span class="nav-icon">🏠</span>
-                <span>ホーム</span>
-            </button>
-            <button class="nav-btn" id="reportBtn">
-                <span class="nav-icon">📊</span>
-                <span>レポート</span>
-            </button>
-            <button class="nav-btn" id="monsterBtn">
-                <span class="nav-icon">👹</span>
-                <span>モンスター</span>
-            </button>
-            <button class="nav-btn" id="settingsBtn">
-                <span class="nav-icon">⚙️</span>
-                <span>設定</span>
-            </button>
-        </nav>
-    </div>
+.header-btn {
+    background: #333;
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js?v=4"></script>
-</body>
-</html>
+/* 習慣名のスタイル */
+.habit-name {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.habit-number {
+    font-weight: bold;
+    color: #4A90E2;
+    font-size: 12px;
+    margin-bottom: 1px;
+}
+
+.habit-short-name {
+    font-size: 9px;
+    color: white;
+    text-align: center;
+    word-break: keep-all;
+}
+
+/* メインコンテンツ */
+.main-content {
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 120px);
+    background: #000 !important;
+}
+
+/* 週間ビュー */
+.week-view {
+    height: 100%;
+    background: #000 !important;
+}
+
+/* 月選択 */
+.month-selector {
+    background: #1a1a1a;
+    padding: 4px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.nav-arrow {
+    background: #333;
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.month-display {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    color: #666;
+}
+
+.month-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    background: #333;
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.today-btn {
+    background: #4A90E2;
+    font-weight: bold;
+    width: auto;
+    padding: 2px 8px;
+    font-size: 10px;
+}
+
+.today-btn:hover {
+    background: #357ABD;
+}
+
+/* カレンダーコンテナ */
+.calendar-container {
+    background: #000;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.calendar-grid {
+    display: flex;
+    flex-direction: column;
+    background: #000 !important;
+    min-height: 100vh;
+}
+
+/* グリッドヘッダー */
+.grid-header {
+    display: grid;
+    grid-template-columns: 30px 50px repeat(7, 1fr) 41px 41px;
+    min-height: 24px;
+    background: #000 !important;
+}
+
+.grid-header .header-cell {
+    height: 24px;
+    padding: 1px 2px;
+}
+
+.header-cell {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    color: white;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-header {
+    font-weight: bold;
+}
+
+.item-header {
+    font-weight: bold;
+}
+
+.day-header {
+    font-weight: bold;
+}
+
+.day-header:nth-child(8) {
+    color: #4A90E2; /* 土曜日を青色 */
+}
+
+.day-header:nth-child(9) {
+    color: #ff6b6b; /* 日曜日を赤色 */
+}
+
+.total-header {
+    font-weight: bold;
+    background: #2a2a2a;
+    color: #4A90E2;
+    font-size: 10.5px;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+    transform: none;
+}
+
+.day-label {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    border-right: 1px solid #333;
+}
+
+.day-label:first-child {
+    border-right: 1px solid #333;
+}
+
+/* 日付行 */
+.date-row {
+    display: grid;
+    grid-template-columns: 30px 50px repeat(7, 1fr) 41px 41px;
+    min-height: 24px;
+    background: #000 !important;
+}
+
+.date-row .date-cell {
+    height: 24px;
+    padding: 1px 2px;
+}
+
+.empty-cell {
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+}
+
+.date-cell {
+    padding: 4px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 35px;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.date-number {
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.date-cell.today {
+    background: #4A90E2;
+    color: white;
+    border-left: 2px solid #4A90E2;
+    border-right: 2px solid #4A90E2;
+    border-top: 2px solid #4A90E2;
+}
+
+
+.date-cell:first-child {
+    border-right: 1px solid #333;
+}
+
+/* 習慣グリッド */
+.habits-grid {
+    display: flex;
+    flex-direction: column;
+    background: #000 !important;
+}
+
+/* グループヘッダー行 */
+.group-header-row {
+    display: grid;
+    grid-template-columns: 40px 80px repeat(7, 1fr) 50px 50px;
+    border-bottom: 1px solid #333;
+    min-height: 35px;
+}
+
+.group-header-no-cell {
+    padding: 4px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 35px;
+}
+
+.group-header-cell {
+    padding: 4px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 35px;
+    white-space: pre-line;
+    line-height: 1;
+}
+
+.group-header-empty-cell {
+    padding: 4px 2px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    height: 35px;
+}
+
+.habit-row {
+    display: grid;
+    grid-template-columns: 30px 50px repeat(7, 1fr) 41px 41px;
+    border-bottom: 1px solid #333;
+    min-height: 32px;
+    background: #000 !important;
+}
+
+/* No.から5行目までを一つの黒四角で囲む */
+.grid-header,
+.date-row,
+.habit-row:nth-child(1),
+.habit-row:nth-child(2),
+.habit-row:nth-child(3),
+.habit-row:nth-child(4),
+.habit-row:nth-child(5) {
+    border-left: 3px solid #000;
+    border-right: 3px solid #000;
+    background: #1a1a1a;
+    min-height: 32px;
+}
+
+.grid-header {
+    border-top: 3px solid #000;
+    margin: 2px 0 0 0;
+}
+
+.date-row {
+    margin: 0;
+}
+
+.habit-row:nth-child(1),
+.habit-row:nth-child(2),
+.habit-row:nth-child(3),
+.habit-row:nth-child(4) {
+    margin: 0;
+}
+
+.habit-row:nth-child(5) {
+    border-bottom: 3px solid #000;
+    margin: 0 0 2px 0;
+}
+
+.habit-row:nth-child(1) .habit-cell,
+.habit-row:nth-child(2) .habit-cell,
+.habit-row:nth-child(3) .habit-cell,
+.habit-row:nth-child(4) .habit-cell,
+.habit-row:nth-child(5) .habit-cell,
+.habit-row:nth-child(1) .habit-no-cell,
+.habit-row:nth-child(2) .habit-no-cell,
+.habit-row:nth-child(3) .habit-no-cell,
+.habit-row:nth-child(4) .habit-no-cell,
+.habit-row:nth-child(5) .habit-no-cell,
+.habit-row:nth-child(1) .habit-item-cell,
+.habit-row:nth-child(2) .habit-item-cell,
+.habit-row:nth-child(3) .habit-item-cell,
+.habit-row:nth-child(4) .habit-item-cell,
+.habit-row:nth-child(5) .habit-item-cell,
+.habit-row:nth-child(1) .habit-total-cell,
+.habit-row:nth-child(2) .habit-total-cell,
+.habit-row:nth-child(3) .habit-total-cell,
+.habit-row:nth-child(4) .habit-total-cell,
+.habit-row:nth-child(5) .habit-total-cell {
+    height: 32px;
+    padding: 1px 2px;
+}
+
+/* 日計行 */
+.daily-total-row {
+    display: grid;
+    grid-template-columns: 30px 50px repeat(7, 1fr) 41px 41px;
+    border-bottom: 1px solid #333;
+    min-height: 32px;
+    background: #000 !important;
+}
+
+/* 習慣セル */
+.habit-no-cell {
+    padding: 1px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 32px;
+    min-width: 30px;
+    max-width: 30px;
+    box-sizing: border-box;
+}
+
+.habit-item-cell {
+    padding: 1px 2px;
+    text-align: left;
+    color: white;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 10px;
+    height: 32px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 50px;
+    max-width: 50px;
+    box-sizing: border-box;
+}
+
+.habit-total-cell {
+    padding: 1px 2px;
+    text-align: center;
+    color: white;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    height: 32px;
+    min-width: 41px;
+    max-width: 41px;
+    box-sizing: border-box;
+}
+
+.habit-name {
+    padding: 4px 2px;
+    font-size: 10px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a1a;
+    line-height: 1.1;
+    pointer-events: none;
+    border-bottom: 1px solid #333;
+}
+
+.habit-cell {
+    padding: 1px 2px;
+    text-align: center;
+    border-right: 1px solid #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    height: 32px;
+    pointer-events: auto;
+    border-bottom: 1px solid #333;
+    background: #000 !important;
+}
+
+.habit-cell.today {
+    border-left: 2px solid #4A90E2;
+    border-right: 2px solid #4A90E2;
+}
+
+.habit-cell.today:last-of-type {
+    border-bottom: 2px solid #4A90E2;
+}
+
+.habit-cell:hover {
+    background: #1a1a1a;
+}
+
+.habit-cell.completed {
+    background: #000 !important;
+}
+
+.habit-cell.completed::after {
+    content: '✓';
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* チェックマークの色分け */
+.habit-cell.completed.priority-5::after {
+    color: #ff6b6b;
+}
+
+.habit-cell.completed.priority-4::after {
+    color: #ff6b6b;
+}
+
+.habit-cell.completed.priority-3::after {
+    color: #ff6b6b;
+}
+
+.habit-cell.completed.priority-2::after {
+    color: #ff6b6b;
+}
+
+.habit-cell.completed.priority-1::after {
+    color: #ff6b6b;
+}
+
+/* 統計ビュー */
+.stats-view {
+    padding: 20px;
+    background: #000;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* モンスタービュー */
+.monster-view {
+    padding: 20px;
+    background: #000;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.monster-view h2 {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.monster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.monster-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+    text-align: center;
+}
+
+.monster-image {
+    width: 120px;
+    height: 120px;
+    background: #333;
+    border-radius: 8px;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    border: 2px solid #555;
+}
+
+.monster-name {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.monster-description {
+    color: #ccc;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.monster-stats {
+    display: flex;
+    justify-content: space-between;
+    color: #4A90E2;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* グラフセクション */
+.chart-section {
+    margin: 30px 0;
+}
+
+.chart-section h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.chart-container {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+    text-align: center;
+}
+
+/* レポートテーブルセクション */
+.report-table-section {
+    margin: 30px 0;
+}
+
+.report-table {
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+    overflow: hidden;
+}
+
+.report-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+    padding: 6px 8px;
+    text-align: center;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+}
+
+.report-table th {
+    background: #2a2a2a;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.report-table th:last-child,
+.report-table td:last-child {
+    border-right: none;
+}
+
+.report-table tr:last-child td {
+    border-bottom: none;
+}
+
+.report-table td {
+    color: white;
+    font-size: 12px;
+}
+
+.report-table .habit-number {
+    color: white;
+    font-weight: bold;
+    width: 30px;
+}
+
+.report-table .habit-name {
+    text-align: left;
+    padding-left: 12px;
+    width: 120px;
+    color: white;
+}
+
+.report-table .stat-value {
+    color: white;
+    font-weight: bold;
+}
+
+.report-table .best-streak-value {
+    color: white;
+    font-weight: bold;
+}
+
+/* ボトムナビゲーション */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    display: flex;
+    z-index: 1000;
+}
+
+.nav-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+.nav-btn.active {
+    color: #4A90E2;
+}
+
+.nav-btn.add-btn {
+    background: #4A90E2;
+    color: white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -10px 10px;
+    flex: none;
+}
+
+.nav-btn.add-btn .nav-icon {
+    font-size: 24px;
+}
+
+.nav-btn:hover {
+    color: white;
+}
+
+.nav-icon {
+    font-size: 20px;
+}
+
+.nav-btn span:last-child {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* スクロールバー */
+.calendar-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.calendar-container::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.calendar-container::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* カレンダーモーダル */
+.calendar-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.modal-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 18px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: #333;
+}
+
+.calendar-container-modal {
+    background: #000;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.calendar-header span {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.month-nav {
+    background: #333;
+    border: none;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.month-nav:hover {
+    background: #555;
+}
+
+.calendar-grid-modal {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-day-header {
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+.calendar-day {
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 14px;
+    color: white;
+    background: #1a1a1a;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.calendar-day:hover {
+    background: #333;
+}
+
+.calendar-day.today {
+    background: #4A90E2;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.selected {
+    background: #28a745;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.other-month {
+    color: #666;
+    background: #0a0a0a;
+}
+
+/* 連続日数の色分け */
+.habit-streak-cell.streak-0 {
+    color: white;
+}
+
+.habit-streak-cell.streak-1 {
+    color: white;
+}
+
+.habit-streak-cell.streak-2 {
+    color: #4A90E2;
+}
+
+.habit-streak-cell.streak-3 {
+    color: #28a745;
+}
+
+.habit-streak-cell.streak-4 {
+    color: #ff8c00;
+}
+
+.habit-streak-cell.streak-5 {
+    color: #ff6b6b;
+}
+
+.habit-streak-cell.streak-6 {
+    color: #8a2be2;
+}
+
+.habit-streak-cell.streak-7 {
+    color: #ffd700;
+}
+
+.habit-streak-cell.streak-8-or-more {
+    color: #ffd700;
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 6-8行目のグループ枠線（グレー） */
+.habit-row:nth-child(6) {
+    border-top: 3px solid #666;
+    border-left: 3px solid #666;
+    border-right: 3px solid #666;
+    margin: 2px 0 0 0;
+    background: #1a1a1a;
+    min-height: 32px;
+}
+
+.habit-row:nth-child(7) {
+    border-left: 3px solid #666;
+    border-right: 3px solid #666;
+    margin: 0;
+    background: #1a1a1a;
+    min-height: 32px;
+}
+
+.habit-row:nth-child(8) {
+    border-bottom: 3px solid #666;
+    border-left: 3px solid #666;
+    border-right: 3px solid #666;
+    margin: 0 0 2px 0;
+    background: #1a1a1a;
+    min-height: 32px;
+}
+
+
+/* 9-15行目のグループ枠線（濃い緑） */
+.habit-row:nth-child(9) {
+    border-top: 3px solid #1a5f1a;
+    border-left: 3px solid #1a5f1a;
+    border-right: 3px solid #1a5f1a;
+    margin: 2px 0 0 0;
+    background: #1a1a1a;
+}
+
+.habit-row:nth-child(10),
+.habit-row:nth-child(11),
+.habit-row:nth-child(12),
+.habit-row:nth-child(13),
+.habit-row:nth-child(14) {
+    border-left: 3px solid #1a5f1a;
+    border-right: 3px solid #1a5f1a;
+    margin: 0;
+    background: #1a1a1a;
+}
+
+.habit-row:nth-child(15) {
+    border-bottom: 3px solid #1a5f1a;
+    border-left: 3px solid #1a5f1a;
+    border-right: 3px solid #1a5f1a;
+    margin: 0 0 2px 0;
+    background: #1a1a1a;
+}
+
+
+
+/* 日計行は黒太枠で囲む */
+.daily-total-row {
+    margin: 2px 0 0 0;
+    border: 3px solid #000;
+    border-radius: 4px;
+    background: #1a1a1a;
+}
+
+/* 週計の数字の色分け */
+.habit-total-cell[data-total="0"] {
+    color: white;
+}
+
+.habit-total-cell[data-total="1"] {
+    color: #4A90E2;
+}
+
+.habit-total-cell[data-total="2"] {
+    color: #ffd700;
+}
+
+.habit-total-cell[data-total="3"] {
+    color: #28a745;
+}
+
+.habit-total-cell[data-total="4"] {
+    color: #ff8c00;
+}
+
+.habit-total-cell[data-total="5"] {
+    color: #ff6b6b;
+}
+
+.habit-total-cell[data-total="6"] {
+    color: #8a2be2;
+}
+
+.habit-total-cell[data-total="7"] {
+    color: #ff69b4;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 480px) {
+    .app-container {
+        box-shadow: none;
+        max-width: 100%;
+        height: 100vh;
+        background: #000 !important;
+    }
+    
+    .main-content {
+        height: calc(100vh - 80px);
+        background: #000 !important;
+    }
+    
+    /* 週間ナビゲーション */
+    .week-navigation {
+        padding: 4px 8px;
+        background: #000 !important;
+    }
+    
+    .week-nav-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+    
+    .week-display {
+        font-size: 12px;
+        padding: 0 6px;
+    }
+    
+    .today-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+    
+    /* グリッドの調整 */
+    .grid-header,
+    .date-row,
+    .habit-row,
+    .daily-total-row {
+        grid-template-columns: 25px 45px repeat(7, 1fr) 35px 35px;
+    }
+    
+    /* セルのサイズ調整 */
+    .habit-no-cell {
+        min-width: 25px;
+        max-width: 25px;
+        font-size: 10px;
+        height: 28px;
+        justify-content: center;
+        text-align: center;
+        background: #1a1a1a;
+    }
+    
+    .habit-item-cell {
+        min-width: 45px;
+        max-width: 45px;
+        font-size: 9px;
+        height: 28px;
+        justify-content: center;
+        text-align: center;
+        background: #1a1a1a;
+    }
+    
+    .habit-cell {
+        height: 28px;
+        font-size: 10px;
+        background: #000;
+    }
+    
+    .habit-total-cell {
+        min-width: 35px;
+        max-width: 35px;
+        font-size: 10px;
+        height: 28px;
+        background: #1a1a1a;
+    }
+    
+    .header-cell {
+        font-size: 9px;
+        height: 20px;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
+    
+    .date-cell {
+        font-size: 10px;
+        height: 20px;
+    }
+    
+    /* 行の高さ調整 */
+    .grid-header,
+    .date-row {
+        min-height: 20px;
+    }
+    
+    .habit-row,
+    .daily-total-row {
+        min-height: 28px;
+    }
+    
+    /* グリッド全体の背景 */
+    .calendar-grid {
+        background: #000 !important;
+    }
+    
+    .habits-grid {
+        background: #000 !important;
+    }
+    
+    /* カレンダーモーダル */
+    .calendar-modal {
+        padding: 20px 10px;
+    }
+    
+    .modal-content {
+        width: 90%;
+        max-width: 320px;
+    }
+    
+    .calendar-grid-modal {
+        gap: 2px;
+    }
+    
+    .calendar-day {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    /* レポートテーブルのモバイル対応 */
+    .report-table {
+        background: #000 !important;
+        border: 1px solid #333;
+    }
+    
+    .report-table th {
+        background: #1a1a1a !important;
+        color: white !important;
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+    
+    .report-table td {
+        background: #000 !important;
+        color: white !important;
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+    
+    .report-table .habit-number {
+        color: white !important;
+        background: #000 !important;
+    }
+    
+    .report-table .habit-name {
+        color: white !important;
+        background: #000 !important;
+    }
+    
+    .report-table .stat-value {
+        color: white !important;
+        background: #000 !important;
+    }
+    
+    .report-table .best-streak-value {
+        color: white !important;
+        background: #000 !important;
+    }
+}
+
+/* より小さな画面対応 */
+@media (max-width: 360px) {
+    .grid-header,
+    .date-row,
+    .habit-row,
+    .daily-total-row {
+        grid-template-columns: 22px 40px repeat(7, 1fr) 30px 30px;
+    }
+    
+    .habit-no-cell {
+        min-width: 22px;
+        max-width: 22px;
+        font-size: 9px;
+        justify-content: center;
+        text-align: center;
+        background: #1a1a1a;
+    }
+    
+    .habit-item-cell {
+        min-width: 40px;
+        max-width: 40px;
+        font-size: 8px;
+        justify-content: center;
+        text-align: center;
+        background: #1a1a1a;
+    }
+    
+    .habit-total-cell {
+        min-width: 30px;
+        max-width: 30px;
+        font-size: 9px;
+        background: #1a1a1a;
+    }
+    
+    .header-cell {
+        font-size: 8px;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
+    
+    .date-cell {
+        font-size: 9px;
+    }
+    
+    .habit-cell {
+        background: #000;
+    }
+    
+    .week-display {
+        font-size: 10px;
+        padding: 0 4px;
+    }
+    
+    .today-btn {
+        padding: 3px 6px;
+        font-size: 9px;
+    }
+    
+    .week-navigation {
+        padding: 2px 6px;
+    }
+    
+    .week-nav-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    
+    /* レポートテーブルの小画面対応 */
+    .report-table th {
+        background: #1a1a1a !important;
+        color: white !important;
+        font-size: 9px;
+        padding: 3px 4px;
+    }
+    
+    .report-table td {
+        background: #000 !important;
+        color: white !important;
+        font-size: 9px;
+        padding: 3px 4px;
+    }
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.habit-cell {
+    animation: fadeIn 0.2s ease;
+}
+
+/* No系習慣のスタイル */
+.no-habit-item {
+    color: white !important;
+    font-weight: 500;
+}
+
+.no-habit-cell {
+    background: #000 !important;
+}
+
+.no-habit-cell.completed {
+    background: #000 !important;
+}
+
+.no-habit-cell.completed::after {
+    content: '✓';
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* サプリ・食事系習慣のスタイル */
+.supplement-habit-item {
+    color: white !important;
+    font-weight: 500;
+}
+
+.supplement-habit-cell {
+    background: #000 !important;
+}
+
+.supplement-habit-cell.completed {
+    background: #000 !important;
+}
+
+.supplement-habit-cell.completed::after {
+    content: '✓';
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* 日計セル */
+.daily-total-cell {
+    padding: 4px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 35px;
+}
+
+.daily-total-cell.today {
+    border-left: 2px solid #4A90E2;
+    border-right: 2px solid #4A90E2;
+}
+
+/* 連続列ヘッダー */
+.streak-header {
+    background: #1a1a1a;
+    color: white;
+    font-weight: bold;
+    font-size: 10.5px;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+    transform: none;
+}
+
+/* 習慣連続セル */
+.habit-streak-cell {
+    padding: 4px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    height: 35px;
+    min-width: 41px;
+    max-width: 41px;
+    box-sizing: border-box;
+}
+
+
+/* 報酬システムのスタイル */
+.reward-info {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.reward-info h3 {
+    color: #4A90E2;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.current-reward {
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.reward-emoji {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.reward-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.reward-description {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.next-reward {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.next-reward-title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.next-reward-emoji {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.next-reward-name {
+    font-size: 16px;
+    color: white;
+    font-weight: 500;
+}
+
+/* 詳細レポートのスタイル */
+.detailed-report {
+    margin-top: 20px;
+}
+
+.detailed-report h3 {
+    color: #4A90E2;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.habit-report-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #333;
+}
+
+.habit-report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.habit-report-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+}
+
+.habit-report-type {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.habit-type {
+    background: #4A90E2;
+    color: white;
+}
+
+.no-type {
+    background: #ff6b6b;
+    color: white;
+}
+
+.supplement-type {
+    background: #48dbfb;
+    color: white;
+}
+
+.habit-report-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4A90E2;
+}
+
+.stat-value.best-streak {
+    color: #ffd700;
+}
+
+/* ダークモード対応（既にダークテーマ） */
+@media (prefers-color-scheme: light) {
+    body {
+        background: #f5f5f5;
+    }
+    
+    .app-container {
+        background: white;
+        color: #333;
+    }
+    
+    .header,
+    .tab-nav,
+    .month-selector {
+        background: white;
+        border-color: #e0e0e0;
+    }
+    
+    .calendar-grid {
+        background: white;
+    }
+    
+    .date-header,
+    .date-row {
+        background: #f8f9fa;
+    }
+    
+    .habit-name {
+        background: #f8f9fa;
+        color: #333;
+    }
+    
+    .habit-cell {
+        background: white;
+    }
+    
+    .habit-cell:hover {
+        background: #f8f9fa;
+    }
+    
+    .bottom-nav {
+        background: white;
+        border-color: #e0e0e0;
+    }
+    
+    .nav-btn {
+        color: #666;
+    }
+    
+    .nav-btn.active {
+        color: #4A90E2;
+    }
+    
+    .no-habit-row {
+        background: #f8f9fa;
+        border-left-color: #ff6b6b;
+    }
+    
+    .no-habit-cell {
+        background: #000 !important;
+        border-left-color: #ff6b6b;
+    }
+    
+    .supplement-habit-row {
+        background: #f8f9fa;
+        border-left-color: #4A90E2;
+    }
+    
+    .supplement-habit-cell {
+        background: #000 !important;
+        border-left-color: #4A90E2;
+    }
+    
+    
+    .reward-info {
+        background: #f8f9fa;
+        border-color: #e0e0e0;
+    }
+    
+    .next-reward {
+        background: #e9ecef;
+        border-color: #dee2e6;
+    }
+}
