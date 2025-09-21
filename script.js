@@ -62,7 +62,9 @@ class HabitTracker {
     init() {
         this.renderCalendar();
         this.setupEventListeners();
-        // 手動同期ボタンのみを有効化（データ読み込みなし）
+        // 同期機能を有効化
+        this.setupOptionalSync();
+        // 手動同期ボタンも有効化
         this.setupManualSyncOnly();
     }
 
@@ -1184,7 +1186,7 @@ class HabitTracker {
     // オプション同期機能の設定
     setupOptionalSync() {
         // 同期機能を完全に無効化する場合は true に設定
-        const DISABLE_SYNC = true;
+        const DISABLE_SYNC = false;
         
         if (DISABLE_SYNC) {
             console.log('同期機能は無効化されています');
@@ -1420,7 +1422,7 @@ class HabitTracker {
     saveCompletedHabits() {
         localStorage.setItem('habitTrackerData', JSON.stringify(this.completedHabits));
         
-        // 手動同期でのみクラウド保存（リアルタイム同期は無効）
+        // 自動同期でクラウド保存
         if (window.optionalSync && window.optionalSync.isEnabled) {
             window.optionalSync.saveData({
                 completedHabits: this.completedHabits,
