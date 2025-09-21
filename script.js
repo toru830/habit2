@@ -277,8 +277,16 @@ class HabitTracker {
             });
 
             // タッチイベント（モバイル対応）
-            habitCell.addEventListener('touchend', (e) => {
+            habitCell.addEventListener('touchstart', (e) => {
                 console.log('Cell touched:', habit.id, date.toISOString().split('T')[0]);
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleHabit(habit.id, date, habitCell);
+            });
+            
+            // タップイベントも追加（より確実なタッチ対応）
+            habitCell.addEventListener('click', (e) => {
+                console.log('Cell clicked:', habit.id, date.toISOString().split('T')[0]);
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleHabit(habit.id, date, habitCell);

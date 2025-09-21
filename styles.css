@@ -538,6 +538,13 @@ body {
     position: relative;
     z-index: 10;
     height: 32px;
+    /* タッチ操作の改善 */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     pointer-events: auto;
     border-bottom: 1px solid #333;
     background: #000 !important;
