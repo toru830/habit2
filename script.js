@@ -270,7 +270,14 @@ class HabitTracker {
 
             // クリックイベントのみ（タッチイベントは削除）
             habitCell.addEventListener('click', (e) => {
-                console.log('Cell clicked:', habit.id, date.toISOString().split('T')[0]);
+                console.log('Cell clicked:', {
+                    habitId: habit.id,
+                    habitName: habit.name,
+                    habitType: habitType,
+                    date: date.toISOString().split('T')[0],
+                    className: habitCell.className,
+                    target: e.target
+                });
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleHabit(habit.id, date, habitCell);
@@ -504,9 +511,15 @@ class HabitTracker {
 
     // 習慣の完了状態を切り替え
     toggleHabit(habitId, date, cell) {
-        console.log('習慣を切り替え:', { habitId, date: date.toISOString().split('T')[0] });
+        console.log('習慣を切り替え:', { 
+            habitId, 
+            date: date.toISOString().split('T')[0],
+            cellClassName: cell.className,
+            cellDataset: cell.dataset
+        });
         const dateStr = date.toISOString().split('T')[0];
         const isCompleted = this.isHabitCompleted(habitId, date);
+        console.log('現在の完了状態:', isCompleted);
 
         if (isCompleted) {
             // 完了を解除
