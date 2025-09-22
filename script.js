@@ -64,18 +64,6 @@ class HabitTracker {
         this.setupEventListeners();
         // 同期機能を完全に無効化（データ消失を防ぐため）
         console.log('同期機能は完全に無効化されています');
-        
-        // ページ離脱時にデータを保存
-        window.addEventListener('beforeunload', () => {
-            this.saveCompletedHabits();
-        });
-        
-        // スマホでのページ非表示時にデータを保存
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.saveCompletedHabits();
-            }
-        });
     }
 
     // 現在の週を取得（月曜日開始）
@@ -517,6 +505,8 @@ class HabitTracker {
         // 現在の完了状態を直接チェック
         const isCurrentlyCompleted = this.completedHabits[dateStr]?.includes(habitId) || false;
         
+        console.log('toggleHabit開始:', { habitId, dateStr, isCurrentlyCompleted, currentData: this.completedHabits });
+        
         if (isCurrentlyCompleted) {
             // 完了を解除
             if (this.completedHabits[dateStr]) {
@@ -526,6 +516,7 @@ class HabitTracker {
                 }
             }
             cell.classList.remove('completed');
+            console.log('習慣を未完了に変更');
         } else {
             // 完了に設定
             if (!this.completedHabits[dateStr]) {
@@ -533,8 +524,10 @@ class HabitTracker {
             }
             this.completedHabits[dateStr].push(habitId);
             cell.classList.add('completed');
+            console.log('習慣を完了に変更');
         }
 
+        console.log('変更後のデータ:', this.completedHabits);
         this.saveCompletedHabits();
         
         // 合計を更新
@@ -1394,12 +1387,13 @@ class HabitTracker {
     // ローカルストレージに完了した習慣を保存
     saveCompletedHabits() {
         try {
-            localStorage.setItem('habitTrackerData', JSON.stringify(this.completedHabits));
-            console.log('ローカルにデータを保存完了:', this.completedHabits);
-            
-            // 保存確認
-            const saved = localStorage.getItem('habitTrackerData');
-            console.log('保存確認:', saved);
+            // データが空でない場合のみ保存
+            if (this.completedHabits && Object.keys(this.completedHabits).length > 0) {
+                localStorage.setItem('habitTrackerData', JSON.stringify(this.completedHabits));
+                console.log('ローカルにデータを保存完了:', this.completedHabits);
+            } else {
+                console.log('保存するデータがありません');
+            }
         } catch (error) {
             console.error('ローカル保存エラー:', error);
         }
