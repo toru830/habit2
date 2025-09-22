@@ -50,21 +50,15 @@ class OptionalSyncManager {
 
     async enableSync() {
         try {
-            console.log('同期機能を有効化中...');
+            console.log('手動同期機能を有効化中...');
             // 同期マネージャーを動的インポート
             const syncModule = await import('./sync-manager.js');
             this.syncManager = syncModule.syncManager;
             this.isEnabled = true;
-            console.log('同期機能が有効になりました');
+            console.log('手動同期機能が有効になりました');
             
-            // 初期接続を試行
-            if (this.syncManager) {
-                console.log('同期マネージャーに接続中...');
-                await this.syncManager.connect();
-                console.log('同期マネージャーに接続完了');
-            } else {
-                console.error('同期マネージャーが取得できませんでした');
-            }
+            // リアルタイム同期は無効化（手動同期のみ）
+            console.log('リアルタイム同期は無効化されています');
         } catch (error) {
             console.error('同期機能の有効化に失敗:', error);
             this.isEnabled = false;
@@ -116,7 +110,14 @@ class OptionalSyncManager {
     async forceSync() {
         if (this.isEnabled && this.syncManager) {
             try {
-                await this.syncManager.forceSync();
+                console.log('手動同期開始 - データ保存のみ');
+                // 現在のローカルデータを保存（上書きなし）
+                const currentData = {
+                    completedHabits: JSON.parse(localStorage.getItem('habitTrackerData') || '{}'),
+                    lastUpdated: Date.now()
+                };
+                await this.syncManager.saveAppData(currentData);
+                console.log('手動同期完了 - データ保存のみ');
             } catch (error) {
                 console.error('手動同期エラー:', error);
                 throw error;
