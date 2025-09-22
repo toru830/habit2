@@ -64,6 +64,18 @@ class HabitTracker {
         this.setupEventListeners();
         // 同期機能を完全に無効化（データ消失を防ぐため）
         console.log('同期機能は完全に無効化されています');
+        
+        // ページ離脱時にデータを保存
+        window.addEventListener('beforeunload', () => {
+            this.saveCompletedHabits();
+        });
+        
+        // スマホでのページ非表示時にデータを保存
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.saveCompletedHabits();
+            }
+        });
     }
 
     // 現在の週を取得（月曜日開始）
@@ -1367,16 +1379,30 @@ class HabitTracker {
 
     // ローカルストレージから完了した習慣を読み込み
     loadCompletedHabits() {
-        // 開発用：データをクリアして初期化（コメントアウト）
-        // localStorage.removeItem('habitTrackerData');
-        const saved = localStorage.getItem('habitTrackerData');
-        return saved ? JSON.parse(saved) : {};
+        try {
+            const saved = localStorage.getItem('habitTrackerData');
+            console.log('ローカルストレージから読み込み:', saved);
+            const result = saved ? JSON.parse(saved) : {};
+            console.log('読み込み結果:', result);
+            return result;
+        } catch (error) {
+            console.error('ローカル読み込みエラー:', error);
+            return {};
+        }
     }
 
     // ローカルストレージに完了した習慣を保存
     saveCompletedHabits() {
-        localStorage.setItem('habitTrackerData', JSON.stringify(this.completedHabits));
-        console.log('ローカルにデータを保存完了');
+        try {
+            localStorage.setItem('habitTrackerData', JSON.stringify(this.completedHabits));
+            console.log('ローカルにデータを保存完了:', this.completedHabits);
+            
+            // 保存確認
+            const saved = localStorage.getItem('habitTrackerData');
+            console.log('保存確認:', saved);
+        } catch (error) {
+            console.error('ローカル保存エラー:', error);
+        }
     }
     
     // 手動同期ボタンを表示
