@@ -108,10 +108,8 @@ class SyncManager {
         this.lastSyncTime = new Date();
         this.updateSyncStatus();
         
-        // カスタムイベントでアプリに変更を通知
-        window.dispatchEvent(new CustomEvent('dataUpdated', { 
-          detail: { completedHabits: remoteData.completedHabits } 
-        }));
+        // カスタムイベントは無効化（データ上書きを防ぐため）
+        console.log('データ更新イベントは無効化されています');
       }
     }, (error) => {
       console.error('同期エラー:', error);
@@ -194,8 +192,8 @@ class SyncManager {
   setLocalData(data) {
     try {
       localStorage.setItem('habitTrackerData', JSON.stringify(data));
-      // カスタムイベントでアプリに変更を通知
-      window.dispatchEvent(new CustomEvent('dataUpdated', { detail: data }));
+      // カスタムイベントは無効化（データ上書きを防ぐため）
+      console.log('データ更新イベントは無効化されています');
     } catch (error) {
       console.error('ローカルデータ保存エラー:', error);
     }

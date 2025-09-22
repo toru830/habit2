@@ -1543,15 +1543,8 @@ class HabitTracker {
 document.addEventListener('DOMContentLoaded', () => {
     const app = new HabitTracker();
     
-    // データ更新イベントの監視
-    window.addEventListener('dataUpdated', (event) => {
-        console.log('データ更新イベントを受信:', event.detail);
-        if (event.detail && event.detail.completedHabits) {
-            app.completedHabits = event.detail.completedHabits;
-            app.renderCalendar();
-            console.log('データが更新されました');
-        }
-    });
+    // データ更新イベントは無効化（データ上書きを防ぐため）
+    console.log('データ更新イベントは無効化されています');
 });
 
 // サービスワーカーの登録（PWA対応）
