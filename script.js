@@ -62,8 +62,8 @@ class HabitTracker {
     init() {
         this.renderCalendar();
         this.setupEventListeners();
-        // 手動同期ボタンのみ有効化（自動同期は無効）
-        this.setupManualSyncOnly();
+        // 同期機能を完全に無効化（データ消失を防ぐため）
+        console.log('同期機能は完全に無効化されています');
     }
 
     // 現在の週を取得（月曜日開始）
@@ -1136,42 +1136,9 @@ class HabitTracker {
 
     // 手動同期のみの安全なセットアップ
     setupManualSyncOnly() {
-        console.log('手動同期ボタンと自動同期を有効化します');
-        
-        // 手動同期ボタンのイベントリスナー（データ保存のみ）
-        const forceSyncBtn = document.getElementById('forceSyncBtn');
-        if (forceSyncBtn && !forceSyncBtn.hasAttribute('data-listener-added')) {
-            forceSyncBtn.setAttribute('data-listener-added', 'true');
-            forceSyncBtn.addEventListener('click', async () => {
-                if (window.optionalSync && window.optionalSync.isEnabled) {
-                    try {
-                        // ボタンを無効化
-                        forceSyncBtn.disabled = true;
-                        forceSyncBtn.style.opacity = '0.5';
-                        
-                        // 同期を実行（データ保存のみ）
-                        await window.optionalSync.forceSync();
-                        
-                        // データ読み込みは行わない（安全のため）
-                        console.log('手動同期が完了しました（データ保存のみ）');
-                        
-                        // ボタンを再有効化
-                        forceSyncBtn.disabled = false;
-                        forceSyncBtn.style.opacity = '1';
-                        
-                    } catch (error) {
-                        console.error('手動同期エラー:', error);
-                        alert('同期に失敗しました: ' + error.message);
-                        
-                        // エラー時もボタンを再有効化
-                        forceSyncBtn.disabled = false;
-                        forceSyncBtn.style.opacity = '1';
-                    }
-                } else {
-                    alert('同期機能は利用できません。Firebase設定を確認してください。');
-                }
-            });
-        }
+        console.log('手動同期は無効化されています');
+        // 同期機能を完全に無効化
+        return;
     }
 
     // オプション同期機能の設定（自動同期を無効化）
