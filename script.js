@@ -62,11 +62,8 @@ class HabitTracker {
     init() {
         this.renderCalendar();
         this.setupEventListeners();
-        // 同期機能を有効化
-        this.setupOptionalSync();
-        // 手動同期ボタンも有効化
+        // 手動同期ボタンのみ有効化（自動同期は無効）
         this.setupManualSyncOnly();
-        // データ更新イベントを監視（メソッドを削除して直接設定）
     }
 
     // 現在の週を取得（月曜日開始）
@@ -1177,16 +1174,10 @@ class HabitTracker {
         }
     }
 
-    // オプション同期機能の設定
+    // オプション同期機能の設定（自動同期を無効化）
     setupOptionalSync() {
-        console.log('setupOptionalSync呼び出し');
-        // 同期機能を完全に無効化する場合は true に設定
-        const DISABLE_SYNC = false;
-        
-        if (DISABLE_SYNC) {
-            console.log('同期機能は無効化されています');
-            return;
-        }
+        console.log('自動同期は無効化されています');
+        return;
         
         console.log('同期機能の設定を開始');
         
@@ -1418,28 +1409,7 @@ class HabitTracker {
     // ローカルストレージに完了した習慣を保存
     saveCompletedHabits() {
         localStorage.setItem('habitTrackerData', JSON.stringify(this.completedHabits));
-        
-        // 自動同期でクラウド保存（エラーハンドリング付き）
-        if (window.optionalSync && window.optionalSync.isEnabled) {
-            try {
-                console.log('Firebaseにデータを保存中...');
-                window.optionalSync.saveData({
-                    completedHabits: this.completedHabits,
-                    lastUpdated: Date.now()
-                }).then(() => {
-                    console.log('Firebaseにデータを保存完了');
-                }).catch((error) => {
-                    console.error('Firebase保存エラー:', error);
-                    // エラー時は手動同期ボタンを表示
-                    this.showManualSyncButton();
-                });
-            } catch (error) {
-                console.error('同期エラー:', error);
-                this.showManualSyncButton();
-            }
-        } else {
-            console.log('同期機能が無効 - ローカル保存のみ');
-        }
+        console.log('ローカルにデータを保存完了');
     }
     
     // 手動同期ボタンを表示
