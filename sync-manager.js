@@ -183,7 +183,7 @@ class SyncManager {
 
   getLocalData() {
     try {
-      const data = localStorage.getItem('habitData');
+      const data = localStorage.getItem('habitTrackerData');
       return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error('ローカルデータ読み込みエラー:', error);
@@ -193,7 +193,7 @@ class SyncManager {
 
   setLocalData(data) {
     try {
-      localStorage.setItem('habitData', JSON.stringify(data));
+      localStorage.setItem('habitTrackerData', JSON.stringify(data));
       // カスタムイベントでアプリに変更を通知
       window.dispatchEvent(new CustomEvent('dataUpdated', { detail: data }));
     } catch (error) {

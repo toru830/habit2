@@ -116,7 +116,8 @@ class OptionalSyncManager {
                     completedHabits: JSON.parse(localStorage.getItem('habitTrackerData') || '{}'),
                     lastUpdated: Date.now()
                 };
-                await this.syncManager.saveAppData(currentData);
+                // 直接Firebaseに保存（ローカルデータは上書きしない）
+                await this.syncManager.saveData(currentData);
                 console.log('手動同期完了 - データ保存のみ');
             } catch (error) {
                 console.error('手動同期エラー:', error);
