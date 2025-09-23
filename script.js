@@ -365,7 +365,8 @@ class HabitTracker {
             }
 
             // 完了状態をチェック
-            const isCompleted = this.isHabitCompleted(habit.id, date);
+            const dateStr = date.toISOString().split('T')[0];
+            const isCompleted = this.isHabitCompleted(habit.id, dateStr);
             if (isCompleted) {
                 habitCell.classList.add('completed');
             }
@@ -2163,9 +2164,9 @@ class HabitTracker {
     calculateStreaks() {
         const streaks = {};
         for (const habit of this.habits) {
-            streaks[habit] = {
-                current: this.getCurrentStreak(habit),
-                best: this.getBestStreak(habit)
+            streaks[habit.id] = {
+                current: this.getCurrentStreak(habit.id),
+                best: this.getBestStreak(habit.id)
             };
         }
         return streaks;
