@@ -58,14 +58,117 @@ class HabitTracker {
         this.calendarMonth = new Date(); // 現在の月
         this.reportMonth = new Date(); // レポート用の月
         this.healthData = this.loadHealthData(); // ヘルスキーピングとヘッドマッサージのデータ
+        
+        // モチベーション機能
+        this.achievements = this.loadAchievements();
+        this.streaks = this.calculateStreaks();
+        this.totalScore = this.calculateTotalScore();
+        
         this.init();
     }
 
     init() {
         this.renderCalendar();
         this.setupEventListeners();
+        this.setupDataManagement();
         // 同期機能を完全に無効化（データ消失を防ぐため）
         console.log('同期機能は完全に無効化されています');
+    }
+    
+    // データ管理機能の設定
+    setupDataManagement() {
+        const exportBtn = document.getElementById('exportDataBtn');
+        const importBtn = document.getElementById('importDataBtn');
+        const restoreBtn = document.getElementById('restoreDataBtn');
+        
+        if (exportBtn) {
+            exportBtn.onclick = () => this.exportData();
+        }
+        
+        if (importBtn) {
+            importBtn.onclick = () => this.importData();
+        }
+        
+        if (restoreBtn) {
+            restoreBtn.onclick = () => this.restoreFromBackup();
+        }
+    }
+    
+    // データをエクスポート
+    exportData() {
+        const data = {
+            completedHabits: this.completedHabits,
+            healthData: this.healthData,
+            achievements: this.achievements,
+            exportDate: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `habit-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('データをエクスポートしました！');
+    }
+    
+    // データをインポート
+    importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (data.completedHabits) {
+                            this.completedHabits = data.completedHabits;
+                        }
+                        if (data.healthData) {
+                            this.healthData = data.healthData;
+                        }
+                        if (data.achievements) {
+                            this.achievements = data.achievements;
+                        }
+                        
+                        this.saveCompletedHabits();
+                        this.saveHealthData();
+                        this.saveAchievements();
+                        this.renderCalendar();
+                        this.updateMotivationDisplay();
+                        
+                        alert('データをインポートしました！');
+                    } catch (error) {
+                        alert('データのインポートに失敗しました。正しいファイルを選択してください。');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+        
+        input.click();
+    }
+    
+    // バックアップから復元
+    restoreFromBackup() {
+        if (confirm('バックアップから復元しますか？現在のデータは上書きされます。')) {
+            this.restoreHabitsFromBackup();
+            this.restoreFromBackup();
+            this.renderCalendar();
+            this.updateMotivationDisplay();
+            alert('バックアップから復元しました！');
+        }
     }
 
     // 現在の週を取得（月曜日開始）
@@ -553,6 +656,9 @@ class HabitTracker {
 
         console.log('変更後のデータ:', this.completedHabits);
         this.saveCompletedHabits();
+        
+        // 達成チェックを実行
+        this.checkAchievements();
         
         // 合計を更新
         this.updateHabitTotals();
@@ -1379,7 +1485,21 @@ class HabitTracker {
         this.renderHealthSummary();
         this.renderTotalChart();
         this.renderReportTable();
+        this.updateMotivationDisplay();
         this.setActiveNav('reportBtn');
+    }
+    
+    // モチベーション表示を更新
+    updateMotivationDisplay() {
+        // データを再計算
+        this.streaks = this.calculateStreaks();
+        this.totalScore = this.calculateTotalScore();
+        
+        // 表示を更新
+        document.getElementById('currentStreak').textContent = this.achievements.currentStreak;
+        document.getElementById('totalScore').textContent = this.totalScore;
+        document.getElementById('perfectDays').textContent = this.achievements.perfectDays;
+        document.getElementById('badgeCount').textContent = this.achievements.badges.length;
     }
 
     showMonsterView() {
@@ -1432,25 +1552,110 @@ class HabitTracker {
     // ヘルスデータの保存
     saveHealthData() {
         try {
-            localStorage.setItem('healthData', JSON.stringify(this.healthData));
-            console.log('ヘルスデータを保存:', this.healthData);
+            const dataToSave = JSON.stringify(this.healthData);
+            
+            // メイン保存
+            localStorage.setItem('healthData', dataToSave);
+            
+            // バックアップ保存（タイムスタンプ付き）
+            const timestamp = new Date().toISOString();
+            localStorage.setItem(`healthData_backup_${timestamp}`, dataToSave);
+            
+            // 最新のバックアップを保持（古いバックアップは削除）
+            this.cleanupOldBackups();
+            
+            console.log('ヘルスデータを保存（バックアップ付き）:', this.healthData);
         } catch (error) {
             console.error('ヘルスデータ保存エラー:', error);
+            // エラー時は古いバックアップから復元を試行
+            this.restoreFromBackup();
+        }
+    }
+    
+    // 古いバックアップをクリーンアップ（最新5個まで保持）
+    cleanupOldBackups() {
+        const backupKeys = Object.keys(localStorage)
+            .filter(key => key.startsWith('healthData_backup_'))
+            .sort()
+            .reverse();
+        
+        // 最新5個以外を削除
+        backupKeys.slice(5).forEach(key => {
+            localStorage.removeItem(key);
+        });
+    }
+    
+    // バックアップから復元
+    restoreFromBackup() {
+        const backupKeys = Object.keys(localStorage)
+            .filter(key => key.startsWith('healthData_backup_'))
+            .sort()
+            .reverse();
+        
+        if (backupKeys.length > 0) {
+            const latestBackup = localStorage.getItem(backupKeys[0]);
+            if (latestBackup) {
+                this.healthData = JSON.parse(latestBackup);
+                console.log('バックアップから復元しました:', this.healthData);
+            }
         }
     }
 
-    // ローカルストレージに完了した習慣を保存
+    // ローカルストレージに完了した習慣を保存（バックアップ付き）
     saveCompletedHabits() {
         try {
             // データが空でない場合のみ保存
             if (this.completedHabits && Object.keys(this.completedHabits).length > 0) {
-                localStorage.setItem('habitTrackerData', JSON.stringify(this.completedHabits));
-                console.log('ローカルにデータを保存完了:', this.completedHabits);
+                const dataToSave = JSON.stringify(this.completedHabits);
+                
+                // メイン保存
+                localStorage.setItem('habitTrackerData', dataToSave);
+                
+                // バックアップ保存（タイムスタンプ付き）
+                const timestamp = new Date().toISOString();
+                localStorage.setItem(`habitTrackerData_backup_${timestamp}`, dataToSave);
+                
+                // 古いバックアップをクリーンアップ
+                this.cleanupHabitBackups();
+                
+                console.log('ローカルにデータを保存完了（バックアップ付き）:', this.completedHabits);
             } else {
                 console.log('保存するデータがありません');
             }
         } catch (error) {
             console.error('ローカル保存エラー:', error);
+            // エラー時はバックアップから復元を試行
+            this.restoreHabitsFromBackup();
+        }
+    }
+    
+    // 習慣データの古いバックアップをクリーンアップ
+    cleanupHabitBackups() {
+        const backupKeys = Object.keys(localStorage)
+            .filter(key => key.startsWith('habitTrackerData_backup_'))
+            .sort()
+            .reverse();
+        
+        // 最新5個以外を削除
+        backupKeys.slice(5).forEach(key => {
+            localStorage.removeItem(key);
+        });
+    }
+    
+    // 習慣データをバックアップから復元
+    restoreHabitsFromBackup() {
+        const backupKeys = Object.keys(localStorage)
+            .filter(key => key.startsWith('habitTrackerData_backup_'))
+            .sort()
+            .reverse();
+        
+        if (backupKeys.length > 0) {
+            const latestBackup = localStorage.getItem(backupKeys[0]);
+            if (latestBackup) {
+                this.completedHabits = JSON.parse(latestBackup);
+                console.log('習慣データをバックアップから復元しました:', this.completedHabits);
+                this.renderCalendar(); // カレンダーを再描画
+            }
         }
     }
     
@@ -1922,6 +2127,180 @@ class HabitTracker {
         
         const countCell = row.querySelector('.count');
         countCell.textContent = data.count;
+    }
+    
+    // 達成システムのメソッド群
+    loadAchievements() {
+        try {
+            const saved = localStorage.getItem('achievements');
+            return saved ? JSON.parse(saved) : {
+                totalDays: 0,
+                perfectDays: 0,
+                currentStreak: 0,
+                bestStreak: 0,
+                badges: []
+            };
+        } catch (error) {
+            console.error('達成データ読み込みエラー:', error);
+            return {
+                totalDays: 0,
+                perfectDays: 0,
+                currentStreak: 0,
+                bestStreak: 0,
+                badges: []
+            };
+        }
+    }
+    
+    saveAchievements() {
+        try {
+            localStorage.setItem('achievements', JSON.stringify(this.achievements));
+        } catch (error) {
+            console.error('達成データ保存エラー:', error);
+        }
+    }
+    
+    calculateStreaks() {
+        const streaks = {};
+        for (const habit of this.habits) {
+            streaks[habit] = {
+                current: this.getCurrentStreak(habit),
+                best: this.getBestStreak(habit)
+            };
+        }
+        return streaks;
+    }
+    
+    calculateTotalScore() {
+        let totalScore = 0;
+        for (const dateStr in this.completedHabits) {
+            const habits = this.completedHabits[dateStr];
+            if (Array.isArray(habits)) {
+                totalScore += habits.length;
+            } else if (typeof habits === 'object') {
+                totalScore += Object.values(habits).filter(Boolean).length;
+            }
+        }
+        return totalScore;
+    }
+    
+    // 達成チェックとバッジ付与
+    checkAchievements() {
+        const today = new Date().toISOString().split('T')[0];
+        const todayHabits = this.completedHabits[today];
+        const completedCount = Array.isArray(todayHabits) ? todayHabits.length : 
+                             (typeof todayHabits === 'object' ? Object.values(todayHabits).filter(Boolean).length : 0);
+        
+        // 完璧な日（全習慣完了）
+        if (completedCount === this.habits.length) {
+            this.achievements.perfectDays++;
+            this.giveBadge('perfect_day', '完璧な日！', 'すべての習慣を完了しました！');
+        }
+        
+        // 総日数更新
+        if (completedCount > 0) {
+            this.achievements.totalDays++;
+        }
+        
+        // ストリーク更新
+        this.updateStreaks();
+        
+        // バッジチェック
+        this.checkBadges();
+        
+        this.saveAchievements();
+        this.showAchievementNotification();
+    }
+    
+    updateStreaks() {
+        let currentStreak = 0;
+        const today = new Date();
+        
+        for (let i = 0; i < 365; i++) {
+            const checkDate = new Date(today);
+            checkDate.setDate(today.getDate() - i);
+            const dateStr = checkDate.toISOString().split('T')[0];
+            const dayHabits = this.completedHabits[dateStr];
+            
+            if (dayHabits && (Array.isArray(dayHabits) ? dayHabits.length > 0 : Object.values(dayHabits).some(Boolean))) {
+                currentStreak++;
+            } else {
+                break;
+            }
+        }
+        
+        this.achievements.currentStreak = currentStreak;
+        if (currentStreak > this.achievements.bestStreak) {
+            this.achievements.bestStreak = currentStreak;
+        }
+    }
+    
+    checkBadges() {
+        const badges = this.achievements.badges;
+        
+        // 初回完了
+        if (this.achievements.totalDays === 1 && !badges.includes('first_completion')) {
+            this.giveBadge('first_completion', '初回完了！', '初めて習慣を完了しました！');
+        }
+        
+        // 7日連続
+        if (this.achievements.currentStreak >= 7 && !badges.includes('week_streak')) {
+            this.giveBadge('week_streak', '1週間達成！', '7日連続で習慣を続けました！');
+        }
+        
+        // 30日連続
+        if (this.achievements.currentStreak >= 30 && !badges.includes('month_streak')) {
+            this.giveBadge('month_streak', '1ヶ月達成！', '30日連続で習慣を続けました！');
+        }
+        
+        // 100日達成
+        if (this.achievements.totalDays >= 100 && !badges.includes('century')) {
+            this.giveBadge('century', '100日達成！', '100日間習慣を続けました！');
+        }
+        
+        // 完璧な週
+        if (this.achievements.perfectDays >= 7 && !badges.includes('perfect_week')) {
+            this.giveBadge('perfect_week', '完璧な週！', '7日間すべて完璧に完了しました！');
+        }
+    }
+    
+    giveBadge(badgeId, title, description) {
+        if (!this.achievements.badges.includes(badgeId)) {
+            this.achievements.badges.push(badgeId);
+            this.showBadgeNotification(title, description);
+        }
+    }
+    
+    showAchievementNotification() {
+        // 達成通知を表示（簡単なアラート）
+        if (this.achievements.currentStreak > 0 && this.achievements.currentStreak % 7 === 0) {
+            console.log(`🎉 ${this.achievements.currentStreak}日連続達成！`);
+        }
+    }
+    
+    showBadgeNotification(title, description) {
+        // バッジ通知を表示
+        console.log(`🏆 バッジ獲得: ${title} - ${description}`);
+        
+        // 簡単な通知表示
+        const notification = document.createElement('div');
+        notification.className = 'achievement-notification';
+        notification.innerHTML = `
+            <div class="achievement-content">
+                <div class="achievement-icon">🏆</div>
+                <div class="achievement-text">
+                    <div class="achievement-title">${title}</div>
+                    <div class="achievement-description">${description}</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // 3秒後に削除
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
     }
 }
 

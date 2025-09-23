@@ -80,6 +80,50 @@
 
             <!-- 統計ビュー -->
             <section class="stats-view" id="statsView" style="display: none;">
+                <!-- モチベーション表示 -->
+                <div class="motivation-section">
+                    <h3>🏆 あなたの成果</h3>
+                    <div class="motivation-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="currentStreak">0</div>
+                                <div class="stat-label">日連続</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⭐</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="totalScore">0</div>
+                                <div class="stat-label">総スコア</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="perfectDays">0</div>
+                                <div class="stat-label">完璧な日</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🏅</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="badgeCount">0</div>
+                                <div class="stat-label">バッジ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- データ管理 -->
+                <div class="data-management-section">
+                    <h3>💾 データ管理</h3>
+                    <div class="data-buttons">
+                        <button id="exportDataBtn" class="data-btn export-btn">📤 データをエクスポート</button>
+                        <button id="importDataBtn" class="data-btn import-btn">📥 データをインポート</button>
+                        <button id="restoreDataBtn" class="data-btn restore-btn">🔄 バックアップから復元</button>
+                    </div>
+                </div>
 
                 <!-- 月間カレンダー -->
                 <div class="monthly-calendar-section">
