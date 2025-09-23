@@ -103,7 +103,8 @@ body {
 
 /* 週間ビュー */
 .week-view {
-    height: 100%;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
     background: #000 !important;
 }
 
