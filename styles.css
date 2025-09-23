@@ -2014,6 +2014,109 @@ body {
     border-radius: 3px;
 }
 
+/* 設定ビューのスタイル */
+.settings-view {
+    padding: 20px;
+    background: #000;
+    min-height: calc(100vh - 120px);
+}
+
+.settings-view h2 {
+    color: #fff;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 24px;
+}
+
+/* 成果システム説明のスタイル */
+.achievement-explanation-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.achievement-explanation-section h3 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.achievement-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.achievement-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background: #2a2a2a;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.achievement-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.achievement-content h4 {
+    color: #fff;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.achievement-content p {
+    color: #ccc;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* アプリ情報のスタイル */
+.app-info-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.app-info-section h3 {
+    color: #fff;
+    margin-bottom: 15px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #333;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #ccc;
+    font-size: 14px;
+}
+
+.info-value {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+}
+
 /* 達成通知のスタイル */
 .achievement-notification {
     position: fixed;

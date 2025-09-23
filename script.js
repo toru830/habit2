@@ -1491,8 +1491,10 @@ class HabitTracker {
 
 
     showSettingsView() {
-        // 設定ビューの実装（将来の拡張）
-        console.log('設定ビュー');
+        document.getElementById('weekView').style.display = 'none';
+        document.getElementById('statsView').style.display = 'none';
+        document.getElementById('monsterView').style.display = 'none';
+        document.getElementById('settingsView').style.display = 'block';
         this.setActiveNav('settingsBtn');
     }
 

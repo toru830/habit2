@@ -115,16 +115,6 @@
                     </div>
                 </div>
 
-                <!-- データ管理 -->
-                <div class="data-management-section">
-                    <h3>💾 データ管理</h3>
-                    <div class="data-buttons">
-                        <button id="exportDataBtn" class="data-btn export-btn">📤 データをエクスポート</button>
-                        <button id="importDataBtn" class="data-btn import-btn">📥 データをインポート</button>
-                        <button id="restoreDataBtn" class="data-btn restore-btn">🔄 バックアップから復元</button>
-                    </div>
-                </div>
-
                 <!-- 月間カレンダー -->
                 <div class="monthly-calendar-section">
                     <h3>月間カレンダー</h3>
@@ -207,6 +197,73 @@
                 <h2>モンスター図鑑</h2>
                 <div class="monster-grid" id="monsterGrid">
                     <!-- モンスターはJavaScriptで動的に生成 -->
+                </div>
+            </section>
+
+            <!-- 設定ビュー -->
+            <section class="settings-view" id="settingsView" style="display: none;">
+                <h2>⚙️ 設定</h2>
+                
+                <!-- データ管理 -->
+                <div class="data-management-section">
+                    <h3>💾 データ管理</h3>
+                    <div class="data-buttons">
+                        <button id="exportDataBtn" class="data-btn export-btn">📤 データをエクスポート</button>
+                        <button id="importDataBtn" class="data-btn import-btn">📥 データをインポート</button>
+                        <button id="restoreDataBtn" class="data-btn restore-btn">🔄 バックアップから復元</button>
+                    </div>
+                </div>
+
+                <!-- 成果システムの説明 -->
+                <div class="achievement-explanation-section">
+                    <h3>🏆 成果システムの説明</h3>
+                    <div class="achievement-cards">
+                        <div class="achievement-card">
+                            <div class="achievement-icon">🔥</div>
+                            <div class="achievement-content">
+                                <h4>日連続</h4>
+                                <p>現在の連続達成日数です。習慣を毎日続けることで数値が上がります。1日でも途切れると0にリセットされます。</p>
+                            </div>
+                        </div>
+                        <div class="achievement-card">
+                            <div class="achievement-icon">⭐</div>
+                            <div class="achievement-content">
+                                <h4>総スコア</h4>
+                                <p>これまでの全習慣達成回数の合計です。1つの習慣を1回達成するごとに1ポイント加算されます。</p>
+                            </div>
+                        </div>
+                        <div class="achievement-card">
+                            <div class="achievement-icon">🎯</div>
+                            <div class="achievement-content">
+                                <h4>完璧な日</h4>
+                                <p>その日の全ての習慣を達成した日数です。週間の習慣をすべて完了した日がカウントされます。</p>
+                            </div>
+                        </div>
+                        <div class="achievement-card">
+                            <div class="achievement-icon">🏅</div>
+                            <div class="achievement-content">
+                                <h4>バッジ</h4>
+                                <p>特定の条件を満たすと獲得できる特別なバッジです。連続日数や総スコアに応じて新しいバッジが解放されます。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- アプリ情報 -->
+                <div class="app-info-section">
+                    <h3>📱 アプリ情報</h3>
+                    <div class="info-item">
+                        <span class="info-label">バージョン:</span>
+                        <span class="info-value">2.0.0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">最終更新:</span>
+                        <span class="info-value">2025年9月23日</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">データ保存:</span>
+                        <span class="info-value">ローカルストレージ</span>
+                    </div>
                 </div>
             </section>
             
