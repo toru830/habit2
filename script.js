@@ -1654,6 +1654,9 @@ class HabitTracker {
             if (healthStatus.headMassage) {
                 dayElement.classList.add('has-massage');
             }
+            if (healthStatus.dentalCleaning) {
+                dayElement.classList.add('has-dental');
+            }
             if (healthStatus.healthKeeping && healthStatus.headMassage) {
                 dayElement.classList.add('has-both');
             }
@@ -1757,6 +1760,7 @@ class HabitTracker {
         }
         
         this.healthData[dateStr][type] = !this.healthData[dateStr][type];
+        console.log('ヘルスデータ切り替え:', { dateStr, type, newValue: this.healthData[dateStr][type], allData: this.healthData });
         this.saveHealthData();
     }
 
