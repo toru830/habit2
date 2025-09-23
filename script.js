@@ -1646,19 +1646,39 @@ class HabitTracker {
                 dayElement.classList.add('today');
             }
             
-            // ヘルスデータの状態をチェック
+            // ヘルスデータの状態をチェック（複数選択対応）
             const healthStatus = this.healthData[dateStr] || {};
-            if (healthStatus.healthKeeping) {
-                dayElement.classList.add('has-health');
-            }
-            if (healthStatus.headMassage) {
-                dayElement.classList.add('has-massage');
-            }
-            if (healthStatus.dentalCleaning) {
-                dayElement.classList.add('has-dental');
-            }
-            if (healthStatus.healthKeeping && healthStatus.headMassage) {
+            const hasHealth = healthStatus.healthKeeping;
+            const hasMassage = healthStatus.headMassage;
+            const hasDental = healthStatus.dentalCleaning;
+            
+            // 3つすべて選択されている場合
+            if (hasHealth && hasMassage && hasDental) {
                 dayElement.classList.add('has-both');
+                dayElement.style.background = 'linear-gradient(45deg, #28a745 33%, #ffc107 33%, #17a2b8 33%)';
+            }
+            // AとBが選択されている場合
+            else if (hasHealth && hasMassage) {
+                dayElement.classList.add('has-both');
+                dayElement.style.background = 'linear-gradient(45deg, #28a745 50%, #ffc107 50%)';
+            }
+            // AとCが選択されている場合
+            else if (hasHealth && hasDental) {
+                dayElement.classList.add('has-both');
+                dayElement.style.background = 'linear-gradient(45deg, #28a745 50%, #17a2b8 50%)';
+            }
+            // BとCが選択されている場合
+            else if (hasMassage && hasDental) {
+                dayElement.classList.add('has-both');
+                dayElement.style.background = 'linear-gradient(45deg, #ffc107 50%, #17a2b8 50%)';
+            }
+            // 単一選択の場合
+            else if (hasHealth) {
+                dayElement.classList.add('has-health');
+            } else if (hasMassage) {
+                dayElement.classList.add('has-massage');
+            } else if (hasDental) {
+                dayElement.classList.add('has-dental');
             }
             
             // クリックイベントを追加
@@ -1771,15 +1791,41 @@ class HabitTracker {
         // 既存のクラスを削除
         dayElement.classList.remove('has-health', 'has-massage', 'has-dental', 'has-both');
         
-        // 新しいクラスを追加
-        if (healthStatus.healthKeeping && healthStatus.headMassage) {
+        // 複数選択の組み合わせをチェック
+        const hasHealth = healthStatus.healthKeeping;
+        const hasMassage = healthStatus.headMassage;
+        const hasDental = healthStatus.dentalCleaning;
+        
+        // 3つすべて選択されている場合
+        if (hasHealth && hasMassage && hasDental) {
             dayElement.classList.add('has-both');
-        } else if (healthStatus.healthKeeping) {
+            dayElement.style.background = 'linear-gradient(45deg, #28a745 33%, #ffc107 33%, #17a2b8 33%)';
+        }
+        // AとBが選択されている場合
+        else if (hasHealth && hasMassage) {
+            dayElement.classList.add('has-both');
+            dayElement.style.background = 'linear-gradient(45deg, #28a745 50%, #ffc107 50%)';
+        }
+        // AとCが選択されている場合
+        else if (hasHealth && hasDental) {
+            dayElement.classList.add('has-both');
+            dayElement.style.background = 'linear-gradient(45deg, #28a745 50%, #17a2b8 50%)';
+        }
+        // BとCが選択されている場合
+        else if (hasMassage && hasDental) {
+            dayElement.classList.add('has-both');
+            dayElement.style.background = 'linear-gradient(45deg, #ffc107 50%, #17a2b8 50%)';
+        }
+        // 単一選択の場合
+        else if (hasHealth) {
             dayElement.classList.add('has-health');
-        } else if (healthStatus.headMassage) {
+            dayElement.style.background = '';
+        } else if (hasMassage) {
             dayElement.classList.add('has-massage');
-        } else if (healthStatus.dentalCleaning) {
+            dayElement.style.background = '';
+        } else if (hasDental) {
             dayElement.classList.add('has-dental');
+            dayElement.style.background = '';
         }
     }
 }
