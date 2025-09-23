@@ -1376,6 +1376,7 @@ class HabitTracker {
         document.getElementById('statsView').style.display = 'block';
         document.getElementById('monsterView').style.display = 'none';
         this.renderMonthlyCalendar();
+        this.renderHealthSummary();
         this.renderTotalChart();
         this.renderReportTable();
         this.setActiveNav('reportBtn');
@@ -1704,6 +1705,7 @@ class HabitTracker {
             prevBtn.onclick = () => {
                 this.reportMonth.setMonth(this.reportMonth.getMonth() - 1);
                 this.renderMonthlyCalendar();
+                this.renderHealthSummary();
             };
         }
         
@@ -1711,6 +1713,7 @@ class HabitTracker {
             nextBtn.onclick = () => {
                 this.reportMonth.setMonth(this.reportMonth.getMonth() + 1);
                 this.renderMonthlyCalendar();
+                this.renderHealthSummary();
             };
         }
     }
@@ -1829,6 +1832,62 @@ class HabitTracker {
             dayElement.classList.add('has-dental');
             dayElement.style.background = '';
         }
+        
+        // 集計表を更新
+        this.renderHealthSummary();
+    }
+
+    // ヘルス集計表をレンダリング
+    renderHealthSummary() {
+        const year = this.reportMonth.getFullYear();
+        const month = this.reportMonth.getMonth();
+        
+        // 月の最初の日と最後の日を取得
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        
+        // 各項目の集計
+        const healthKeepingData = { count: 0, dates: [] };
+        const headMassageData = { count: 0, dates: [] };
+        const dentalCleaningData = { count: 0, dates: [] };
+        
+        // 当月の各日をチェック
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateStr = date.toISOString().split('T')[0];
+            const healthStatus = this.healthData[dateStr] || {};
+            
+            if (healthStatus.healthKeeping) {
+                healthKeepingData.count++;
+                healthKeepingData.dates.push(day);
+            }
+            if (healthStatus.headMassage) {
+                headMassageData.count++;
+                headMassageData.dates.push(day);
+            }
+            if (healthStatus.dentalCleaning) {
+                dentalCleaningData.count++;
+                dentalCleaningData.dates.push(day);
+            }
+        }
+        
+        // 集計表を更新
+        this.updateSummaryRow('healthKeepingSummary', healthKeepingData);
+        this.updateSummaryRow('headMassageSummary', headMassageData);
+        this.updateSummaryRow('dentalCleaningSummary', dentalCleaningData);
+    }
+
+    // 集計行を更新
+    updateSummaryRow(elementId, data) {
+        const row = document.getElementById(elementId);
+        if (!row) return;
+        
+        const countCell = row.querySelector('.count');
+        const datesCell = row.querySelector('.dates');
+        
+        countCell.textContent = data.count;
+        datesCell.textContent = data.dates.length > 0 ? data.dates.join(', ') : '-';
     }
 }
 
