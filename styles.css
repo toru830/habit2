@@ -1948,9 +1948,10 @@ body {
 .motivation-section {
     margin-bottom: 20px;
     padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
     border-radius: 12px;
-    border: 1px solid #555;
+    border: 2px solid #3498db;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 .motivation-section h3 {
@@ -1995,14 +1996,22 @@ body {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 4px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.3);
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 .stat-label {
     font-size: 12px;
-    opacity: 0.9;
+    color: #fff !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.2);
+    padding: 2px 6px;
+    border-radius: 3px;
 }
 
 /* 達成通知のスタイル */
