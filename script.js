@@ -71,6 +71,7 @@ class HabitTracker {
         this.renderCalendar();
         this.setupEventListeners();
         this.setupDataManagement();
+        this.setupMonthlyCalendarEvents();
         // 同期機能を完全に無効化（データ消失を防ぐため）
         console.log('同期機能は完全に無効化されています');
     }
