@@ -273,17 +273,10 @@ class HabitTracker {
         const habitsGrid = document.getElementById('habitsGrid');
         habitsGrid.innerHTML = '';
 
-        console.log('習慣データ:', this.habits);
-        console.log('習慣データの長さ:', this.habits.length);
-
         // 習慣を種類ごとに分類
         const habitHabits = this.habits.filter(h => h.type === 'habit');
         const noHabits = this.habits.filter(h => h.type === 'no');
         const supplementHabits = this.habits.filter(h => h.type === 'supplement');
-        
-        console.log('習慣系:', habitHabits.length);
-        console.log('No系:', noHabits.length);
-        console.log('サプリ系:', supplementHabits.length);
 
         let habitIndex = 1;
 
@@ -430,8 +423,7 @@ class HabitTracker {
     }
 
     // 習慣の完了状態をチェック
-    isHabitCompleted(habitId, date) {
-        const dateStr = date.toISOString().split('T')[0];
+    isHabitCompleted(habitId, dateStr) {
         const habits = this.completedHabits[dateStr];
         if (Array.isArray(habits)) {
             return habits.includes(habitId);
