@@ -321,7 +321,13 @@ class HabitTracker {
     // 習慣の完了状態をチェック
     isHabitCompleted(habitId, date) {
         const dateStr = date.toISOString().split('T')[0];
-        return this.completedHabits[dateStr]?.includes(habitId) || false;
+        const habits = this.completedHabits[dateStr];
+        if (Array.isArray(habits)) {
+            return habits.includes(habitId);
+        } else if (habits && typeof habits === 'object') {
+            return !!habits[habitId];
+        }
+        return false;
     }
 
     // 習慣の一週間の合計を計算
@@ -366,8 +372,17 @@ class HabitTracker {
     calculateTotalAll(habitId) {
         let total = 0;
         for (const dateStr in this.completedHabits) {
-            if (this.completedHabits[dateStr].includes(habitId)) {
-                total++;
+            const habits = this.completedHabits[dateStr];
+            // 配列かオブジェクトかを判定
+            if (Array.isArray(habits)) {
+                if (habits.includes(habitId)) {
+                    total++;
+                }
+            } else if (habits && typeof habits === 'object') {
+                // オブジェクトの場合、habitIdをキーとして確認
+                if (habits[habitId]) {
+                    total++;
+                }
             }
         }
         return total;
@@ -411,7 +426,11 @@ class HabitTracker {
         const todayStr = today.toISOString().split('T')[0];
         
         // 今日にチェックがあれば1、なければ0
-        if (this.completedHabits[todayStr] && this.completedHabits[todayStr].includes(habitId)) {
+        const todayHabits = this.completedHabits[todayStr];
+        const isCompleted = Array.isArray(todayHabits) ? 
+            todayHabits.includes(habitId) : 
+            (todayHabits && typeof todayHabits === 'object' ? !!todayHabits[habitId] : false);
+        if (isCompleted) {
             return 1;
         } else {
             return 0;
@@ -505,7 +524,10 @@ class HabitTracker {
         const dateStr = date.toISOString().split('T')[0];
         
         // 現在の完了状態を直接チェック
-        const isCurrentlyCompleted = this.completedHabits[dateStr]?.includes(habitId) || false;
+        const habits = this.completedHabits[dateStr];
+        const isCurrentlyCompleted = Array.isArray(habits) ? 
+            habits.includes(habitId) : 
+            (habits && typeof habits === 'object' ? !!habits[habitId] : false);
         
         console.log('toggleHabit開始:', { habitId, dateStr, isCurrentlyCompleted, currentData: this.completedHabits });
         
@@ -608,7 +630,11 @@ class HabitTracker {
         const dates = Object.keys(this.completedHabits).sort().reverse();
         for (let i = 0; i < dates.length; i++) {
             const date = dates[i];
-            if (this.completedHabits[date]?.includes(habitId)) {
+            const habits = this.completedHabits[date];
+            const isCompleted = Array.isArray(habits) ? 
+                habits.includes(habitId) : 
+                (habits && typeof habits === 'object' ? !!habits[habitId] : false);
+            if (isCompleted) {
                 currentStreak++;
             } else {
                 break;
@@ -629,7 +655,11 @@ class HabitTracker {
         let currentStreak = 0;
         
         for (const date of dates) {
-            if (this.completedHabits[date]?.includes(habitId)) {
+            const habits = this.completedHabits[date];
+            const isCompleted = Array.isArray(habits) ? 
+                habits.includes(habitId) : 
+                (habits && typeof habits === 'object' ? !!habits[habitId] : false);
+            if (isCompleted) {
                 currentStreak++;
                 maxStreak = Math.max(maxStreak, currentStreak);
             } else {
