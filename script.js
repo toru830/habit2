@@ -1477,14 +1477,86 @@ class HabitTracker {
         this.streaks = this.calculateStreaks();
         this.totalScore = this.calculateTotalScore();
         
-        // 達成データを再計算
-        this.checkAchievements();
+        // 達成データを完全に再計算
+        this.achievements = this.calculateAllAchievements();
         
         // 表示を更新
         document.getElementById('currentStreak').textContent = this.achievements.currentStreak;
         document.getElementById('totalScore').textContent = this.totalScore;
         document.getElementById('perfectDays').textContent = this.achievements.perfectDays;
         document.getElementById('badgeCount').textContent = this.achievements.badges.length;
+    }
+
+    // 全達成データを再計算
+    calculateAllAchievements() {
+        const achievements = {
+            totalDays: 0,
+            perfectDays: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            badges: []
+        };
+
+        // 完璧な日と現在の連続日数を計算
+        let currentStreak = 0;
+        let maxStreak = 0;
+        const today = new Date();
+        
+        for (let i = 0; i < 365; i++) {
+            const checkDate = new Date(today);
+            checkDate.setDate(today.getDate() - i);
+            const dateStr = checkDate.toISOString().split('T')[0];
+            const dayHabits = this.completedHabits[dateStr];
+            
+            if (dayHabits) {
+                const completedCount = Array.isArray(dayHabits) ? dayHabits.length : 
+                                     (typeof dayHabits === 'object' ? Object.values(dayHabits).filter(Boolean).length : 0);
+                
+                if (completedCount > 0) {
+                    achievements.totalDays++;
+                }
+                
+                // 完璧な日（全習慣完了）
+                if (completedCount === this.habits.length) {
+                    achievements.perfectDays++;
+                    if (i === 0) { // 今日が完璧な日
+                        currentStreak++;
+                        maxStreak = Math.max(maxStreak, currentStreak);
+                    } else if (currentStreak > 0) { // 過去の完璧な日の連続
+                        currentStreak++;
+                        maxStreak = Math.max(maxStreak, currentStreak);
+                    }
+                } else {
+                    // 完璧でない日があったら連続をリセット
+                    if (i > 0) {
+                        currentStreak = 0;
+                    }
+                }
+            } else {
+                // データがない日があったら連続をリセット
+                if (i > 0) {
+                    currentStreak = 0;
+                }
+            }
+        }
+        
+        achievements.currentStreak = currentStreak;
+        achievements.bestStreak = maxStreak;
+        
+        // バッジチェック（簡易版）
+        if (achievements.currentStreak >= 1) achievements.badges.push('初回達成');
+        if (achievements.currentStreak >= 3) achievements.badges.push('3日連続');
+        if (achievements.currentStreak >= 7) achievements.badges.push('7日連続');
+        if (achievements.currentStreak >= 30) achievements.badges.push('30日連続');
+        if (achievements.currentStreak >= 100) achievements.badges.push('100日連続');
+        if (this.totalScore >= 100) achievements.badges.push('スコア100');
+        if (this.totalScore >= 500) achievements.badges.push('スコア500');
+        if (this.totalScore >= 1000) achievements.badges.push('スコア1000');
+        if (achievements.perfectDays >= 10) achievements.badges.push('完璧10日');
+        if (achievements.perfectDays >= 50) achievements.badges.push('完璧50日');
+        if (achievements.perfectDays >= 100) achievements.badges.push('完璧100日');
+        
+        return achievements;
     }
 
     showMonsterView() {
