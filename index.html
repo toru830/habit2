@@ -74,6 +74,67 @@
                         <div class="daily-total-row" id="dailyTotalRow">
                             <!-- 日計はJavaScriptで動的に生成 -->
                         </div>
+                        
+                        <!-- 月間カレンダー -->
+                        <div class="monthly-calendar-section">
+                            <h3>月間カレンダー</h3>
+                            <div class="monthly-calendar-container">
+                                <div class="monthly-calendar-header">
+                                    <button class="month-nav" id="prevMonthReport">‹</button>
+                                    <span id="currentMonthReport">2025年9月</span>
+                                    <button class="month-nav" id="nextMonthReport">›</button>
+                                </div>
+                                <div class="monthly-calendar-grid" id="monthlyCalendarGrid">
+                                    <!-- 月間カレンダーはJavaScriptで動的に生成 -->
+                                </div>
+                            </div>
+                            
+                            <!-- ヘルス集計表 -->
+                            <div class="health-summary-section">
+                                <h4>全期間ヘルス集計</h4>
+                                <div class="health-summary-table">
+                                    <div class="health-summary-header">
+                                        <div class="summary-cell">項目</div>
+                                        <div class="summary-cell">総回数</div>
+                                    </div>
+                                    <div class="health-summary-row" id="healthKeepingSummary">
+                                        <div class="summary-cell">
+                                            <span class="health-legend-color has-health"></span>
+                                            A ヘルスキーピング
+                                        </div>
+                                        <div class="summary-cell count">0</div>
+                                    </div>
+                                    <div class="health-summary-row" id="headMassageSummary">
+                                        <div class="summary-cell">
+                                            <span class="health-legend-color has-massage"></span>
+                                            B ヘッドマッサージ
+                                        </div>
+                                        <div class="summary-cell count">0</div>
+                                    </div>
+                                    <div class="health-summary-row" id="dentalCleaningSummary">
+                                        <div class="summary-cell">
+                                            <span class="health-legend-color has-dental"></span>
+                                            C 歯科クリーニング
+                                        </div>
+                                        <div class="summary-cell count">0</div>
+                                    </div>
+                                    <div class="health-summary-row" id="saunaSummary">
+                                        <div class="summary-cell">
+                                            <span class="health-legend-color has-sauna"></span>
+                                            D サウナ
+                                        </div>
+                                        <div class="summary-cell count">0</div>
+                                    </div>
+                                    <div class="health-summary-row" id="catcafeSummary">
+                                        <div class="summary-cell">
+                                            <span class="health-legend-color has-catcafe"></span>
+                                            E 猫カフェ
+                                        </div>
+                                        <div class="summary-cell count">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -88,7 +149,7 @@
                             <div class="stat-icon">🔥</div>
                             <div class="stat-content">
                                 <div class="stat-value" id="currentStreak">0</div>
-                                <div class="stat-label">日連続</div>
+                                <div class="stat-label">完璧な日の連続</div>
                             </div>
                         </div>
                         <div class="stat-card">
@@ -115,66 +176,6 @@
                     </div>
                 </div>
 
-                <!-- 月間カレンダー -->
-                <div class="monthly-calendar-section">
-                    <h3>月間カレンダー</h3>
-                    <div class="monthly-calendar-container">
-                        <div class="monthly-calendar-header">
-                            <button class="month-nav" id="prevMonthReport">‹</button>
-                            <span id="currentMonthReport">2025年9月</span>
-                            <button class="month-nav" id="nextMonthReport">›</button>
-                        </div>
-                        <div class="monthly-calendar-grid" id="monthlyCalendarGrid">
-                            <!-- 月間カレンダーはJavaScriptで動的に生成 -->
-                        </div>
-                    </div>
-                    
-                    <!-- ヘルス集計表 -->
-                    <div class="health-summary-section">
-                        <h4>全期間ヘルス集計</h4>
-                        <div class="health-summary-table">
-                            <div class="health-summary-header">
-                                <div class="summary-cell">項目</div>
-                                <div class="summary-cell">総回数</div>
-                            </div>
-                            <div class="health-summary-row" id="healthKeepingSummary">
-                                <div class="summary-cell">
-                                    <span class="health-legend-color has-health"></span>
-                                    A ヘルスキーピング
-                                </div>
-                                <div class="summary-cell count">0</div>
-                            </div>
-                            <div class="health-summary-row" id="headMassageSummary">
-                                <div class="summary-cell">
-                                    <span class="health-legend-color has-massage"></span>
-                                    B ヘッドマッサージ
-                                </div>
-                                <div class="summary-cell count">0</div>
-                            </div>
-                            <div class="health-summary-row" id="dentalCleaningSummary">
-                                <div class="summary-cell">
-                                    <span class="health-legend-color has-dental"></span>
-                                    C 歯科クリーニング
-                                </div>
-                                <div class="summary-cell count">0</div>
-                            </div>
-                            <div class="health-summary-row" id="saunaSummary">
-                                <div class="summary-cell">
-                                    <span class="health-legend-color has-sauna"></span>
-                                    D サウナ
-                                </div>
-                                <div class="summary-cell count">0</div>
-                            </div>
-                            <div class="health-summary-row" id="catcafeSummary">
-                                <div class="summary-cell">
-                                    <span class="health-legend-color has-catcafe"></span>
-                                    E 猫カフェ
-                                </div>
-                                <div class="summary-cell count">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- 合計値推移グラフ -->
                 <div class="chart-section">
@@ -211,7 +212,7 @@
                         <div class="achievement-card">
                             <div class="achievement-icon">🔥</div>
                             <div class="achievement-content">
-                                <div class="achievement-title-vertical">日連続</div>
+                                <div class="achievement-title-vertical">完璧な日の連続</div>
                                 <div class="achievement-details">
                                     <div class="achievement-detail-item">
                                         <div class="achievement-detail-label">条件</div>

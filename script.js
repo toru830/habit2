@@ -1456,6 +1456,8 @@ class HabitTracker {
 
     showHomeView() {
         this.showWeekView();
+        this.renderMonthlyCalendar();
+        this.renderHealthSummary();
         this.setActiveNav('homeBtn');
     }
 
@@ -1463,8 +1465,6 @@ class HabitTracker {
         document.getElementById('weekView').style.display = 'none';
         document.getElementById('statsView').style.display = 'block';
         document.getElementById('monsterView').style.display = 'none';
-        this.renderMonthlyCalendar();
-        this.renderHealthSummary();
         this.renderTotalChart();
         this.renderReportTable();
         this.updateMotivationDisplay();
@@ -1502,7 +1502,8 @@ class HabitTracker {
         let maxStreak = 0;
         const today = new Date();
         
-        for (let i = 0; i < 365; i++) {
+        // 過去から現在に向かって計算（連続日数を正しく計算するため）
+        for (let i = 365; i >= 0; i--) {
             const checkDate = new Date(today);
             checkDate.setDate(today.getDate() - i);
             const dateStr = checkDate.toISOString().split('T')[0];
@@ -1519,24 +1520,15 @@ class HabitTracker {
                 // 完璧な日（全習慣完了）
                 if (completedCount === this.habits.length) {
                     achievements.perfectDays++;
-                    if (i === 0) { // 今日が完璧な日
-                        currentStreak++;
-                        maxStreak = Math.max(maxStreak, currentStreak);
-                    } else if (currentStreak > 0) { // 過去の完璧な日の連続
-                        currentStreak++;
-                        maxStreak = Math.max(maxStreak, currentStreak);
-                    }
+                    currentStreak++;
+                    maxStreak = Math.max(maxStreak, currentStreak);
                 } else {
                     // 完璧でない日があったら連続をリセット
-                    if (i > 0) {
-                        currentStreak = 0;
-                    }
+                    currentStreak = 0;
                 }
             } else {
                 // データがない日があったら連続をリセット
-                if (i > 0) {
-                    currentStreak = 0;
-                }
+                currentStreak = 0;
             }
         }
         
