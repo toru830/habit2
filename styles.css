@@ -1918,13 +1918,13 @@ body {
 }
 
 .monthly-calendar-day.has-massage {
-    background: #ffc107;
-    color: #000;
+    background: #b8860b; /* 濃い黄色（ダークゴールド）に統一 */
+    color: #fff; /* 白文字に統一 */
 }
 
 .monthly-calendar-day.has-both {
-    background: linear-gradient(45deg, #28a745 50%, #ffc107 50%);
-    color: #000;
+    background: linear-gradient(45deg, #28a745 50%, #b8860b 50%);
+    color: #fff;
 }
 
 .monthly-calendar-day.has-dental {
@@ -2449,8 +2449,8 @@ body {
 }
 
 .health-selection-option.selected.head-massage {
-    background: #ffc107;
-    color: #000;
+    background: #b8860b; /* 濃い黄色（ダークゴールド）に統一 */
+    color: #fff; /* 白文字に統一 */
 }
 
 .health-selection-option.selected.dental-cleaning {

@@ -1852,7 +1852,7 @@ class HabitTracker {
                 // 複数選択の場合はグラデーション表示
                 const colors = [];
                 if (hasHealth) colors.push('#28a745');
-                if (hasMassage) colors.push('#ffc107');
+                if (hasMassage) colors.push('#b8860b');
                 if (hasDental) colors.push('#17a2b8');
                 if (hasSauna) colors.push('#dc3545');
                 if (hasCatcafe) colors.push('#6f42c1');
