@@ -1652,27 +1652,33 @@ class HabitTracker {
             const hasHealth = healthStatus.healthKeeping;
             const hasMassage = healthStatus.headMassage;
             const hasDental = healthStatus.dentalCleaning;
+            const hasSauna = healthStatus.sauna;
+            const hasCatcafe = healthStatus.catcafe;
             
-            // 3つすべて選択されている場合
-            if (hasHealth && hasMassage && hasDental) {
+            // 複数選択の組み合わせをチェック
+            const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe].filter(Boolean).length;
+            
+            if (selectedCount > 1) {
                 dayElement.classList.add('has-both');
-                // 三色のストライプグラデーション
-                dayElement.style.background = 'repeating-linear-gradient(45deg, #28a745 0px, #28a745 8px, #ffc107 8px, #ffc107 16px, #17a2b8 16px, #17a2b8 24px)';
-            }
-            // AとBが選択されている場合
-            else if (hasHealth && hasMassage) {
-                dayElement.classList.add('has-both');
-                dayElement.style.background = 'linear-gradient(45deg, #28a745 50%, #ffc107 50%)';
-            }
-            // AとCが選択されている場合
-            else if (hasHealth && hasDental) {
-                dayElement.classList.add('has-both');
-                dayElement.style.background = 'linear-gradient(45deg, #28a745 50%, #17a2b8 50%)';
-            }
-            // BとCが選択されている場合
-            else if (hasMassage && hasDental) {
-                dayElement.classList.add('has-both');
-                dayElement.style.background = 'linear-gradient(45deg, #ffc107 50%, #17a2b8 50%)';
+                // 複数選択の場合はグラデーション表示
+                const colors = [];
+                if (hasHealth) colors.push('#28a745');
+                if (hasMassage) colors.push('#ffc107');
+                if (hasDental) colors.push('#17a2b8');
+                if (hasSauna) colors.push('#dc3545');
+                if (hasCatcafe) colors.push('#6f42c1');
+                
+                if (colors.length === 2) {
+                    dayElement.style.background = `linear-gradient(45deg, ${colors[0]} 50%, ${colors[1]} 50%)`;
+                } else if (colors.length === 3) {
+                    dayElement.style.background = `repeating-linear-gradient(45deg, ${colors[0]} 0px, ${colors[0]} 8px, ${colors[1]} 8px, ${colors[1]} 16px, ${colors[2]} 16px, ${colors[2]} 24px)`;
+                } else if (colors.length >= 4) {
+                    // 4色以上の場合は複雑なグラデーション
+                    const gradientStops = colors.map((color, index) => 
+                        `${color} ${(index * 100) / (colors.length - 1)}%`
+                    ).join(', ');
+                    dayElement.style.background = `linear-gradient(45deg, ${gradientStops})`;
+                }
             }
             // 単一選択の場合
             else if (hasHealth) {
@@ -1681,6 +1687,10 @@ class HabitTracker {
                 dayElement.classList.add('has-massage');
             } else if (hasDental) {
                 dayElement.classList.add('has-dental');
+            } else if (hasSauna) {
+                dayElement.classList.add('has-sauna');
+            } else if (hasCatcafe) {
+                dayElement.classList.add('has-catcafe');
             }
             
             // クリックイベントを追加
@@ -1758,9 +1768,29 @@ class HabitTracker {
             dropdown.remove();
         };
         
+        const saunaOption = document.createElement('div');
+        saunaOption.className = `health-selection-option ${healthStatus.sauna ? 'selected sauna' : ''}`;
+        saunaOption.textContent = 'D';
+        saunaOption.onclick = () => {
+            this.toggleHealthData(dateStr, 'sauna');
+            this.updateHealthDisplay(dayElement, dateStr);
+            dropdown.remove();
+        };
+        
+        const catcafeOption = document.createElement('div');
+        catcafeOption.className = `health-selection-option ${healthStatus.catcafe ? 'selected catcafe' : ''}`;
+        catcafeOption.textContent = 'E';
+        catcafeOption.onclick = () => {
+            this.toggleHealthData(dateStr, 'catcafe');
+            this.updateHealthDisplay(dayElement, dateStr);
+            dropdown.remove();
+        };
+        
         dropdown.appendChild(healthOption);
         dropdown.appendChild(massageOption);
         dropdown.appendChild(dentalOption);
+        dropdown.appendChild(saunaOption);
+        dropdown.appendChild(catcafeOption);
         
         // 日付要素に相対的に配置
         dayElement.style.position = 'relative';
@@ -1791,33 +1821,39 @@ class HabitTracker {
         const healthStatus = this.healthData[dateStr] || {};
         
         // 既存のクラスを削除
-        dayElement.classList.remove('has-health', 'has-massage', 'has-dental', 'has-both');
+        dayElement.classList.remove('has-health', 'has-massage', 'has-dental', 'has-sauna', 'has-catcafe', 'has-both');
         
         // 複数選択の組み合わせをチェック
         const hasHealth = healthStatus.healthKeeping;
         const hasMassage = healthStatus.headMassage;
         const hasDental = healthStatus.dentalCleaning;
+        const hasSauna = healthStatus.sauna;
+        const hasCatcafe = healthStatus.catcafe;
         
-        // 3つすべて選択されている場合
-        if (hasHealth && hasMassage && hasDental) {
+        // 複数選択の組み合わせをチェック
+        const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe].filter(Boolean).length;
+        
+        if (selectedCount > 1) {
             dayElement.classList.add('has-both');
-            // 三色のストライプグラデーション
-            dayElement.style.background = 'repeating-linear-gradient(45deg, #28a745 0px, #28a745 8px, #ffc107 8px, #ffc107 16px, #17a2b8 16px, #17a2b8 24px)';
-        }
-        // AとBが選択されている場合
-        else if (hasHealth && hasMassage) {
-            dayElement.classList.add('has-both');
-            dayElement.style.background = 'linear-gradient(45deg, #28a745 50%, #ffc107 50%)';
-        }
-        // AとCが選択されている場合
-        else if (hasHealth && hasDental) {
-            dayElement.classList.add('has-both');
-            dayElement.style.background = 'linear-gradient(45deg, #28a745 50%, #17a2b8 50%)';
-        }
-        // BとCが選択されている場合
-        else if (hasMassage && hasDental) {
-            dayElement.classList.add('has-both');
-            dayElement.style.background = 'linear-gradient(45deg, #ffc107 50%, #17a2b8 50%)';
+            // 複数選択の場合はグラデーション表示
+            const colors = [];
+            if (hasHealth) colors.push('#28a745');
+            if (hasMassage) colors.push('#ffc107');
+            if (hasDental) colors.push('#17a2b8');
+            if (hasSauna) colors.push('#dc3545');
+            if (hasCatcafe) colors.push('#6f42c1');
+            
+            if (colors.length === 2) {
+                dayElement.style.background = `linear-gradient(45deg, ${colors[0]} 50%, ${colors[1]} 50%)`;
+            } else if (colors.length === 3) {
+                dayElement.style.background = `repeating-linear-gradient(45deg, ${colors[0]} 0px, ${colors[0]} 8px, ${colors[1]} 8px, ${colors[1]} 16px, ${colors[2]} 16px, ${colors[2]} 24px)`;
+            } else if (colors.length >= 4) {
+                // 4色以上の場合は複雑なグラデーション
+                const gradientStops = colors.map((color, index) => 
+                    `${color} ${(index * 100) / (colors.length - 1)}%`
+                ).join(', ');
+                dayElement.style.background = `linear-gradient(45deg, ${gradientStops})`;
+            }
         }
         // 単一選択の場合
         else if (hasHealth) {
@@ -1828,6 +1864,12 @@ class HabitTracker {
             dayElement.style.background = '';
         } else if (hasDental) {
             dayElement.classList.add('has-dental');
+            dayElement.style.background = '';
+        } else if (hasSauna) {
+            dayElement.classList.add('has-sauna');
+            dayElement.style.background = '';
+        } else if (hasCatcafe) {
+            dayElement.classList.add('has-catcafe');
             dayElement.style.background = '';
         }
         
@@ -1841,6 +1883,8 @@ class HabitTracker {
         const healthKeepingData = { count: 0 };
         const headMassageData = { count: 0 };
         const dentalCleaningData = { count: 0 };
+        const saunaData = { count: 0 };
+        const catcafeData = { count: 0 };
         
         // 全期間のデータをチェック
         for (const dateStr in this.healthData) {
@@ -1855,12 +1899,20 @@ class HabitTracker {
             if (healthStatus.dentalCleaning) {
                 dentalCleaningData.count++;
             }
+            if (healthStatus.sauna) {
+                saunaData.count++;
+            }
+            if (healthStatus.catcafe) {
+                catcafeData.count++;
+            }
         }
         
         // 集計表を更新
         this.updateSummaryRow('healthKeepingSummary', healthKeepingData);
         this.updateSummaryRow('headMassageSummary', headMassageData);
         this.updateSummaryRow('dentalCleaningSummary', dentalCleaningData);
+        this.updateSummaryRow('saunaSummary', saunaData);
+        this.updateSummaryRow('catcafeSummary', catcafeData);
     }
 
     // 集計行を更新

@@ -1932,6 +1932,16 @@ body {
     color: #fff;
 }
 
+.monthly-calendar-day.has-sauna {
+    background: #dc3545;
+    color: #fff;
+}
+
+.monthly-calendar-day.has-catcafe {
+    background: #6f42c1;
+    color: #fff;
+}
+
 /* ヘルス選択の説明 */
 .health-legend {
     display: flex;
@@ -1964,6 +1974,14 @@ body {
 
 .health-legend-color.has-dental {
     background: #17a2b8;
+}
+
+.health-legend-color.has-sauna {
+    background: #dc3545;
+}
+
+.health-legend-color.has-catcafe {
+    background: #6f42c1;
 }
 
 .health-legend-text {
@@ -2084,5 +2102,15 @@ body {
 
 .health-selection-option.selected.dental-cleaning {
     background: #17a2b8;
+    color: #fff;
+}
+
+.health-selection-option.selected.sauna {
+    background: #dc3545;
+    color: #fff;
+}
+
+.health-selection-option.selected.catcafe {
+    background: #6f42c1;
     color: #fff;
 }
