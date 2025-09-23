@@ -2271,6 +2271,28 @@ body {
     color: #fff;
 }
 
+/* 各項目の背景色 */
+#healthKeepingSummary {
+    background: #28a745; /* 緑色 */
+}
+
+#headMassageSummary {
+    background: #ffc107; /* 黄色 */
+    color: #000; /* 黄色背景なので文字色を黒に */
+}
+
+#dentalCleaningSummary {
+    background: #17a2b8; /* 青色 */
+}
+
+#saunaSummary {
+    background: #dc3545; /* 赤色 */
+}
+
+#catcafeSummary {
+    background: #6f42c1; /* 紫色 */
+}
+
 .summary-cell {
     padding: 10px 12px;
     display: flex;
