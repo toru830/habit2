@@ -56,6 +56,8 @@ class HabitTracker {
         this.completedHabits = this.loadCompletedHabits();
         this.currentWeek = this.getCurrentWeek();
         this.calendarMonth = new Date(); // 現在の月
+        this.reportMonth = new Date(); // レポート用の月
+        this.healthData = this.loadHealthData(); // ヘルスキーピングとヘッドマッサージのデータ
         this.init();
     }
 
@@ -1343,6 +1345,7 @@ class HabitTracker {
         document.getElementById('weekView').style.display = 'none';
         document.getElementById('statsView').style.display = 'block';
         document.getElementById('monsterView').style.display = 'none';
+        this.renderMonthlyCalendar();
         this.renderTotalChart();
         this.renderReportTable();
         this.setActiveNav('reportBtn');
@@ -1381,6 +1384,27 @@ class HabitTracker {
         } catch (error) {
             console.error('ローカル読み込みエラー:', error);
             return {};
+        }
+    }
+
+    // ヘルスデータの読み込み
+    loadHealthData() {
+        try {
+            const saved = localStorage.getItem('healthData');
+            return saved ? JSON.parse(saved) : {};
+        } catch (error) {
+            console.error('ヘルスデータ読み込みエラー:', error);
+            return {};
+        }
+    }
+
+    // ヘルスデータの保存
+    saveHealthData() {
+        try {
+            localStorage.setItem('healthData', JSON.stringify(this.healthData));
+            console.log('ヘルスデータを保存:', this.healthData);
+        } catch (error) {
+            console.error('ヘルスデータ保存エラー:', error);
         }
     }
 
@@ -1536,6 +1560,181 @@ class HabitTracker {
         }
         
         return week;
+    }
+
+    // 月間カレンダーを描画
+    renderMonthlyCalendar() {
+        const calendarGrid = document.getElementById('monthlyCalendarGrid');
+        const monthDisplay = document.getElementById('currentMonthReport');
+        if (!calendarGrid || !monthDisplay) return;
+
+        const year = this.reportMonth.getFullYear();
+        const month = this.reportMonth.getMonth();
+        
+        // 月表示を更新
+        monthDisplay.textContent = `${year}年${month + 1}月`;
+        
+        // 月の最初の日と最後の日を取得
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        
+        // 月の最初の日の曜日（0=日曜日）
+        const firstDayOfWeek = firstDay.getDay();
+        
+        // カレンダーグリッドをクリア
+        calendarGrid.innerHTML = '';
+        
+        // 曜日ヘッダー
+        const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
+        weekDays.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'monthly-calendar-day-header';
+            dayHeader.textContent = day;
+            calendarGrid.appendChild(dayHeader);
+        });
+        
+        // 前月の日付（空白セル）
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'monthly-calendar-day other-month';
+            calendarGrid.appendChild(emptyDay);
+        }
+        
+        // 当月の日付
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'monthly-calendar-day';
+            dayElement.textContent = day;
+            
+            const date = new Date(year, month, day);
+            const dateStr = date.toISOString().split('T')[0];
+            
+            // 今日かどうかチェック
+            const today = new Date();
+            if (date.toDateString() === today.toDateString()) {
+                dayElement.classList.add('today');
+            }
+            
+            // ヘルスデータの状態をチェック
+            const healthStatus = this.healthData[dateStr] || {};
+            if (healthStatus.healthKeeping) {
+                dayElement.classList.add('has-health');
+            }
+            if (healthStatus.headMassage) {
+                dayElement.classList.add('has-massage');
+            }
+            if (healthStatus.healthKeeping && healthStatus.headMassage) {
+                dayElement.classList.add('has-both');
+            }
+            
+            // クリックイベントを追加
+            dayElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.showHealthSelection(date, dayElement);
+            });
+            
+            calendarGrid.appendChild(dayElement);
+        }
+        
+        // 月移動ボタンのイベントリスナー
+        this.setupMonthlyCalendarEvents();
+    }
+
+    // 月間カレンダーのイベント設定
+    setupMonthlyCalendarEvents() {
+        const prevBtn = document.getElementById('prevMonthReport');
+        const nextBtn = document.getElementById('nextMonthReport');
+        
+        if (prevBtn) {
+            prevBtn.onclick = () => {
+                this.reportMonth.setMonth(this.reportMonth.getMonth() - 1);
+                this.renderMonthlyCalendar();
+            };
+        }
+        
+        if (nextBtn) {
+            nextBtn.onclick = () => {
+                this.reportMonth.setMonth(this.reportMonth.getMonth() + 1);
+                this.renderMonthlyCalendar();
+            };
+        }
+    }
+
+    // ヘルス選択プルダウンを表示
+    showHealthSelection(date, dayElement) {
+        // 既存のプルダウンを削除
+        const existingDropdown = document.querySelector('.health-selection-dropdown');
+        if (existingDropdown) {
+            existingDropdown.remove();
+        }
+        
+        const dateStr = date.toISOString().split('T')[0];
+        const healthStatus = this.healthData[dateStr] || {};
+        
+        // プルダウンを作成
+        const dropdown = document.createElement('div');
+        dropdown.className = 'health-selection-dropdown show';
+        
+        const healthOption = document.createElement('div');
+        healthOption.className = `health-selection-option ${healthStatus.healthKeeping ? 'selected' : ''}`;
+        healthOption.textContent = '1. ヘルスキーピング';
+        healthOption.onclick = () => {
+            this.toggleHealthData(dateStr, 'healthKeeping');
+            this.updateHealthDisplay(dayElement, dateStr);
+            dropdown.remove();
+        };
+        
+        const massageOption = document.createElement('div');
+        massageOption.className = `health-selection-option ${healthStatus.headMassage ? 'selected' : ''}`;
+        massageOption.textContent = '2. ヘッドマッサージ';
+        massageOption.onclick = () => {
+            this.toggleHealthData(dateStr, 'headMassage');
+            this.updateHealthDisplay(dayElement, dateStr);
+            dropdown.remove();
+        };
+        
+        dropdown.appendChild(healthOption);
+        dropdown.appendChild(massageOption);
+        
+        // 日付要素に相対的に配置
+        dayElement.style.position = 'relative';
+        dayElement.appendChild(dropdown);
+        
+        // 外部クリックでプルダウンを閉じる
+        setTimeout(() => {
+            document.addEventListener('click', function closeDropdown() {
+                dropdown.remove();
+                document.removeEventListener('click', closeDropdown);
+            });
+        }, 100);
+    }
+
+    // ヘルスデータの切り替え
+    toggleHealthData(dateStr, type) {
+        if (!this.healthData[dateStr]) {
+            this.healthData[dateStr] = {};
+        }
+        
+        this.healthData[dateStr][type] = !this.healthData[dateStr][type];
+        this.saveHealthData();
+    }
+
+    // ヘルス表示の更新
+    updateHealthDisplay(dayElement, dateStr) {
+        const healthStatus = this.healthData[dateStr] || {};
+        
+        // 既存のクラスを削除
+        dayElement.classList.remove('has-health', 'has-massage', 'has-both');
+        
+        // 新しいクラスを追加
+        if (healthStatus.healthKeeping && healthStatus.headMassage) {
+            dayElement.classList.add('has-both');
+        } else if (healthStatus.healthKeeping) {
+            dayElement.classList.add('has-health');
+        } else if (healthStatus.headMassage) {
+            dayElement.classList.add('has-massage');
+        }
     }
 }
 

@@ -78,6 +78,21 @@
             <!-- 統計ビュー -->
             <section class="stats-view" id="statsView" style="display: none;">
 
+                <!-- 月間カレンダー -->
+                <div class="monthly-calendar-section">
+                    <h3>月間カレンダー</h3>
+                    <div class="monthly-calendar-container">
+                        <div class="monthly-calendar-header">
+                            <button class="month-nav" id="prevMonthReport">‹</button>
+                            <span id="currentMonthReport">2025年9月</span>
+                            <button class="month-nav" id="nextMonthReport">›</button>
+                        </div>
+                        <div class="monthly-calendar-grid" id="monthlyCalendarGrid">
+                            <!-- 月間カレンダーはJavaScriptで動的に生成 -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 合計値推移グラフ -->
                 <div class="chart-section">
                     <h3>合計値の推移</h3>

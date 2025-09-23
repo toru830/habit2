@@ -1824,3 +1824,144 @@ body {
         border-color: #dee2e6;
     }
 }
+
+/* 月間カレンダーのスタイル */
+.monthly-calendar-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.monthly-calendar-section h3 {
+    color: #fff;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.monthly-calendar-container {
+    background: #000;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.monthly-calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 10px;
+}
+
+.monthly-calendar-header .month-nav {
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.monthly-calendar-header .month-nav:hover {
+    background: #555;
+}
+
+.monthly-calendar-header span {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.monthly-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.monthly-calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #222;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.monthly-calendar-day:hover {
+    background: #444;
+}
+
+.monthly-calendar-day.other-month {
+    color: #666;
+    background: #111;
+}
+
+.monthly-calendar-day.today {
+    background: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+.monthly-calendar-day.has-health {
+    background: #28a745;
+    color: #fff;
+}
+
+.monthly-calendar-day.has-massage {
+    background: #ffc107;
+    color: #000;
+}
+
+.monthly-calendar-day.has-both {
+    background: linear-gradient(45deg, #28a745 50%, #ffc107 50%);
+    color: #000;
+}
+
+/* プルダウンメニューのスタイル */
+.health-selection-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.health-selection-dropdown.show {
+    display: block;
+}
+
+.health-selection-option {
+    padding: 8px 12px;
+    color: #fff;
+    cursor: pointer;
+    border-bottom: 1px solid #555;
+    font-size: 12px;
+}
+
+.health-selection-option:last-child {
+    border-bottom: none;
+}
+
+.health-selection-option:hover {
+    background: #555;
+}
+
+.health-selection-option.selected {
+    background: #007bff;
+    color: #fff;
+}
