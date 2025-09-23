@@ -2274,6 +2274,7 @@ body {
 /* 各項目の背景色 */
 #healthKeepingSummary {
     background: #28a745; /* 緑色 */
+    color: #fff;
 }
 
 #headMassageSummary {
@@ -2283,14 +2284,33 @@ body {
 
 #dentalCleaningSummary {
     background: #17a2b8; /* 青色 */
+    color: #fff;
 }
 
 #saunaSummary {
     background: #dc3545; /* 赤色 */
+    color: #fff;
 }
 
 #catcafeSummary {
     background: #6f42c1; /* 紫色 */
+    color: #fff;
+}
+
+/* 総回数セルの文字色を強調 */
+#healthKeepingSummary .count,
+#dentalCleaningSummary .count,
+#saunaSummary .count,
+#catcafeSummary .count {
+    color: #fff !important;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+#headMassageSummary .count {
+    color: #000 !important;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.3);
 }
 
 .summary-cell {

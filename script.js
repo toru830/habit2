@@ -668,6 +668,9 @@ class HabitTracker {
         
         // 日計も更新
         this.updateDailyTotals();
+        
+        // モチベーション表示を更新
+        this.updateMotivationDisplay();
     }
 
     // 今日かどうかをチェック
