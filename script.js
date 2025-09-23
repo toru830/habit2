@@ -754,27 +754,6 @@ class HabitTracker {
         };
     }
 
-    // 過去最高連続日数を取得
-    getBestStreak(habitId) {
-        const dates = Object.keys(this.completedHabits).sort();
-        let maxStreak = 0;
-        let currentStreak = 0;
-        
-        for (const date of dates) {
-            const habits = this.completedHabits[date];
-            const isCompleted = Array.isArray(habits) ? 
-                habits.includes(habitId) : 
-                (habits && typeof habits === 'object' ? !!habits[habitId] : false);
-            if (isCompleted) {
-                currentStreak++;
-                maxStreak = Math.max(maxStreak, currentStreak);
-            } else {
-                currentStreak = 0;
-            }
-        }
-        
-        return maxStreak;
-    }
 
     // タイプラベルを取得
     getTypeLabel(type) {
@@ -2170,6 +2149,52 @@ class HabitTracker {
         }
         return streaks;
     }
+    
+    // 現在の連続日数を取得
+    getCurrentStreak(habitId) {
+        let currentStreak = 0;
+        const today = new Date();
+        
+        for (let i = 0; i < 365; i++) {
+            const checkDate = new Date(today);
+            checkDate.setDate(today.getDate() - i);
+            const dateStr = checkDate.toISOString().split('T')[0];
+            const dayHabits = this.completedHabits[dateStr];
+            
+            if (dayHabits && (Array.isArray(dayHabits) ? dayHabits.includes(habitId) : dayHabits[habitId])) {
+                currentStreak++;
+            } else {
+                break;
+            }
+        }
+        
+        return currentStreak;
+    }
+    
+    // 最高連続日数を取得
+    getBestStreak(habitId) {
+        let maxStreak = 0;
+        let currentStreak = 0;
+        const today = new Date();
+        
+        for (let i = 365; i >= 0; i--) {
+            const checkDate = new Date(today);
+            checkDate.setDate(today.getDate() - i);
+            const dateStr = checkDate.toISOString().split('T')[0];
+            const dayHabits = this.completedHabits[dateStr];
+            
+            if (dayHabits && (Array.isArray(dayHabits) ? dayHabits.includes(habitId) : dayHabits[habitId])) {
+                currentStreak++;
+                maxStreak = Math.max(maxStreak, currentStreak);
+            } else {
+                currentStreak = 0;
+            }
+        }
+        
+        return maxStreak;
+    }
+    
+    
     
     calculateTotalScore() {
         let totalScore = 0;
