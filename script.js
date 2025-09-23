@@ -1707,7 +1707,7 @@ class HabitTracker {
         dropdown.className = 'health-selection-dropdown show';
         
         const healthOption = document.createElement('div');
-        healthOption.className = `health-selection-option ${healthStatus.healthKeeping ? 'selected' : ''}`;
+        healthOption.className = `health-selection-option ${healthStatus.healthKeeping ? 'selected health-keeping' : ''}`;
         healthOption.textContent = 'A';
         healthOption.onclick = () => {
             this.toggleHealthData(dateStr, 'healthKeeping');
@@ -1716,7 +1716,7 @@ class HabitTracker {
         };
         
         const massageOption = document.createElement('div');
-        massageOption.className = `health-selection-option ${healthStatus.headMassage ? 'selected' : ''}`;
+        massageOption.className = `health-selection-option ${healthStatus.headMassage ? 'selected head-massage' : ''}`;
         massageOption.textContent = 'B';
         massageOption.onclick = () => {
             this.toggleHealthData(dateStr, 'headMassage');

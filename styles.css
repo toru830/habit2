@@ -2002,3 +2002,13 @@ body {
     background: #007bff;
     color: #fff;
 }
+
+.health-selection-option.selected.health-keeping {
+    background: #28a745;
+    color: #fff;
+}
+
+.health-selection-option.selected.head-massage {
+    background: #ffc107;
+    color: #000;
+}
