@@ -1705,7 +1705,6 @@ class HabitTracker {
             prevBtn.onclick = () => {
                 this.reportMonth.setMonth(this.reportMonth.getMonth() - 1);
                 this.renderMonthlyCalendar();
-                this.renderHealthSummary();
             };
         }
         
@@ -1713,7 +1712,6 @@ class HabitTracker {
             nextBtn.onclick = () => {
                 this.reportMonth.setMonth(this.reportMonth.getMonth() + 1);
                 this.renderMonthlyCalendar();
-                this.renderHealthSummary();
             };
         }
     }
@@ -1837,38 +1835,25 @@ class HabitTracker {
         this.renderHealthSummary();
     }
 
-    // ヘルス集計表をレンダリング
+    // ヘルス集計表をレンダリング（全期間）
     renderHealthSummary() {
-        const year = this.reportMonth.getFullYear();
-        const month = this.reportMonth.getMonth();
-        
-        // 月の最初の日と最後の日を取得
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        
         // 各項目の集計
-        const healthKeepingData = { count: 0, dates: [] };
-        const headMassageData = { count: 0, dates: [] };
-        const dentalCleaningData = { count: 0, dates: [] };
+        const healthKeepingData = { count: 0 };
+        const headMassageData = { count: 0 };
+        const dentalCleaningData = { count: 0 };
         
-        // 当月の各日をチェック
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, month, day);
-            const dateStr = date.toISOString().split('T')[0];
+        // 全期間のデータをチェック
+        for (const dateStr in this.healthData) {
             const healthStatus = this.healthData[dateStr] || {};
             
             if (healthStatus.healthKeeping) {
                 healthKeepingData.count++;
-                healthKeepingData.dates.push(day);
             }
             if (healthStatus.headMassage) {
                 headMassageData.count++;
-                headMassageData.dates.push(day);
             }
             if (healthStatus.dentalCleaning) {
                 dentalCleaningData.count++;
-                dentalCleaningData.dates.push(day);
             }
         }
         
@@ -1884,10 +1869,7 @@ class HabitTracker {
         if (!row) return;
         
         const countCell = row.querySelector('.count');
-        const datesCell = row.querySelector('.dates');
-        
         countCell.textContent = data.count;
-        datesCell.textContent = data.dates.length > 0 ? data.dates.join(', ') : '-';
     }
 }
 

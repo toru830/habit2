@@ -1998,7 +1998,7 @@ body {
 
 .health-summary-header {
     display: grid;
-    grid-template-columns: 2fr 1fr 2fr;
+    grid-template-columns: 2fr 1fr;
     background: #444;
     font-weight: bold;
     color: #fff;
@@ -2006,7 +2006,7 @@ body {
 
 .health-summary-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 2fr;
+    grid-template-columns: 2fr 1fr;
     background: #2a2a2a;
     color: #fff;
 }
