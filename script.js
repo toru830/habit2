@@ -1655,7 +1655,8 @@ class HabitTracker {
             // 3つすべて選択されている場合
             if (hasHealth && hasMassage && hasDental) {
                 dayElement.classList.add('has-both');
-                dayElement.style.background = 'linear-gradient(45deg, #28a745 33%, #ffc107 33%, #17a2b8 33%)';
+                // 三色のストライプグラデーション
+                dayElement.style.background = 'repeating-linear-gradient(45deg, #28a745 0px, #28a745 8px, #ffc107 8px, #ffc107 16px, #17a2b8 16px, #17a2b8 24px)';
             }
             // AとBが選択されている場合
             else if (hasHealth && hasMassage) {
@@ -1799,7 +1800,8 @@ class HabitTracker {
         // 3つすべて選択されている場合
         if (hasHealth && hasMassage && hasDental) {
             dayElement.classList.add('has-both');
-            dayElement.style.background = 'linear-gradient(45deg, #28a745 33%, #ffc107 33%, #17a2b8 33%)';
+            // 三色のストライプグラデーション
+            dayElement.style.background = 'repeating-linear-gradient(45deg, #28a745 0px, #28a745 8px, #ffc107 8px, #ffc107 16px, #17a2b8 16px, #17a2b8 24px)';
         }
         // AとBが選択されている場合
         else if (hasHealth && hasMassage) {
