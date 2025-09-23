@@ -1724,8 +1724,18 @@ class HabitTracker {
             dropdown.remove();
         };
         
+        const dentalOption = document.createElement('div');
+        dentalOption.className = `health-selection-option ${healthStatus.dentalCleaning ? 'selected dental-cleaning' : ''}`;
+        dentalOption.textContent = 'C';
+        dentalOption.onclick = () => {
+            this.toggleHealthData(dateStr, 'dentalCleaning');
+            this.updateHealthDisplay(dayElement, dateStr);
+            dropdown.remove();
+        };
+        
         dropdown.appendChild(healthOption);
         dropdown.appendChild(massageOption);
+        dropdown.appendChild(dentalOption);
         
         // 日付要素に相対的に配置
         dayElement.style.position = 'relative';
@@ -1755,7 +1765,7 @@ class HabitTracker {
         const healthStatus = this.healthData[dateStr] || {};
         
         // 既存のクラスを削除
-        dayElement.classList.remove('has-health', 'has-massage', 'has-both');
+        dayElement.classList.remove('has-health', 'has-massage', 'has-dental', 'has-both');
         
         // 新しいクラスを追加
         if (healthStatus.healthKeeping && healthStatus.headMassage) {
@@ -1764,6 +1774,8 @@ class HabitTracker {
             dayElement.classList.add('has-health');
         } else if (healthStatus.headMassage) {
             dayElement.classList.add('has-massage');
+        } else if (healthStatus.dentalCleaning) {
+            dayElement.classList.add('has-dental');
         }
     }
 }

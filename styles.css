@@ -1927,6 +1927,11 @@ body {
     color: #000;
 }
 
+.monthly-calendar-day.has-dental {
+    background: #17a2b8;
+    color: #fff;
+}
+
 /* ヘルス選択の説明 */
 .health-legend {
     display: flex;
@@ -1955,6 +1960,10 @@ body {
 
 .health-legend-color.has-massage {
     background: #ffc107;
+}
+
+.health-legend-color.has-dental {
+    background: #17a2b8;
 }
 
 .health-legend-text {
@@ -2011,4 +2020,9 @@ body {
 .health-selection-option.selected.head-massage {
     background: #ffc107;
     color: #000;
+}
+
+.health-selection-option.selected.dental-cleaning {
+    background: #17a2b8;
+    color: #fff;
 }
