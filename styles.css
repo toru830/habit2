@@ -2348,8 +2348,8 @@ body {
 }
 
 #headMassageSummary {
-    background: #ffc107; /* 黄色 */
-    color: #000; /* 黄色背景なので文字色を黒に */
+    background: #b8860b; /* 濃い黄色（ダークゴールド） */
+    color: #fff; /* 白文字に統一 */
 }
 
 #dentalCleaningSummary {
@@ -2378,9 +2378,9 @@ body {
 }
 
 #headMassageSummary .count {
-    color: #000 !important;
+    color: #fff !important;
     font-weight: bold;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 .summary-cell {
