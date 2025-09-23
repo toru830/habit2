@@ -1477,6 +1477,9 @@ class HabitTracker {
         this.streaks = this.calculateStreaks();
         this.totalScore = this.calculateTotalScore();
         
+        // 達成データを再計算
+        this.checkAchievements();
+        
         // 表示を更新
         document.getElementById('currentStreak').textContent = this.achievements.currentStreak;
         document.getElementById('totalScore').textContent = this.totalScore;
