@@ -2054,16 +2054,17 @@ body {
 .achievement-card {
     display: flex;
     align-items: flex-start;
-    gap: 15px;
-    padding: 20px;
+    gap: 20px;
+    padding: 25px;
     background: #2a2a2a;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid #444;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .achievement-icon {
-    font-size: 28px;
+    font-size: 32px;
     flex-shrink: 0;
     margin-top: 5px;
 }
@@ -2074,30 +2075,66 @@ body {
 
 .achievement-content h4 {
     color: #fff;
-    margin: 0 0 15px 0;
-    font-size: 18px;
+    margin: 0 0 20px 0;
+    font-size: 20px;
     font-weight: bold;
-    border-bottom: 2px solid #444;
-    padding-bottom: 8px;
+    border-bottom: 3px solid #555;
+    padding-bottom: 10px;
+    text-align: center;
+    background: linear-gradient(90deg, transparent, #444, transparent);
+    padding: 10px 0;
 }
 
-.achievement-content p {
-    color: #ccc;
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.6;
+.achievement-details {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
 }
 
-.achievement-content strong {
+.achievement-detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px;
+    background: #333;
+    border-radius: 6px;
+    border-left: 4px solid #666;
+}
+
+.achievement-detail-label {
     color: #fff;
     font-weight: bold;
-    display: inline-block;
-    min-width: 80px;
-    margin-right: 10px;
+    font-size: 14px;
+    min-width: 90px;
+    flex-shrink: 0;
+    text-align: right;
+    padding-right: 8px;
+    border-right: 1px solid #555;
 }
 
-.achievement-content br {
-    margin-bottom: 8px;
+.achievement-detail-content {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.5;
+    flex: 1;
+}
+
+/* 縦書き用のスタイル */
+.achievement-title-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    padding: 10px 5px;
+    border: 2px solid #555;
+    border-radius: 8px;
+    background: #333;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* バッジ一覧のスタイル */
