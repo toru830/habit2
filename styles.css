@@ -1946,9 +1946,9 @@ body {
 .health-legend {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
     margin-top: 10px;
-    padding: 10px;
+    padding: 15px;
 }
 
 .health-legend-item {
@@ -1958,9 +1958,9 @@ body {
 }
 
 .health-legend-color {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
     display: inline-block;
 }
 
@@ -1984,10 +1984,6 @@ body {
     background: #6f42c1;
 }
 
-.health-legend-text {
-    font-size: 12px;
-    color: #ccc;
-}
 
 /* ヘルス集計表のスタイル */
 .health-summary-section {
