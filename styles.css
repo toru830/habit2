@@ -711,6 +711,7 @@ body {
     border: 1px solid var(--monster-legendary-color, #4A90E2);
     background: linear-gradient(140deg, rgba(255, 255, 255, 0.06), var(--monster-legendary-gradient, rgba(74, 144, 226, 0.16)));
     box-shadow: 0 0 18px rgba(0, 0, 0, 0.45);
+    grid-column: 1 / -1;
 }
 
 .monster-card--legendary::after {
@@ -738,6 +739,12 @@ body {
 
 .monster-card--legendary .monster-image span {
     font-size: 32px;
+}
+
+.monster-card--legendary .monster-name {
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
 }
 
 @keyframes float {
