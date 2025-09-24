@@ -1489,6 +1489,9 @@ class HabitTracker {
         document.getElementById('totalScore').textContent = this.totalScore;
         document.getElementById('perfectDays').textContent = this.achievements.perfectDays;
         document.getElementById('badgeCount').textContent = this.achievements.badges.length;
+
+        const totalAchievementValue = this.calculateAchievementTotal();
+        document.getElementById('achievementTotal').textContent = `${totalAchievementValue}ギル`;
     }
 
     // 全達成データを再計算
@@ -1551,8 +1554,18 @@ class HabitTracker {
         if (achievements.perfectDays >= 10) achievements.badges.push('完璧10日');
         if (achievements.perfectDays >= 50) achievements.badges.push('完璧50日');
         if (achievements.perfectDays >= 100) achievements.badges.push('完璧100日');
-        
+
         return achievements;
+    }
+
+    calculateAchievementTotal() {
+        const achievements = this.achievements || {};
+        const currentStreak = Math.max(0, achievements.currentStreak || 0);
+        const perfectDays = Math.max(0, achievements.perfectDays || 0);
+        const badgeCount = Array.isArray(achievements.badges) ? achievements.badges.length : 0;
+        const totalScore = Math.max(0, this.totalScore || 0);
+
+        return currentStreak + perfectDays + badgeCount + totalScore;
     }
 
     showMonsterView() {
