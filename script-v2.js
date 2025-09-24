@@ -879,7 +879,6 @@ class HabitTracker {
             const totalCount = this.calculateTotalAll(habit.id);
             const level = this.getMonsterLevel(totalCount);
             const monsterType = this.getMonsterType(totalCount);
-            const bestStreak = this.getBestStreak(habit.id);
 
             const monsterCard = document.createElement('div');
             monsterCard.className = 'monster-card';
@@ -891,10 +890,6 @@ class HabitTracker {
                 <div class="monster-name">${habit.shortName}</div>
                 <div class="monster-level">Lv.${level}</div>
                 <div class="monster-description">${monsterType.name}</div>
-                <div class="monster-stats">
-                    <span>合計: ${totalCount}</span>
-                    <span>最高: ${bestStreak}日</span>
-                </div>
             `;
 
             monsterGrid.appendChild(monsterCard);
