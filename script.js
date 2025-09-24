@@ -15,7 +15,7 @@ const habitsData = [
     // サプリ・食事系
     { id: 'protein', name: 'プロテイン', shortName: 'ﾌﾟﾛﾃｲﾝ', category: '栄養', priority: 4, reason: '筋トレ効果を高める。運動とセットで効力大。', type: 'supplement' },
     { id: 'probiotics', name: '整腸剤', shortName: '整腸剤', category: '栄養・消化', priority: 2, reason: '腸内環境改善の補助。基本は食事で十分。', type: 'supplement' },
-    { id: 'vitamin_b', name: 'ビタミンB', shortName: 'ﾋﾞﾀﾐﾝB', category: '栄養', priority: 3, reason: 'エネルギー代謝と神経機能に重要。', type: 'supplement' },
+    { id: 'vitamin_b', name: 'ビタミンD', shortName: 'ﾋﾞﾀﾐﾝD', category: '栄養', priority: 3, reason: 'エネルギー代謝と神経機能に重要。', type: 'supplement' },
     { id: 'creatine', name: 'クレアチン', shortName: 'ｸﾚｱﾁﾝ', category: '栄養', priority: 3, reason: '筋力と筋量の向上に効果的。', type: 'supplement' },
     { id: 'ashwagandha', name: 'アシュワガンダ', shortName: 'ｱｼｭﾜｶﾞﾝﾀﾞ', category: '栄養', priority: 2, reason: 'ストレス軽減と睡眠の質向上。', type: 'supplement' },
     { id: 'magnesium', name: 'マグネシウム', shortName: 'ﾏｸﾞﾈｼｳﾑ', category: '栄養', priority: 2, reason: '筋肉のリラクゼーションと睡眠の質向上。', type: 'supplement' },
