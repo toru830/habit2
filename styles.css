@@ -640,6 +640,13 @@ body {
     margin-bottom: 8px;
 }
 
+.monster-level {
+    color: #ffd700;
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
 .monster-image {
     width: 60px;
     height: 60px;

@@ -997,21 +997,23 @@ class HabitTracker {
 
         this.habits.forEach((habit, index) => {
             const totalCount = this.calculateTotalAll(habit.id);
+            const level = this.getMonsterLevel(totalCount);
             const monsterType = this.getMonsterType(totalCount);
             const bestStreak = this.getBestStreak(habit.id);
-            
+
             const monsterCard = document.createElement('div');
             monsterCard.className = 'monster-card';
-            
+
             // 次のレベルまでの必要日数を計算
             const nextLevel = this.getNextLevel(totalCount);
-            const daysToNext = nextLevel - totalCount;
-            
+            const daysToNext = Math.max(0, nextLevel - totalCount);
+
             monsterCard.innerHTML = `
                 <div class="monster-name">${habit.shortName}</div>
                 <div class="monster-image" style="border-color: ${monsterType.color}; background: ${monsterType.color}20;">
                     ${monsterType.emoji}
                 </div>
+                <div class="monster-level">Lv.${level}</div>
                 <div class="monster-description">${monsterType.name}</div>
                 <div class="monster-stats">
                     <span>合計: ${totalCount}</span>
@@ -1026,17 +1028,22 @@ class HabitTracker {
 
     // 合計値に基づいてモンスタータイプを取得
     getMonsterType(totalCount) {
-        if (totalCount === 0) return monsterTypes[0];
-        if (totalCount <= 1) return monsterTypes[1];
-        if (totalCount <= 2) return monsterTypes[2];
-        if (totalCount <= 3) return monsterTypes[3];
-        if (totalCount <= 4) return monsterTypes[4];
-        if (totalCount <= 5) return monsterTypes[5];
-        if (totalCount <= 6) return monsterTypes[6];
-        if (totalCount <= 7) return monsterTypes[7];
-        if (totalCount <= 8) return monsterTypes[8];
-        if (totalCount <= 9) return monsterTypes[9];
-        return monsterTypes[10];
+        const level = this.getMonsterLevel(totalCount);
+        return monsterTypes[level];
+    }
+
+    getMonsterLevel(totalCount) {
+        if (totalCount === 0) return 0;
+        if (totalCount <= 1) return 1;
+        if (totalCount <= 2) return 2;
+        if (totalCount <= 3) return 3;
+        if (totalCount <= 4) return 4;
+        if (totalCount <= 5) return 5;
+        if (totalCount <= 6) return 6;
+        if (totalCount <= 7) return 7;
+        if (totalCount <= 8) return 8;
+        if (totalCount <= 9) return 9;
+        return 10;
     }
 
     // 次のレベルまでの必要日数を取得
