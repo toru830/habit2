@@ -2290,10 +2290,11 @@ body {
 }
 
 .badge-progress-overview {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
     margin-bottom: 22px;
+    align-items: stretch;
 }
 
 .badge-owned-section {
@@ -2371,6 +2372,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    height: 100%;
 }
 
 .badge-progress-card.highlight {
@@ -2527,7 +2529,7 @@ body {
 }
 
 .badge-card-grid.two-column-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
 }
 
@@ -2537,6 +2539,11 @@ body {
     }
 
     .badge-card-grid.two-column-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .badge-progress-overview {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
     }
