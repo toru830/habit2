@@ -161,11 +161,21 @@ const BADGE_GIL_VALUES = {
     '週末戦士': 130,
     '平日戦士': 110,
     '祝日マスター': 160,
-    'health_guardian': 1400,
-    'head_massage_maestro': 1350,
-    'dental_cleaning_conqueror': 1500,
-    'sauna_sage': 1450,
-    'catcafe_starlight': 1300
+    'health_guardian_lv1': 120,
+    'health_guardian_lv2': 260,
+    'health_guardian_lv3': 420,
+    'head_massage_maestro_lv1': 120,
+    'head_massage_maestro_lv2': 260,
+    'head_massage_maestro_lv3': 420,
+    'dental_cleaning_conqueror_lv1': 120,
+    'dental_cleaning_conqueror_lv2': 260,
+    'dental_cleaning_conqueror_lv3': 420,
+    'sauna_sage_lv1': 120,
+    'sauna_sage_lv2': 260,
+    'sauna_sage_lv3': 420,
+    'catcafe_starlight_lv1': 120,
+    'catcafe_starlight_lv2': 260,
+    'catcafe_starlight_lv3': 420
 };
 
 const BADGE_LIBRARY = [
@@ -210,11 +220,21 @@ const BADGE_LIBRARY = [
         title: '💖 ヘルスケアバッジ',
         icon: '💖',
         badges: [
-            { id: 'health_guardian', icon: '🛡️', name: 'A ヘルス守護者', condition: 'ヘルスキーピングを記録する', gil: 1400 },
-            { id: 'head_massage_maestro', icon: '💆', name: 'B ヘッドマイスター', condition: 'ヘッドマッサージを記録する', gil: 1350 },
-            { id: 'dental_cleaning_conqueror', icon: '🦷', name: 'C デンタルチャンピオン', condition: '歯科クリーニングを記録する', gil: 1500 },
-            { id: 'sauna_sage', icon: '🧖', name: 'D サウナ賢者', condition: 'サウナを記録する', gil: 1450 },
-            { id: 'catcafe_starlight', icon: '🐈', name: 'E キャットギルド', condition: '猫カフェを記録する', gil: 1300 }
+            { id: 'health_guardian_lv1', icon: '🛡️', name: 'A ヘルス守護者・初級', condition: 'ヘルスキーピングを3回記録', gil: 120 },
+            { id: 'health_guardian_lv2', icon: '🛡️', name: 'A ヘルス守護者・中級', condition: 'ヘルスキーピングを7回記録', gil: 260 },
+            { id: 'health_guardian_lv3', icon: '🛡️', name: 'A ヘルス守護者・達人', condition: 'ヘルスキーピングを15回記録', gil: 420 },
+            { id: 'head_massage_maestro_lv1', icon: '💆', name: 'B ヘッドマイスター・初級', condition: 'ヘッドマッサージを3回記録', gil: 120 },
+            { id: 'head_massage_maestro_lv2', icon: '💆', name: 'B ヘッドマイスター・中級', condition: 'ヘッドマッサージを7回記録', gil: 260 },
+            { id: 'head_massage_maestro_lv3', icon: '💆', name: 'B ヘッドマイスター・達人', condition: 'ヘッドマッサージを15回記録', gil: 420 },
+            { id: 'dental_cleaning_conqueror_lv1', icon: '🦷', name: 'C デンタルチャンピオン・初級', condition: '歯科クリーニングを3回記録', gil: 120 },
+            { id: 'dental_cleaning_conqueror_lv2', icon: '🦷', name: 'C デンタルチャンピオン・中級', condition: '歯科クリーニングを7回記録', gil: 260 },
+            { id: 'dental_cleaning_conqueror_lv3', icon: '🦷', name: 'C デンタルチャンピオン・達人', condition: '歯科クリーニングを15回記録', gil: 420 },
+            { id: 'sauna_sage_lv1', icon: '🧖', name: 'D サウナ賢者・初級', condition: 'サウナを3回記録', gil: 120 },
+            { id: 'sauna_sage_lv2', icon: '🧖', name: 'D サウナ賢者・中級', condition: 'サウナを7回記録', gil: 260 },
+            { id: 'sauna_sage_lv3', icon: '🧖', name: 'D サウナ賢者・達人', condition: 'サウナを15回記録', gil: 420 },
+            { id: 'catcafe_starlight_lv1', icon: '🐈', name: 'E キャットギルド・初級', condition: '猫カフェを3回記録', gil: 120 },
+            { id: 'catcafe_starlight_lv2', icon: '🐈', name: 'E キャットギルド・中級', condition: '猫カフェを7回記録', gil: 260 },
+            { id: 'catcafe_starlight_lv3', icon: '🐈', name: 'E キャットギルド・達人', condition: '猫カフェを15回記録', gil: 420 }
         ]
     },
     {
@@ -1999,11 +2019,42 @@ class HabitTracker {
 
         if (achievements.totalDays >= 100) badgeSet.add('century');
 
-        if (healthCounts.healthKeeping > 0) badgeSet.add('health_guardian');
-        if (healthCounts.headMassage > 0) badgeSet.add('head_massage_maestro');
-        if (healthCounts.dentalCleaning > 0) badgeSet.add('dental_cleaning_conqueror');
-        if (healthCounts.sauna > 0) badgeSet.add('sauna_sage');
-        if (healthCounts.catcafe > 0) badgeSet.add('catcafe_starlight');
+        const healthBadgeThresholds = {
+            healthKeeping: [
+                { id: 'health_guardian_lv1', threshold: 3 },
+                { id: 'health_guardian_lv2', threshold: 7 },
+                { id: 'health_guardian_lv3', threshold: 15 }
+            ],
+            headMassage: [
+                { id: 'head_massage_maestro_lv1', threshold: 3 },
+                { id: 'head_massage_maestro_lv2', threshold: 7 },
+                { id: 'head_massage_maestro_lv3', threshold: 15 }
+            ],
+            dentalCleaning: [
+                { id: 'dental_cleaning_conqueror_lv1', threshold: 3 },
+                { id: 'dental_cleaning_conqueror_lv2', threshold: 7 },
+                { id: 'dental_cleaning_conqueror_lv3', threshold: 15 }
+            ],
+            sauna: [
+                { id: 'sauna_sage_lv1', threshold: 3 },
+                { id: 'sauna_sage_lv2', threshold: 7 },
+                { id: 'sauna_sage_lv3', threshold: 15 }
+            ],
+            catcafe: [
+                { id: 'catcafe_starlight_lv1', threshold: 3 },
+                { id: 'catcafe_starlight_lv2', threshold: 7 },
+                { id: 'catcafe_starlight_lv3', threshold: 15 }
+            ]
+        };
+
+        Object.entries(healthBadgeThresholds).forEach(([key, tiers]) => {
+            const count = healthCounts[key] || 0;
+            tiers.forEach(tier => {
+                if (count >= tier.threshold) {
+                    badgeSet.add(tier.id);
+                }
+            });
+        });
 
         achievements.badges = Array.from(badgeSet);
         return achievements;
@@ -2021,7 +2072,7 @@ class HabitTracker {
 
         board.innerHTML = '';
 
-        BADGE_LIBRARY.forEach(category => {
+        BADGE_LIBRARY.forEach((category, index) => {
             const categoryCard = document.createElement('div');
             categoryCard.className = 'badge-category-card';
 
@@ -2067,7 +2118,8 @@ class HabitTracker {
 
             const grid = document.createElement('div');
             grid.className = 'badge-card-grid';
-            if (category.key === 'streak' || category.key === 'combo') {
+            const shouldUseTwoColumn = index === 0 || index >= 2;
+            if (shouldUseTwoColumn) {
                 grid.classList.add('two-column-grid');
             }
 
@@ -2808,45 +2860,133 @@ class HabitTracker {
         const definitions = [
             {
                 key: 'healthKeeping',
-                id: 'health_guardian',
-                title: 'A ヘルス守護者',
-                description: 'ヘルスキーピングの記録を達成しました！'
+                tiers: [
+                    {
+                        id: 'health_guardian_lv1',
+                        threshold: 3,
+                        title: 'A ヘルス守護者・初級',
+                        description: 'ヘルスキーピングを3回達成しました！'
+                    },
+                    {
+                        id: 'health_guardian_lv2',
+                        threshold: 7,
+                        title: 'A ヘルス守護者・中級',
+                        description: 'ヘルスキーピングを7回達成しました！'
+                    },
+                    {
+                        id: 'health_guardian_lv3',
+                        threshold: 15,
+                        title: 'A ヘルス守護者・達人',
+                        description: 'ヘルスキーピングを15回達成しました！'
+                    }
+                ]
             },
             {
                 key: 'headMassage',
-                id: 'head_massage_maestro',
-                title: 'B ヘッドマイスター',
-                description: 'ヘッドマッサージのケアを記録しました！'
+                tiers: [
+                    {
+                        id: 'head_massage_maestro_lv1',
+                        threshold: 3,
+                        title: 'B ヘッドマイスター・初級',
+                        description: 'ヘッドマッサージを3回達成しました！'
+                    },
+                    {
+                        id: 'head_massage_maestro_lv2',
+                        threshold: 7,
+                        title: 'B ヘッドマイスター・中級',
+                        description: 'ヘッドマッサージを7回達成しました！'
+                    },
+                    {
+                        id: 'head_massage_maestro_lv3',
+                        threshold: 15,
+                        title: 'B ヘッドマイスター・達人',
+                        description: 'ヘッドマッサージを15回達成しました！'
+                    }
+                ]
             },
             {
                 key: 'dentalCleaning',
-                id: 'dental_cleaning_conqueror',
-                title: 'C デンタルチャンピオン',
-                description: '歯科クリーニングの記録を残しました！'
+                tiers: [
+                    {
+                        id: 'dental_cleaning_conqueror_lv1',
+                        threshold: 3,
+                        title: 'C デンタルチャンピオン・初級',
+                        description: '歯科クリーニングを3回達成しました！'
+                    },
+                    {
+                        id: 'dental_cleaning_conqueror_lv2',
+                        threshold: 7,
+                        title: 'C デンタルチャンピオン・中級',
+                        description: '歯科クリーニングを7回達成しました！'
+                    },
+                    {
+                        id: 'dental_cleaning_conqueror_lv3',
+                        threshold: 15,
+                        title: 'C デンタルチャンピオン・達人',
+                        description: '歯科クリーニングを15回達成しました！'
+                    }
+                ]
             },
             {
                 key: 'sauna',
-                id: 'sauna_sage',
-                title: 'D サウナ賢者',
-                description: 'サウナでのリフレッシュを記録しました！'
+                tiers: [
+                    {
+                        id: 'sauna_sage_lv1',
+                        threshold: 3,
+                        title: 'D サウナ賢者・初級',
+                        description: 'サウナを3回達成しました！'
+                    },
+                    {
+                        id: 'sauna_sage_lv2',
+                        threshold: 7,
+                        title: 'D サウナ賢者・中級',
+                        description: 'サウナを7回達成しました！'
+                    },
+                    {
+                        id: 'sauna_sage_lv3',
+                        threshold: 15,
+                        title: 'D サウナ賢者・達人',
+                        description: 'サウナを15回達成しました！'
+                    }
+                ]
             },
             {
                 key: 'catcafe',
-                id: 'catcafe_starlight',
-                title: 'E キャットギルド',
-                description: '猫カフェでの癒やしを記録しました！'
+                tiers: [
+                    {
+                        id: 'catcafe_starlight_lv1',
+                        threshold: 3,
+                        title: 'E キャットギルド・初級',
+                        description: '猫カフェを3回達成しました！'
+                    },
+                    {
+                        id: 'catcafe_starlight_lv2',
+                        threshold: 7,
+                        title: 'E キャットギルド・中級',
+                        description: '猫カフェを7回達成しました！'
+                    },
+                    {
+                        id: 'catcafe_starlight_lv3',
+                        threshold: 15,
+                        title: 'E キャットギルド・達人',
+                        description: '猫カフェを15回達成しました！'
+                    }
+                ]
             }
         ];
 
         let unlocked = false;
 
         definitions.forEach(def => {
-            if ((healthCounts[def.key] || 0) > 0) {
-                const granted = this.giveBadge(def.id, def.title, def.description);
-                if (granted) {
-                    unlocked = true;
+            const count = healthCounts[def.key] || 0;
+            def.tiers.forEach(tier => {
+                if (count >= tier.threshold) {
+                    const granted = this.giveBadge(tier.id, tier.title, tier.description);
+                    if (granted) {
+                        unlocked = true;
+                    }
                 }
-            }
+            });
         });
 
         if (unlocked) {
