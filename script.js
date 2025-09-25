@@ -160,7 +160,12 @@ const BADGE_GIL_VALUES = {
     '金曜日キング': 90,
     '週末戦士': 130,
     '平日戦士': 110,
-    '祝日マスター': 160
+    '祝日マスター': 160,
+    'health_guardian': 1400,
+    'head_massage_maestro': 1350,
+    'dental_cleaning_conqueror': 1500,
+    'sauna_sage': 1450,
+    'catcafe_starlight': 1300
 };
 
 const BADGE_LIBRARY = [
@@ -198,6 +203,18 @@ const BADGE_LIBRARY = [
             { id: '5個チェック連続', icon: '⚡', name: '5個チェック連続', condition: '5個チェックが付いた日が20日連続', gil: 420 },
             { id: '3個チェック連続', icon: '💫', name: '3個チェック連続', condition: '3個チェックが付いた日が30日連続', gil: 360 },
             { id: '1個チェック連続', icon: '🌟', name: '1個チェック連続', condition: '1個チェックが付いた日が50日連続', gil: 280 }
+        ]
+    },
+    {
+        key: 'health',
+        title: '💖 ヘルスケアバッジ',
+        icon: '💖',
+        badges: [
+            { id: 'health_guardian', icon: '🛡️', name: 'A ヘルス守護者', condition: 'ヘルスキーピングを記録する', gil: 1400 },
+            { id: 'head_massage_maestro', icon: '💆', name: 'B ヘッドマイスター', condition: 'ヘッドマッサージを記録する', gil: 1350 },
+            { id: 'dental_cleaning_conqueror', icon: '🦷', name: 'C デンタルチャンピオン', condition: '歯科クリーニングを記録する', gil: 1500 },
+            { id: 'sauna_sage', icon: '🧖', name: 'D サウナ賢者', condition: 'サウナを記録する', gil: 1450 },
+            { id: 'catcafe_starlight', icon: '🐈', name: 'E キャットギルド', condition: '猫カフェを記録する', gil: 1300 }
         ]
     },
     {
@@ -1957,6 +1974,7 @@ class HabitTracker {
         const habitMaxStreaks = Object.values(habitStats).map(stat => stat.maxConsecutive);
         const highestHabitTotal = habitTotals.length > 0 ? Math.max(...habitTotals) : 0;
         const highestHabitStreak = habitMaxStreaks.length > 0 ? Math.max(...habitMaxStreaks) : 0;
+        const healthCounts = this.getHealthCounts();
 
         if (highestHabitTotal >= 1) badgeSet.add('初心者');
         if (highestHabitTotal >= 10) badgeSet.add('10回達成');
@@ -1980,6 +1998,12 @@ class HabitTracker {
         if (this.totalScore >= 1000) badgeSet.add('スコア1000');
 
         if (achievements.totalDays >= 100) badgeSet.add('century');
+
+        if (healthCounts.healthKeeping > 0) badgeSet.add('health_guardian');
+        if (healthCounts.headMassage > 0) badgeSet.add('head_massage_maestro');
+        if (healthCounts.dentalCleaning > 0) badgeSet.add('dental_cleaning_conqueror');
+        if (healthCounts.sauna > 0) badgeSet.add('sauna_sage');
+        if (healthCounts.catcafe > 0) badgeSet.add('catcafe_starlight');
 
         achievements.badges = Array.from(badgeSet);
         return achievements;
@@ -2043,6 +2067,9 @@ class HabitTracker {
 
             const grid = document.createElement('div');
             grid.className = 'badge-card-grid';
+            if (category.key === 'streak' || category.key === 'combo') {
+                grid.classList.add('two-column-grid');
+            }
 
             categoryBadges.forEach(badge => {
                 totalBadges++;
@@ -2735,49 +2762,96 @@ class HabitTracker {
 
     // ヘルス集計表をレンダリング（全期間）
     renderHealthSummary() {
-        // 各項目の集計
-        const healthKeepingData = { count: 0 };
-        const headMassageData = { count: 0 };
-        const dentalCleaningData = { count: 0 };
-        const saunaData = { count: 0 };
-        const catcafeData = { count: 0 };
-        
-        // 全期間のデータをチェック
-        for (const dateStr in this.healthData) {
-            const healthStatus = this.healthData[dateStr] || {};
-            
-            if (healthStatus.healthKeeping) {
-                healthKeepingData.count++;
-            }
-            if (healthStatus.headMassage) {
-                headMassageData.count++;
-            }
-            if (healthStatus.dentalCleaning) {
-                dentalCleaningData.count++;
-            }
-            if (healthStatus.sauna) {
-                saunaData.count++;
-            }
-            if (healthStatus.catcafe) {
-                catcafeData.count++;
-            }
-        }
-        
-        // 集計表を更新
-        this.updateSummaryRow('healthKeepingSummary', healthKeepingData);
-        this.updateSummaryRow('headMassageSummary', headMassageData);
-        this.updateSummaryRow('dentalCleaningSummary', dentalCleaningData);
-        this.updateSummaryRow('saunaSummary', saunaData);
-        this.updateSummaryRow('catcafeSummary', catcafeData);
+        const healthCounts = this.getHealthCounts();
+
+        this.updateSummaryRow('healthKeepingSummary', { count: healthCounts.healthKeeping });
+        this.updateSummaryRow('headMassageSummary', { count: healthCounts.headMassage });
+        this.updateSummaryRow('dentalCleaningSummary', { count: healthCounts.dentalCleaning });
+        this.updateSummaryRow('saunaSummary', { count: healthCounts.sauna });
+        this.updateSummaryRow('catcafeSummary', { count: healthCounts.catcafe });
+
+        this.evaluateHealthBadges(healthCounts);
     }
 
     // 集計行を更新
     updateSummaryRow(elementId, data) {
         const row = document.getElementById(elementId);
         if (!row) return;
-        
+
         const countCell = row.querySelector('.count');
         countCell.textContent = data.count;
+    }
+
+    getHealthCounts() {
+        const counts = {
+            healthKeeping: 0,
+            headMassage: 0,
+            dentalCleaning: 0,
+            sauna: 0,
+            catcafe: 0
+        };
+
+        for (const dateStr in this.healthData) {
+            const healthStatus = this.healthData[dateStr] || {};
+
+            if (healthStatus.healthKeeping) counts.healthKeeping++;
+            if (healthStatus.headMassage) counts.headMassage++;
+            if (healthStatus.dentalCleaning) counts.dentalCleaning++;
+            if (healthStatus.sauna) counts.sauna++;
+            if (healthStatus.catcafe) counts.catcafe++;
+        }
+
+        return counts;
+    }
+
+    evaluateHealthBadges(healthCounts) {
+        const definitions = [
+            {
+                key: 'healthKeeping',
+                id: 'health_guardian',
+                title: 'A ヘルス守護者',
+                description: 'ヘルスキーピングの記録を達成しました！'
+            },
+            {
+                key: 'headMassage',
+                id: 'head_massage_maestro',
+                title: 'B ヘッドマイスター',
+                description: 'ヘッドマッサージのケアを記録しました！'
+            },
+            {
+                key: 'dentalCleaning',
+                id: 'dental_cleaning_conqueror',
+                title: 'C デンタルチャンピオン',
+                description: '歯科クリーニングの記録を残しました！'
+            },
+            {
+                key: 'sauna',
+                id: 'sauna_sage',
+                title: 'D サウナ賢者',
+                description: 'サウナでのリフレッシュを記録しました！'
+            },
+            {
+                key: 'catcafe',
+                id: 'catcafe_starlight',
+                title: 'E キャットギルド',
+                description: '猫カフェでの癒やしを記録しました！'
+            }
+        ];
+
+        let unlocked = false;
+
+        definitions.forEach(def => {
+            if ((healthCounts[def.key] || 0) > 0) {
+                const granted = this.giveBadge(def.id, def.title, def.description);
+                if (granted) {
+                    unlocked = true;
+                }
+            }
+        });
+
+        if (unlocked) {
+            this.saveAchievements();
+        }
     }
     
     // 達成システムのメソッド群
@@ -2965,7 +3039,9 @@ class HabitTracker {
         if (!this.achievements.badges.includes(badgeId)) {
             this.achievements.badges.push(badgeId);
             this.showBadgeNotification(title, description);
+            return true;
         }
+        return false;
     }
     
     showAchievementNotification() {
