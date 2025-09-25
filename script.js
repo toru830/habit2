@@ -2118,10 +2118,6 @@ class HabitTracker {
 
             const grid = document.createElement('div');
             grid.className = 'badge-card-grid';
-            const shouldUseTwoColumn = (category.badges || []).length >= 4;
-            if (shouldUseTwoColumn) {
-                grid.classList.add('two-column-grid');
-            }
 
             categoryBadges.forEach(badge => {
                 totalBadges++;
