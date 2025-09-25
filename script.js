@@ -2204,21 +2204,42 @@ class HabitTracker {
                 }
 
                 const card = document.createElement('div');
-                card.className = `badge-card ${unlocked ? 'unlocked' : 'locked'}`;
-                card.innerHTML = `
-                    <div class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</div>
-                    <div class="badge-card-body">
-                        <div class="badge-icon">${badge.icon}</div>
-                        <div class="badge-info">
-                            <span class="badge-name">${badge.name}</span>
-                            <span class="badge-condition">${badge.condition}</span>
+                const cardClasses = ['badge-card', unlocked ? 'unlocked' : 'locked'];
+
+                if (category.key === 'streak') {
+                    cardClasses.push('streak-layout');
+                    const scoreLabel = badge.name.includes('スコア') ? badge.name : `スコア ${badge.name}`;
+                    card.innerHTML = `
+                        <div class="badge-streak-top">
+                            <span class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</span>
+                            <span class="badge-reward">+${badge.gil}ギル</span>
                         </div>
-                    </div>
-                    <div class="badge-card-footer">
-                        <span class="badge-reward">+${badge.gil}ギル</span>
-                        ${unlocked ? '<span class="badge-card-check">✨</span>' : '<span class="badge-card-hint">チャレンジ！</span>'}
-                    </div>
-                `;
+                        <div class="badge-streak-body">
+                            <div class="badge-icon">${badge.icon}</div>
+                            <div class="badge-streak-info">
+                                <span class="badge-streak-score">${scoreLabel}</span>
+                                <span class="badge-streak-description">${badge.condition}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</div>
+                        <div class="badge-card-body">
+                            <div class="badge-icon">${badge.icon}</div>
+                            <div class="badge-info">
+                                <span class="badge-name">${badge.name}</span>
+                                <span class="badge-condition">${badge.condition}</span>
+                            </div>
+                        </div>
+                        <div class="badge-card-footer">
+                            <span class="badge-reward">+${badge.gil}ギル</span>
+                            ${unlocked ? '<span class="badge-card-check">✨</span>' : '<span class="badge-card-hint">チャレンジ！</span>'}
+                        </div>
+                    `;
+                }
+
+                card.className = cardClasses.join(' ');
 
                 grid.appendChild(card);
             });
