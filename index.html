@@ -209,6 +209,72 @@
             <section class="badge-view" id="badgeView" style="display: none;">
                 <h2>🏅 バッジセンター</h2>
 
+                <!-- バッジ一覧 -->
+                <div class="badge-list-section">
+                    <h3>🏅 バッジギャラリー</h3>
+                    <p class="badge-gil-note">バッジを集めると大量のギルが獲得できます。コンプリート状況をチェックして、次に狙うバッジを決めましょう！</p>
+                    <div class="badge-progress-overview">
+                        <div class="badge-progress-card">
+                            <div class="badge-progress-label">コンプリート状況</div>
+                            <div class="badge-progress-main">
+                                <span class="badge-progress-value" id="earnedBadgeCount">0</span>
+                                <span class="badge-progress-divider">/</span>
+                                <span class="badge-progress-total" id="totalBadgeCount">0</span>
+                            </div>
+                            <div class="badge-progress-sub">コンプリート率 <span id="badgeCompletionRate">0%</span></div>
+                            <div class="badge-progress-bar">
+                                <div class="badge-progress-fill" id="badgeProgressFill"></div>
+                            </div>
+                        </div>
+                        <div class="badge-progress-card highlight">
+                            <div class="badge-progress-label">次のゴール</div>
+                            <div class="badge-progress-message" id="nextBadgeMessage">チャレンジ中の条件を確認しましょう！</div>
+                        </div>
+                    </div>
+
+                    <div class="badge-owned-section">
+                        <h4>🎖 持っているバッジ</h4>
+                        <p class="badge-owned-note">獲得済みのバッジアイコンがここに並びます。</p>
+                        <div class="badge-owned-grid" id="badgeIconGrid"></div>
+                        <div class="badge-owned-empty" id="badgeIconEmpty">まだバッジはありません。毎日のチャレンジで獲得しましょう！</div>
+                    </div>
+
+                    <div class="badge-category-board" id="badgeCategoryBoard"></div>
+                </div>
+            </section>
+
+
+            <!-- 設定ビュー -->
+            <section class="settings-view" id="settingsView" style="display: none;">
+                <h2>⚙️ 設定</h2>
+
+                <!-- アプリ情報 -->
+                <div class="app-info-section">
+                    <h3>📱 アプリ情報</h3>
+                    <div class="info-item">
+                        <span class="info-label">バージョン:</span>
+                        <span class="info-value">2.0.0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">最終更新:</span>
+                        <span class="info-value">2025年9月23日</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">データ保存:</span>
+                        <span class="info-value">ローカルストレージ</span>
+                    </div>
+                </div>
+
+                <!-- データ管理 -->
+                <div class="data-management-section">
+                    <h3>💾 データ管理</h3>
+                    <div class="data-buttons">
+                        <button id="exportDataBtn" class="data-btn export-btn">📤 データをエクスポート</button>
+                        <button id="importDataBtn" class="data-btn import-btn">📥 データをインポート</button>
+                        <button id="restoreDataBtn" class="data-btn restore-btn">🔄 バックアップから復元</button>
+                    </div>
+                </div>
+
                 <!-- 成果システムの説明 -->
                 <div class="achievement-explanation-section">
                     <h3>🏆 成果システムの説明</h3>
@@ -301,72 +367,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- バッジ一覧 -->
-                <div class="badge-list-section">
-                    <h3>🏅 バッジギャラリー</h3>
-                    <p class="badge-gil-note">バッジを集めると大量のギルが獲得できます。コンプリート状況をチェックして、次に狙うバッジを決めましょう！</p>
-                    <div class="badge-progress-overview">
-                        <div class="badge-progress-card">
-                            <div class="badge-progress-label">コンプリート状況</div>
-                            <div class="badge-progress-main">
-                                <span class="badge-progress-value" id="earnedBadgeCount">0</span>
-                                <span class="badge-progress-divider">/</span>
-                                <span class="badge-progress-total" id="totalBadgeCount">0</span>
-                            </div>
-                            <div class="badge-progress-sub">コンプリート率 <span id="badgeCompletionRate">0%</span></div>
-                            <div class="badge-progress-bar">
-                                <div class="badge-progress-fill" id="badgeProgressFill"></div>
-                            </div>
-                        </div>
-                        <div class="badge-progress-card highlight">
-                            <div class="badge-progress-label">次のゴール</div>
-                            <div class="badge-progress-message" id="nextBadgeMessage">チャレンジ中の条件を確認しましょう！</div>
-                        </div>
-                    </div>
-
-                    <div class="badge-owned-section">
-                        <h4>🎖 持っているバッジ</h4>
-                        <p class="badge-owned-note">獲得済みのバッジアイコンがここに並びます。</p>
-                        <div class="badge-owned-grid" id="badgeIconGrid"></div>
-                        <div class="badge-owned-empty" id="badgeIconEmpty">まだバッジはありません。毎日のチャレンジで獲得しましょう！</div>
-                    </div>
-
-                    <div class="badge-category-board" id="badgeCategoryBoard"></div>
-                </div>
-            </section>
-
-
-            <!-- 設定ビュー -->
-            <section class="settings-view" id="settingsView" style="display: none;">
-                <h2>⚙️ 設定</h2>
-                
-                <!-- アプリ情報 -->
-                <div class="app-info-section">
-                    <h3>📱 アプリ情報</h3>
-                    <div class="info-item">
-                        <span class="info-label">バージョン:</span>
-                        <span class="info-value">2.0.0</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">最終更新:</span>
-                        <span class="info-value">2025年9月23日</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">データ保存:</span>
-                        <span class="info-value">ローカルストレージ</span>
-                    </div>
-                </div>
-
-                <!-- データ管理 -->
-                <div class="data-management-section">
-                    <h3>💾 データ管理</h3>
-                    <div class="data-buttons">
-                        <button id="exportDataBtn" class="data-btn export-btn">📤 データをエクスポート</button>
-                        <button id="importDataBtn" class="data-btn import-btn">📥 データをインポート</button>
-                        <button id="restoreDataBtn" class="data-btn restore-btn">🔄 バックアップから復元</button>
                     </div>
                 </div>
             </section>
