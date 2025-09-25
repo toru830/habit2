@@ -218,7 +218,10 @@ const BADGE_GIL_VALUES = {
     'sauna_sage_lv3': 420,
     'catcafe_starlight_lv1': 120,
     'catcafe_starlight_lv2': 260,
-    'catcafe_starlight_lv3': 420
+    'catcafe_starlight_lv3': 420,
+    'friend_party_fellow_lv1': 120,
+    'friend_party_fellow_lv2': 260,
+    'friend_party_fellow_lv3': 420
 };
 
 const BADGE_LIBRARY = [
@@ -277,7 +280,10 @@ const BADGE_LIBRARY = [
             { id: 'sauna_sage_lv3', icon: '🧖', name: 'D サウナ賢者・達人', condition: 'サウナを15回記録', gil: 420 },
             { id: 'catcafe_starlight_lv1', icon: '🐈', name: 'E キャットギルド・初級', condition: '猫カフェを3回記録', gil: 120 },
             { id: 'catcafe_starlight_lv2', icon: '🐈', name: 'E キャットギルド・中級', condition: '猫カフェを7回記録', gil: 260 },
-            { id: 'catcafe_starlight_lv3', icon: '🐈', name: 'E キャットギルド・達人', condition: '猫カフェを15回記録', gil: 420 }
+            { id: 'catcafe_starlight_lv3', icon: '🐈', name: 'E キャットギルド・達人', condition: '猫カフェを15回記録', gil: 420 },
+            { id: 'friend_party_fellow_lv1', icon: '🤝', name: 'F 懇親会ギルド・初級', condition: '懇親会を3回記録', gil: 120 },
+            { id: 'friend_party_fellow_lv2', icon: '🤝', name: 'F 懇親会ギルド・中級', condition: '懇親会を7回記録', gil: 260 },
+            { id: 'friend_party_fellow_lv3', icon: '🤝', name: 'F 懇親会ギルド・達人', condition: '懇親会を15回記録', gil: 420 }
         ]
     },
     {
@@ -2116,6 +2122,11 @@ class HabitTracker {
                 { id: 'catcafe_starlight_lv1', threshold: 3 },
                 { id: 'catcafe_starlight_lv2', threshold: 7 },
                 { id: 'catcafe_starlight_lv3', threshold: 15 }
+            ],
+            friendParty: [
+                { id: 'friend_party_fellow_lv1', threshold: 3 },
+                { id: 'friend_party_fellow_lv2', threshold: 7 },
+                { id: 'friend_party_fellow_lv3', threshold: 15 }
             ]
         };
 
@@ -2657,10 +2668,11 @@ class HabitTracker {
             const hasDental = healthStatus.dentalCleaning;
             const hasSauna = healthStatus.sauna;
             const hasCatcafe = healthStatus.catcafe;
-            
+            const hasFriendParty = healthStatus.friendParty;
+
             // 複数選択の組み合わせをチェック
-            const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe].filter(Boolean).length;
-            
+            const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe, hasFriendParty].filter(Boolean).length;
+
             if (selectedCount > 1) {
                 dayElement.classList.add('has-both');
                 // 複数選択の場合はグラデーション表示
@@ -2670,7 +2682,8 @@ class HabitTracker {
                 if (hasDental) colors.push('#17a2b8');
                 if (hasSauna) colors.push('#dc3545');
                 if (hasCatcafe) colors.push('#6f42c1');
-                
+                if (hasFriendParty) colors.push('#ff6f61');
+
                 if (colors.length === 2) {
                     dayElement.style.background = `linear-gradient(45deg, ${colors[0]} 50%, ${colors[1]} 50%)`;
                 } else if (colors.length === 3) {
@@ -2694,6 +2707,8 @@ class HabitTracker {
                 dayElement.classList.add('has-sauna');
             } else if (hasCatcafe) {
                 dayElement.classList.add('has-catcafe');
+            } else if (hasFriendParty) {
+                dayElement.classList.add('has-friendparty');
             }
             
             // クリックイベントを追加
@@ -2779,7 +2794,7 @@ class HabitTracker {
             this.updateHealthDisplay(dayElement, dateStr);
             dropdown.remove();
         };
-        
+
         const catcafeOption = document.createElement('div');
         catcafeOption.className = `health-selection-option ${healthStatus.catcafe ? 'selected catcafe' : ''}`;
         catcafeOption.textContent = 'E';
@@ -2788,12 +2803,22 @@ class HabitTracker {
             this.updateHealthDisplay(dayElement, dateStr);
             dropdown.remove();
         };
-        
+
+        const friendPartyOption = document.createElement('div');
+        friendPartyOption.className = `health-selection-option ${healthStatus.friendParty ? 'selected friend-party' : ''}`;
+        friendPartyOption.textContent = 'F';
+        friendPartyOption.onclick = () => {
+            this.toggleHealthData(dateStr, 'friendParty');
+            this.updateHealthDisplay(dayElement, dateStr);
+            dropdown.remove();
+        };
+
         dropdown.appendChild(healthOption);
         dropdown.appendChild(massageOption);
         dropdown.appendChild(dentalOption);
         dropdown.appendChild(saunaOption);
         dropdown.appendChild(catcafeOption);
+        dropdown.appendChild(friendPartyOption);
         
         // 日付要素に相対的に配置
         dayElement.style.position = 'relative';
@@ -2824,7 +2849,7 @@ class HabitTracker {
         const healthStatus = this.healthData[dateStr] || {};
         
         // 既存のクラスを削除
-        dayElement.classList.remove('has-health', 'has-massage', 'has-dental', 'has-sauna', 'has-catcafe', 'has-both');
+        dayElement.classList.remove('has-health', 'has-massage', 'has-dental', 'has-sauna', 'has-catcafe', 'has-friendparty', 'has-both');
         
         // 複数選択の組み合わせをチェック
         const hasHealth = healthStatus.healthKeeping;
@@ -2832,9 +2857,10 @@ class HabitTracker {
         const hasDental = healthStatus.dentalCleaning;
         const hasSauna = healthStatus.sauna;
         const hasCatcafe = healthStatus.catcafe;
-        
+        const hasFriendParty = healthStatus.friendParty;
+
         // 複数選択の組み合わせをチェック
-        const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe].filter(Boolean).length;
+        const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe, hasFriendParty].filter(Boolean).length;
         
         if (selectedCount > 1) {
             dayElement.classList.add('has-both');
@@ -2845,6 +2871,7 @@ class HabitTracker {
             if (hasDental) colors.push('#17a2b8');
             if (hasSauna) colors.push('#dc3545');
             if (hasCatcafe) colors.push('#6f42c1');
+            if (hasFriendParty) colors.push('#ff6f61');
             
             if (colors.length === 2) {
                 dayElement.style.background = `linear-gradient(45deg, ${colors[0]} 50%, ${colors[1]} 50%)`;
@@ -2874,6 +2901,9 @@ class HabitTracker {
         } else if (hasCatcafe) {
             dayElement.classList.add('has-catcafe');
             dayElement.style.background = '';
+        } else if (hasFriendParty) {
+            dayElement.classList.add('has-friendparty');
+            dayElement.style.background = '';
         }
         
         // 集計表を更新
@@ -2889,6 +2919,7 @@ class HabitTracker {
         this.updateSummaryRow('dentalCleaningSummary', { count: healthCounts.dentalCleaning });
         this.updateSummaryRow('saunaSummary', { count: healthCounts.sauna });
         this.updateSummaryRow('catcafeSummary', { count: healthCounts.catcafe });
+        this.updateSummaryRow('friendPartySummary', { count: healthCounts.friendParty });
 
         this.evaluateHealthBadges(healthCounts);
     }
@@ -2908,7 +2939,8 @@ class HabitTracker {
             headMassage: 0,
             dentalCleaning: 0,
             sauna: 0,
-            catcafe: 0
+            catcafe: 0,
+            friendParty: 0
         };
 
         for (const dateStr in this.healthData) {
@@ -2919,6 +2951,7 @@ class HabitTracker {
             if (healthStatus.dentalCleaning) counts.dentalCleaning++;
             if (healthStatus.sauna) counts.sauna++;
             if (healthStatus.catcafe) counts.catcafe++;
+            if (healthStatus.friendParty) counts.friendParty++;
         }
 
         return counts;
@@ -3038,6 +3071,29 @@ class HabitTracker {
                         threshold: 15,
                         title: 'E キャットギルド・達人',
                         description: '猫カフェを15回達成しました！'
+                    }
+                ]
+            },
+            {
+                key: 'friendParty',
+                tiers: [
+                    {
+                        id: 'friend_party_fellow_lv1',
+                        threshold: 3,
+                        title: 'F 懇親会ギルド・初級',
+                        description: '懇親会を3回達成しました！'
+                    },
+                    {
+                        id: 'friend_party_fellow_lv2',
+                        threshold: 7,
+                        title: 'F 懇親会ギルド・中級',
+                        description: '懇親会を7回達成しました！'
+                    },
+                    {
+                        id: 'friend_party_fellow_lv3',
+                        threshold: 15,
+                        title: 'F 懇親会ギルド・達人',
+                        description: '懇親会を15回達成しました！'
                     }
                 ]
             }
