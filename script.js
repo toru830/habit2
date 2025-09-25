@@ -1548,6 +1548,7 @@ class HabitTracker {
         document.getElementById('homeBtn').addEventListener('click', () => this.showHomeView());
         document.getElementById('reportBtn').addEventListener('click', () => this.showReportView());
         document.getElementById('monsterBtn').addEventListener('click', () => this.showMonsterView());
+        document.getElementById('badgeBtn').addEventListener('click', () => this.showBadgeView());
         document.getElementById('settingsBtn').addEventListener('click', () => this.showSettingsView());
         
         // Firebaseテストボタン
@@ -1753,9 +1754,22 @@ class HabitTracker {
 
 
     // ビューの切り替え
+    hideAllViews() {
+        const viewIds = ['weekView', 'statsView', 'monsterView', 'settingsView', 'badgeView'];
+        viewIds.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.style.display = 'none';
+            }
+        });
+    }
+
     showWeekView() {
-        document.getElementById('weekView').style.display = 'block';
-        document.getElementById('statsView').style.display = 'none';
+        this.hideAllViews();
+        const weekView = document.getElementById('weekView');
+        if (weekView) {
+            weekView.style.display = 'block';
+        }
     }
 
     showHomeView() {
@@ -1766,13 +1780,31 @@ class HabitTracker {
     }
 
     showReportView() {
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('statsView').style.display = 'block';
-        document.getElementById('monsterView').style.display = 'none';
+        this.hideAllViews();
+        const statsView = document.getElementById('statsView');
+        if (statsView) {
+            statsView.style.display = 'block';
+        }
         this.renderTotalChart();
         this.renderReportTable();
         this.updateMotivationDisplay();
         this.setActiveNav('reportBtn');
+    }
+
+    showBadgeView() {
+        this.hideAllViews();
+        const badgeView = document.getElementById('badgeView');
+        if (badgeView) {
+            badgeView.style.display = 'block';
+        }
+        this.updateBadgeCenter();
+        this.setActiveNav('badgeBtn');
+    }
+
+    updateBadgeCenter() {
+        this.totalScore = this.calculateTotalScore();
+        this.achievements = this.calculateAllAchievements();
+        this.renderBadgeCollection();
     }
     
     // モチベーション表示を更新
@@ -1961,6 +1993,7 @@ class HabitTracker {
         let totalBadges = 0;
         let unlockedBadges = 0;
         let nextTargetBadge = null;
+        const unlockedBadgeMap = new Map();
 
         board.innerHTML = '';
 
@@ -2016,6 +2049,9 @@ class HabitTracker {
                 const unlocked = isBadgeUnlocked(earnedSet, badge);
                 if (unlocked) {
                     unlockedBadges++;
+                    if (!unlockedBadgeMap.has(badge.id)) {
+                        unlockedBadgeMap.set(badge.id, badge);
+                    }
                 } else if (!nextTargetBadge) {
                     nextTargetBadge = badge;
                 }
@@ -2050,12 +2086,39 @@ class HabitTracker {
         const rateEl = document.getElementById('badgeCompletionRate');
         const progressEl = document.getElementById('badgeProgressFill');
         const messageEl = document.getElementById('nextBadgeMessage');
+        const ownedGrid = document.getElementById('badgeIconGrid');
+        const emptyOwnedMessage = document.getElementById('badgeIconEmpty');
 
         if (earnedEl) earnedEl.textContent = unlockedBadges;
         if (totalEl) totalEl.textContent = totalBadges;
         const overallRate = totalBadges > 0 ? Math.round((unlockedBadges / totalBadges) * 100) : 0;
         if (rateEl) rateEl.textContent = `${overallRate}%`;
         if (progressEl) progressEl.style.width = `${overallRate}%`;
+
+        if (ownedGrid) {
+            ownedGrid.innerHTML = '';
+            const unlockedBadgeList = Array.from(unlockedBadgeMap.values());
+
+            if (unlockedBadgeList.length > 0) {
+                unlockedBadgeList
+                    .sort((a, b) => a.name.localeCompare(b.name, 'ja'))
+                    .forEach(badge => {
+                        const badgeItem = document.createElement('div');
+                        badgeItem.className = 'badge-owned-item';
+                        badgeItem.innerHTML = `
+                            <span class="badge-owned-icon">${badge.icon}</span>
+                            <span class="badge-owned-name">${badge.name}</span>
+                        `;
+                        ownedGrid.appendChild(badgeItem);
+                    });
+            }
+
+            if (emptyOwnedMessage) {
+                emptyOwnedMessage.style.display = unlockedBadgeList.length === 0 ? 'block' : 'none';
+            }
+        } else if (emptyOwnedMessage) {
+            emptyOwnedMessage.style.display = unlockedBadgeMap.size === 0 ? 'block' : 'none';
+        }
 
         if (messageEl) {
             if (nextTargetBadge) {
@@ -2086,19 +2149,22 @@ class HabitTracker {
     }
 
     showMonsterView() {
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('statsView').style.display = 'none';
-        document.getElementById('monsterView').style.display = 'block';
+        this.hideAllViews();
+        const monsterView = document.getElementById('monsterView');
+        if (monsterView) {
+            monsterView.style.display = 'block';
+        }
         this.renderMonsters();
         this.setActiveNav('monsterBtn');
     }
 
 
     showSettingsView() {
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('statsView').style.display = 'none';
-        document.getElementById('monsterView').style.display = 'none';
-        document.getElementById('settingsView').style.display = 'block';
+        this.hideAllViews();
+        const settingsView = document.getElementById('settingsView');
+        if (settingsView) {
+            settingsView.style.display = 'block';
+        }
         this.setActiveNav('settingsBtn');
     }
 

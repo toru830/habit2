@@ -205,10 +205,10 @@
                 </div>
             </section>
 
-            <!-- 設定ビュー -->
-            <section class="settings-view" id="settingsView" style="display: none;">
-                <h2>⚙️ 設定</h2>
-                
+            <!-- バッジビュー -->
+            <section class="badge-view" id="badgeView" style="display: none;">
+                <h2>🏅 バッジセンター</h2>
+
                 <!-- 成果システムの説明 -->
                 <div class="achievement-explanation-section">
                     <h3>🏆 成果システムの説明</h3>
@@ -326,8 +326,23 @@
                             <div class="badge-progress-message" id="nextBadgeMessage">チャレンジ中の条件を確認しましょう！</div>
                         </div>
                     </div>
+
+                    <div class="badge-owned-section">
+                        <h4>🎖 持っているバッジ</h4>
+                        <p class="badge-owned-note">獲得済みのバッジアイコンがここに並びます。</p>
+                        <div class="badge-owned-grid" id="badgeIconGrid"></div>
+                        <div class="badge-owned-empty" id="badgeIconEmpty">まだバッジはありません。毎日のチャレンジで獲得しましょう！</div>
+                    </div>
+
                     <div class="badge-category-board" id="badgeCategoryBoard"></div>
                 </div>
+            </section>
+
+
+            <!-- 設定ビュー -->
+            <section class="settings-view" id="settingsView" style="display: none;">
+                <h2>⚙️ 設定</h2>
+                
                 <!-- アプリ情報 -->
                 <div class="app-info-section">
                     <h3>📱 アプリ情報</h3>
@@ -390,6 +405,10 @@
             <button class="nav-btn" id="monsterBtn">
                 <span class="nav-icon">👹</span>
                 <span>モンスター</span>
+            </button>
+            <button class="nav-btn" id="badgeBtn">
+                <span class="nav-icon">🏅</span>
+                <span>バッジ</span>
             </button>
             <button class="nav-btn" id="settingsBtn">
                 <span class="nav-icon">⚙️</span>
