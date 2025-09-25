@@ -2072,7 +2072,7 @@ class HabitTracker {
 
         board.innerHTML = '';
 
-        BADGE_LIBRARY.forEach((category, index) => {
+        BADGE_LIBRARY.forEach(category => {
             const categoryCard = document.createElement('div');
             categoryCard.className = 'badge-category-card';
 
@@ -2118,7 +2118,7 @@ class HabitTracker {
 
             const grid = document.createElement('div');
             grid.className = 'badge-card-grid';
-            const shouldUseTwoColumn = index === 0 || index >= 2;
+            const shouldUseTwoColumn = (category.badges || []).length >= 4;
             if (shouldUseTwoColumn) {
                 grid.classList.add('two-column-grid');
             }
