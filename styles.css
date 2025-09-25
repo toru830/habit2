@@ -2522,17 +2522,44 @@ body {
 
 .badge-card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: 14px;
 }
 
 .badge-card-grid.two-column-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 600px) {
+    .badge-card-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
     .badge-card-grid.two-column-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .badge-card {
+        padding: 14px;
+        min-height: 150px;
+    }
+
+    .badge-card-body {
+        gap: 10px;
+    }
+
+    .badge-icon {
+        font-size: 26px;
+    }
+
+    .badge-name {
+        font-size: 14px;
+    }
+
+    .badge-condition {
+        font-size: 11px;
     }
 }
 
