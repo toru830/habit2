@@ -107,6 +107,49 @@ const combinedMonsterStages = [
     }
 ];
 
+const HEALTH_MONSTER_DEFINITIONS = [
+    {
+        key: 'healthKeeping',
+        displayName: '🛡️ヘルスキープ',
+        title: '守護のヘルスゴーレム',
+        description: (count) => count > 0
+            ? `ヘルスキーピングを${count}日記録し、体調の盾が輝きを増している。`
+            : 'まだ体調管理の盾は眠ったまま。'
+    },
+    {
+        key: 'headMassage',
+        displayName: '💆ヘッドマッサージ',
+        title: '癒しのヘッドスピリット',
+        description: (count) => count > 0
+            ? `リラックスタイムを${count}日積み重ね、柔らかな風が吹き抜ける。`
+            : '頭皮ケアの精霊は静かに目覚めを待っている。'
+    },
+    {
+        key: 'dentalCleaning',
+        displayName: '🦷デンタルケア',
+        title: '煌きのデンタルガーディアン',
+        description: (count) => count > 0
+            ? `口元を磨いた日が${count}日、光の粒子がきらめきを放つ。`
+            : 'まだ光は弱く、磨きの力を欲している。'
+    },
+    {
+        key: 'sauna',
+        displayName: '♨️サウナタイム',
+        title: '蒸気のサウナフェニックス',
+        description: (count) => count > 0
+            ? `温かな蒸気を${count}日浴び、羽ばたきに熱が宿った。`
+            : 'フェニックスは静かな湯けむりの中で力を温めている。'
+    },
+    {
+        key: 'catcafe',
+        displayName: '🐾猫カフェ',
+        title: '星詠みのキャットスピリット',
+        description: (count) => count > 0
+            ? `猫たちと過ごした日が${count}日、柔らかな癒しが星を揺らす。`
+            : 'まだ猫たちは遠くで丸くなっている。'
+    }
+];
+
 const BADGE_GIL_VALUES = {
     '初回達成': 50,
     'first_completion': 50,
@@ -1269,20 +1312,49 @@ class HabitTracker {
 
         monsterGrid.innerHTML = '';
 
-        const monsterDetails = this.habits.map((habit) => {
+        const baseMonsters = this.habits.map((habit) => {
             const totalCount = this.calculateTotalAll(habit.id);
             const level = this.getMonsterLevel(totalCount);
             const monsterType = this.getMonsterType(totalCount);
             const nextLevel = this.getNextLevel(totalCount);
 
             return {
-                habit,
+                id: habit.id,
+                displayName: habit.shortName,
                 totalCount,
                 level,
-                monsterType,
-                nextLevel
+                nextLevel,
+                color: monsterType.color,
+                emoji: monsterType.emoji,
+                title: monsterType.name,
+                flavor: monsterType.description
             };
         });
+
+        const healthCounts = this.getHealthCounts();
+        const healthMonsters = HEALTH_MONSTER_DEFINITIONS.map((definition) => {
+            const totalCount = healthCounts[definition.key] || 0;
+            const level = this.getMonsterLevel(totalCount);
+            const monsterType = this.getMonsterType(totalCount);
+            const nextLevel = this.getNextLevel(totalCount);
+            const flavorText = typeof definition.description === 'function'
+                ? definition.description(totalCount)
+                : (definition.description || monsterType.description);
+
+            return {
+                id: definition.key,
+                displayName: definition.displayName,
+                totalCount,
+                level,
+                nextLevel,
+                color: definition.color || monsterType.color,
+                emoji: definition.emoji || monsterType.emoji,
+                title: definition.title || monsterType.name,
+                flavor: flavorText
+            };
+        });
+
+        const monsterDetails = [...baseMonsters, ...healthMonsters];
 
         const totalLevel = monsterDetails.reduce((sum, detail) => sum + detail.level, 0);
         const combinedStage = this.getCombinedMonsterStage(totalLevel);
@@ -1318,20 +1390,20 @@ class HabitTracker {
 
         monsterGrid.appendChild(combinedCard);
 
-        monsterDetails.forEach(({ habit, totalCount, level, monsterType, nextLevel }) => {
+        monsterDetails.forEach(({ displayName, totalCount, level, title, flavor, color, emoji, nextLevel }) => {
             const monsterCard = document.createElement('div');
             monsterCard.className = 'monster-card';
             const daysToNext = Math.max(0, nextLevel - totalCount);
 
             monsterCard.innerHTML = `
-                <div class="monster-name">${habit.shortName}</div>
-                <div class="monster-image" style="border-color: ${monsterType.color}; background: radial-gradient(circle, ${monsterType.color}33 0%, rgba(0, 0, 0, 0.85) 70%);">
-                    <span>${monsterType.emoji}</span>
+                <div class="monster-name">${displayName}</div>
+                <div class="monster-image" style="border-color: ${color}; background: radial-gradient(circle, ${color}33 0%, rgba(0, 0, 0, 0.85) 70%);">
+                    <span>${emoji}</span>
                 </div>
                 <div class="monster-level">Lv.${level}</div>
                 <div class="monster-description">
-                    <div class="monster-title">${monsterType.name}</div>
-                    <div class="monster-flavor">${monsterType.description}</div>
+                    <div class="monster-title">${title}</div>
+                    <div class="monster-flavor">${flavor}</div>
                 </div>
                 <div class="monster-stats">
                     <span>次のレベルまで: ${daysToNext}日</span>

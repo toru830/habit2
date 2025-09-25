@@ -2324,13 +2324,14 @@ body {
 
 .badge-owned-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 12px;
+    justify-items: center;
 }
 
 @media (max-width: 900px) {
     .badge-owned-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: 1fr;
     }
 }
 
