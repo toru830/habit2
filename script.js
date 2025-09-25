@@ -2180,9 +2180,9 @@ class HabitTracker {
                     .forEach(badge => {
                         const badgeItem = document.createElement('div');
                         badgeItem.className = 'badge-owned-item';
+                        badgeItem.setAttribute('title', badge.name);
                         badgeItem.innerHTML = `
                             <span class="badge-owned-icon">${badge.icon}</span>
-                            <span class="badge-owned-name">${badge.name}</span>
                         `;
                         ownedGrid.appendChild(badgeItem);
                     });
