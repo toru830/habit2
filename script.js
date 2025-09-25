@@ -107,6 +107,93 @@ const combinedMonsterStages = [
     }
 ];
 
+const BADGE_GIL_VALUES = {
+    '初回達成': 50,
+    'first_completion': 50,
+    '3日連続': 120,
+    '7日連続': 250,
+    'week_streak': 250,
+    '14日連続': 400,
+    '30日連続': 650,
+    'month_streak': 650,
+    '100日連続': 900,
+    'century': 900,
+    '完璧10日': 320,
+    '完璧50日': 520,
+    '完璧100日': 820,
+    'perfect_day': 180,
+    'perfect_week': 400,
+    'スコア50': 80,
+    'score_50': 80,
+    'スコア100': 150,
+    'score_100': 150,
+    'スコア250': 260,
+    'score_250': 260,
+    'スコア500': 420,
+    'score_500': 420,
+    'スコア750': 620,
+    'score_750': 620,
+    'スコア1000': 900,
+    'score_1000': 900,
+    '10個チェック連続': 500,
+    '5個チェック連続': 420,
+    '3個チェック連続': 360,
+    '1個チェック連続': 280,
+    '初心者': 60,
+    '10回達成': 150,
+    '見習い': 260,
+    '100回達成': 360,
+    '修行者': 480,
+    '熟練者': 650,
+    'エキスパート': 820,
+    'マスター': 1100,
+    '10回連続': 220,
+    '20回連続': 360,
+    '50回連続': 540,
+    '100回連続': 800,
+    'ダブルアップ': 120,
+    'サーカス': 200,
+    'アクター': 280,
+    'アーティスト': 360,
+    'ラッキー': 480,
+    '月曜日マスター': 70,
+    '金曜日キング': 90,
+    '週末戦士': 130,
+    '平日戦士': 110,
+    '祝日マスター': 160
+};
+
+const JAPANESE_HOLIDAY_MD = new Set([
+    '01-01', // 元日
+    '01-13', // 成人の日 (2025)
+    '02-11', // 建国記念の日
+    '02-23', // 天皇誕生日
+    '03-20', // 春分の日 (2025)
+    '04-29', // 昭和の日
+    '05-03', // 憲法記念日
+    '05-04', // みどりの日
+    '05-05', // こどもの日
+    '07-21', // 海の日 (2025)
+    '08-11', // 山の日
+    '09-15', // 敬老の日 (2025)
+    '09-23', // 秋分の日 (2025)
+    '10-13', // スポーツの日 (2025)
+    '11-03', // 文化の日
+    '11-23', // 勤労感謝の日
+    '12-23'  // 天皇誕生日 (振替用に保持)
+]);
+
+function isJapaneseHoliday(date) {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return JAPANESE_HOLIDAY_MD.has(`${month}-${day}`);
+}
+
+function getBadgeGilValue(badgeKey) {
+    if (!badgeKey) return 0;
+    return BADGE_GIL_VALUES[badgeKey] || 0;
+}
+
 // アプリの状態管理
 class HabitTracker {
     constructor() {
@@ -1625,57 +1712,150 @@ class HabitTracker {
             badges: []
         };
 
-        // 完璧な日と現在の連続日数を計算
-        let currentStreak = 0;
-        let maxStreak = 0;
+        const badgeSet = new Set();
         const today = new Date();
-        
-        // 過去から現在に向かって計算（連続日数を正しく計算するため）
+        let currentPerfectStreak = 0;
+        let maxPerfectStreak = 0;
+
+        const dailyThresholds = {
+            10: { current: 0, max: 0, required: 10, name: '10個チェック連続' },
+            5: { current: 0, max: 0, required: 20, name: '5個チェック連続' },
+            3: { current: 0, max: 0, required: 30, name: '3個チェック連続' },
+            1: { current: 0, max: 0, required: 50, name: '1個チェック連続' }
+        };
+
+        const randomBadgeFlags = { 2: false, 3: false, 4: false, 5: false, 6: false };
+        const dayBadges = { monday: false, friday: false, weekend: false, weekday: false, holiday: false };
+
+        const habitStats = {};
+        this.habits.forEach(habit => {
+            habitStats[habit.id] = { total: 0, consecutive: 0, maxConsecutive: 0 };
+        });
+
+        // 過去から現在に向かって計算（連続日数などを正しく計算するため）
         for (let i = 365; i >= 0; i--) {
             const checkDate = new Date(today);
             checkDate.setDate(today.getDate() - i);
             const dateStr = checkDate.toISOString().split('T')[0];
-            const dayHabits = this.completedHabits[dateStr];
-            
-            if (dayHabits) {
-                const completedCount = Array.isArray(dayHabits) ? dayHabits.length : 
-                                     (typeof dayHabits === 'object' ? Object.values(dayHabits).filter(Boolean).length : 0);
-                
-                if (completedCount > 0) {
-                    achievements.totalDays++;
-                }
-                
-                // 完璧な日（全習慣完了）
-                if (completedCount === this.habits.length) {
-                    achievements.perfectDays++;
-                    currentStreak++;
-                    maxStreak = Math.max(maxStreak, currentStreak);
-                } else {
-                    // 完璧でない日があったら連続をリセット
-                    currentStreak = 0;
-                }
-            } else {
-                // データがない日があったら連続をリセット
-                currentStreak = 0;
-            }
-        }
-        
-        achievements.currentStreak = currentStreak;
-        achievements.bestStreak = maxStreak;
-        
-        // バッジチェック（簡易版）
-        if (achievements.currentStreak >= 1) achievements.badges.push('初回達成');
-        if (achievements.currentStreak >= 3) achievements.badges.push('3日連続');
-        if (achievements.currentStreak >= 7) achievements.badges.push('7日連続');
-        if (achievements.currentStreak >= 30) achievements.badges.push('30日連続');
-        if (achievements.currentStreak >= 100) achievements.badges.push('100日連続');
-        if (this.totalScore >= 100) achievements.badges.push('スコア100');
-        if (this.totalScore >= 500) achievements.badges.push('スコア500');
-        if (this.totalScore >= 1000) achievements.badges.push('スコア1000');
-        if (achievements.perfectDays >= 10) achievements.badges.push('完璧10日');
-        if (achievements.perfectDays >= 50) achievements.badges.push('完璧50日');
-        if (achievements.perfectDays >= 100) achievements.badges.push('完璧100日');
+            const dayHabitsRaw = this.completedHabits[dateStr];
+            const dayHabits = Array.isArray(dayHabitsRaw)
+                ? dayHabitsRaw
+                : (typeof dayHabitsRaw === 'object'
+                    ? Object.keys(dayHabitsRaw).filter(key => dayHabitsRaw[key])
+                    : []);
+            const completedCount = dayHabits.length;
 
+            if (completedCount > 0) {
+                achievements.totalDays++;
+                const day = checkDate.getDay();
+                if (day === 1) dayBadges.monday = true;
+                if (day === 5) dayBadges.friday = true;
+                if (day === 0 || day === 6) dayBadges.weekend = true;
+                if (day >= 1 && day <= 5) dayBadges.weekday = true;
+                if (isJapaneseHoliday(checkDate)) dayBadges.holiday = true;
+            }
+
+            if (completedCount === this.habits.length && this.habits.length > 0) {
+                achievements.perfectDays++;
+                currentPerfectStreak++;
+                maxPerfectStreak = Math.max(maxPerfectStreak, currentPerfectStreak);
+                badgeSet.add('perfect_day');
+            } else {
+                currentPerfectStreak = 0;
+            }
+
+            Object.keys(dailyThresholds).forEach(key => {
+                const threshold = Number(key);
+                const tracker = dailyThresholds[threshold];
+                if (completedCount >= threshold) {
+                    tracker.current++;
+                    tracker.max = Math.max(tracker.max, tracker.current);
+                } else {
+                    tracker.current = 0;
+                }
+            });
+
+            if (completedCount >= 2) randomBadgeFlags[2] = true;
+            if (completedCount >= 3) randomBadgeFlags[3] = true;
+            if (completedCount >= 4) randomBadgeFlags[4] = true;
+            if (completedCount >= 5) randomBadgeFlags[5] = true;
+            if (completedCount >= 6) randomBadgeFlags[6] = true;
+
+            this.habits.forEach(habit => {
+                const stats = habitStats[habit.id];
+                const isCompleted = dayHabits.includes(habit.id);
+                if (isCompleted) {
+                    stats.total++;
+                    stats.consecutive++;
+                    stats.maxConsecutive = Math.max(stats.maxConsecutive, stats.consecutive);
+                } else {
+                    stats.consecutive = 0;
+                }
+            });
+        }
+
+        achievements.currentStreak = currentPerfectStreak;
+        achievements.bestStreak = maxPerfectStreak;
+
+        if (achievements.currentStreak >= 1) badgeSet.add('初回達成');
+        if (achievements.currentStreak >= 3) badgeSet.add('3日連続');
+        if (achievements.currentStreak >= 7) badgeSet.add('7日連続');
+        if (achievements.currentStreak >= 14) badgeSet.add('14日連続');
+        if (achievements.currentStreak >= 30) badgeSet.add('30日連続');
+        if (achievements.currentStreak >= 100) badgeSet.add('100日連続');
+
+        if (achievements.perfectDays >= 10) badgeSet.add('完璧10日');
+        if (achievements.perfectDays >= 50) badgeSet.add('完璧50日');
+        if (achievements.perfectDays >= 100) badgeSet.add('完璧100日');
+        if (maxPerfectStreak >= 7) badgeSet.add('perfect_week');
+
+        Object.values(dailyThresholds).forEach(tracker => {
+            if (tracker.max >= tracker.required) {
+                badgeSet.add(tracker.name);
+            }
+        });
+
+        if (randomBadgeFlags[2]) badgeSet.add('ダブルアップ');
+        if (randomBadgeFlags[3]) badgeSet.add('サーカス');
+        if (randomBadgeFlags[4]) badgeSet.add('アクター');
+        if (randomBadgeFlags[5]) badgeSet.add('アーティスト');
+        if (randomBadgeFlags[6]) badgeSet.add('ラッキー');
+
+        if (dayBadges.monday) badgeSet.add('月曜日マスター');
+        if (dayBadges.friday) badgeSet.add('金曜日キング');
+        if (dayBadges.weekend) badgeSet.add('週末戦士');
+        if (dayBadges.weekday) badgeSet.add('平日戦士');
+        if (dayBadges.holiday) badgeSet.add('祝日マスター');
+
+        const habitTotals = Object.values(habitStats).map(stat => stat.total);
+        const habitMaxStreaks = Object.values(habitStats).map(stat => stat.maxConsecutive);
+        const highestHabitTotal = habitTotals.length > 0 ? Math.max(...habitTotals) : 0;
+        const highestHabitStreak = habitMaxStreaks.length > 0 ? Math.max(...habitMaxStreaks) : 0;
+
+        if (highestHabitTotal >= 1) badgeSet.add('初心者');
+        if (highestHabitTotal >= 10) badgeSet.add('10回達成');
+        if (highestHabitTotal >= 50) badgeSet.add('見習い');
+        if (highestHabitTotal >= 100) badgeSet.add('100回達成');
+        if (highestHabitTotal >= 150) badgeSet.add('修行者');
+        if (highestHabitTotal >= 300) badgeSet.add('熟練者');
+        if (highestHabitTotal >= 500) badgeSet.add('エキスパート');
+        if (highestHabitTotal >= 1000) badgeSet.add('マスター');
+
+        if (highestHabitStreak >= 10) badgeSet.add('10回連続');
+        if (highestHabitStreak >= 20) badgeSet.add('20回連続');
+        if (highestHabitStreak >= 50) badgeSet.add('50回連続');
+        if (highestHabitStreak >= 100) badgeSet.add('100回連続');
+
+        if (this.totalScore >= 50) badgeSet.add('スコア50');
+        if (this.totalScore >= 100) badgeSet.add('スコア100');
+        if (this.totalScore >= 250) badgeSet.add('スコア250');
+        if (this.totalScore >= 500) badgeSet.add('スコア500');
+        if (this.totalScore >= 750) badgeSet.add('スコア750');
+        if (this.totalScore >= 1000) badgeSet.add('スコア1000');
+
+        if (achievements.totalDays >= 100) badgeSet.add('century');
+
+        achievements.badges = Array.from(badgeSet);
         return achievements;
     }
 
@@ -1683,10 +1863,19 @@ class HabitTracker {
         const achievements = this.achievements || {};
         const currentStreak = Math.max(0, achievements.currentStreak || 0);
         const perfectDays = Math.max(0, achievements.perfectDays || 0);
-        const badgeCount = Array.isArray(achievements.badges) ? achievements.badges.length : 0;
         const totalScore = Math.max(0, this.totalScore || 0);
 
-        return currentStreak + perfectDays + badgeCount + totalScore;
+        const uniqueBadges = new Set(Array.isArray(achievements.badges) ? achievements.badges : []);
+        let badgeGil = 0;
+        uniqueBadges.forEach(badge => {
+            badgeGil += getBadgeGilValue(badge);
+        });
+
+        const streakBonus = currentStreak * 3;
+        const perfectionBonus = perfectDays * 5;
+        const activityBonus = totalScore * 2;
+
+        return streakBonus + perfectionBonus + activityBonus + badgeGil;
     }
 
     showMonsterView() {

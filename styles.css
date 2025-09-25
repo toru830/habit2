@@ -2277,6 +2277,14 @@ body {
     text-align: center;
 }
 
+.badge-gil-note {
+    color: #ffdd57;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: -10px 0 18px;
+    text-align: center;
+}
+
 .badge-categories {
     display: flex;
     flex-direction: column;
@@ -2300,8 +2308,8 @@ body {
 .badge-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px;
+    gap: 12px;
+    padding: 10px;
     background: #2a2a2a;
     border-radius: 6px;
     border: 1px solid #444;
@@ -2316,6 +2324,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1;
 }
 
 .badge-name {
@@ -2327,6 +2336,14 @@ body {
 .badge-condition {
     color: #ccc;
     font-size: 12px;
+}
+
+.badge-gil {
+    color: #ffdd57;
+    font-weight: 700;
+    font-size: 14px;
+    text-shadow: 0 0 6px rgba(255, 221, 87, 0.45);
+    white-space: nowrap;
 }
 
 /* アプリ情報のスタイル */
