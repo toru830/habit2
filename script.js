@@ -163,6 +163,98 @@ const BADGE_GIL_VALUES = {
     '祝日マスター': 160
 };
 
+const BADGE_LIBRARY = [
+    {
+        key: 'streak',
+        title: '🔥 連続達成バッジ',
+        icon: '🔥',
+        badges: [
+            { id: '初回達成', aliases: ['first_completion'], icon: '🥉', name: '初回達成', condition: '完璧な日を1日達成', gil: 50 },
+            { id: '3日連続', icon: '🥈', name: '3日連続', condition: '完璧な日を3日連続達成', gil: 120 },
+            { id: '7日連続', aliases: ['week_streak'], icon: '🥇', name: '7日連続', condition: '完璧な日を7日連続達成', gil: 250 },
+            { id: '14日連続', icon: '💎', name: '14日連続', condition: '完璧な日を14日連続達成', gil: 400 },
+            { id: '30日連続', aliases: ['month_streak'], icon: '👑', name: '30日連続', condition: '完璧な日を30日連続達成', gil: 650 }
+        ]
+    },
+    {
+        key: 'score',
+        title: '⭐ スコアバッジ',
+        icon: '⭐',
+        badges: [
+            { id: 'スコア50', aliases: ['score_50'], icon: '🎯', name: 'スコア50', condition: '総スコア50達成', gil: 80 },
+            { id: 'スコア100', aliases: ['score_100'], icon: '🚀', name: 'スコア100', condition: '総スコア100達成', gil: 150 },
+            { id: 'スコア250', aliases: ['score_250'], icon: '🌟', name: 'スコア250', condition: '総スコア250達成', gil: 260 },
+            { id: 'スコア500', aliases: ['score_500'], icon: '💫', name: 'スコア500', condition: '総スコア500達成', gil: 420 },
+            { id: 'スコア750', aliases: ['score_750'], icon: '⚡', name: 'スコア750', condition: '総スコア750達成', gil: 620 },
+            { id: 'スコア1000', aliases: ['score_1000'], icon: '🔥', name: 'スコア1000', condition: '総スコア1000達成', gil: 900 }
+        ]
+    },
+    {
+        key: 'combo',
+        title: '📊 連続バッジ',
+        icon: '📊',
+        badges: [
+            { id: '10個チェック連続', icon: '🔥', name: '10個チェック連続', condition: '10個チェックが付いた日が10日連続', gil: 500 },
+            { id: '5個チェック連続', icon: '⚡', name: '5個チェック連続', condition: '5個チェックが付いた日が20日連続', gil: 420 },
+            { id: '3個チェック連続', icon: '💫', name: '3個チェック連続', condition: '3個チェックが付いた日が30日連続', gil: 360 },
+            { id: '1個チェック連続', icon: '🌟', name: '1個チェック連続', condition: '1個チェックが付いた日が50日連続', gil: 280 }
+        ]
+    },
+    {
+        key: 'habit',
+        title: '🏆 習慣達成バッジ',
+        icon: '🏆',
+        badges: [
+            { id: '初心者', icon: '🌱', name: '初心者', condition: '初回習慣を達成', gil: 60 },
+            { id: '10回達成', icon: '🔥', name: '10回達成', condition: '習慣を10回達成', gil: 150 },
+            { id: '見習い', icon: '🌿', name: '見習い', condition: '習慣を50回達成', gil: 260 },
+            { id: '100回達成', icon: '💪', name: '100回達成', condition: '習慣を100回達成', gil: 360 },
+            { id: '修行者', icon: '🌳', name: '修行者', condition: '習慣を150回達成', gil: 480 },
+            { id: '熟練者', icon: '🌲', name: '熟練者', condition: '習慣を300回達成', gil: 650 },
+            { id: 'エキスパート', icon: '⭐', name: 'エキスパート', condition: '習慣を500回達成', gil: 820 },
+            { id: 'マスター', icon: '🌟', name: 'マスター', condition: '習慣を1000回達成', gil: 1100 },
+            { id: '10回連続', icon: '🎯', name: '10回連続', condition: '習慣を10回連続達成', gil: 220 },
+            { id: '20回連続', icon: '🎲', name: '20回連続', condition: '習慣を20回連続達成', gil: 360 },
+            { id: '50回連続', icon: '🃏', name: '50回連続', condition: '習慣を50回連続達成', gil: 540 },
+            { id: '100回連続', icon: '🎰', name: '100回連続', condition: '習慣を100回連続達成', gil: 800 }
+        ]
+    },
+    {
+        key: 'random',
+        title: '🎲 ランダムバッジ',
+        icon: '🎲',
+        badges: [
+            { id: 'ダブルアップ', icon: '🎲', name: 'ダブルアップ', condition: '1日に2個以上達成', gil: 120 },
+            { id: 'サーカス', icon: '🎪', name: 'サーカス', condition: '1日に3個以上達成', gil: 200 },
+            { id: 'アクター', icon: '🎭', name: 'アクター', condition: '1日に4個以上達成', gil: 280 },
+            { id: 'アーティスト', icon: '🎨', name: 'アーティスト', condition: '1日に5個以上達成', gil: 360 },
+            { id: 'ラッキー', icon: '🍀', name: 'ラッキー', condition: '1日に6個以上達成', gil: 480 }
+        ]
+    },
+    {
+        key: 'calendar',
+        title: '📅 日付バッジ',
+        icon: '📅',
+        badges: [
+            { id: '月曜日マスター', icon: '🌙', name: '月曜日マスター', condition: '月曜日に習慣を達成', gil: 70 },
+            { id: '金曜日キング', icon: '💼', name: '金曜日キング', condition: '金曜日に習慣を達成', gil: 90 },
+            { id: '週末戦士', icon: '🗓️', name: '週末戦士', condition: '土日に習慣を達成', gil: 130 },
+            { id: '平日戦士', icon: '📊', name: '平日戦士', condition: '平日に習慣を達成', gil: 110 },
+            { id: '祝日マスター', icon: '📈', name: '祝日マスター', condition: '祝日に習慣を達成', gil: 160 }
+        ]
+    }
+];
+
+function isBadgeUnlocked(earnedSet, badge) {
+    if (earnedSet.has(badge.id)) {
+        return true;
+    }
+    if (Array.isArray(badge.aliases)) {
+        return badge.aliases.some(alias => earnedSet.has(alias));
+    }
+    return false;
+}
+
 const JAPANESE_HOLIDAY_MD = new Set([
     '01-01', // 元日
     '01-13', // 成人の日 (2025)
@@ -1700,6 +1792,8 @@ class HabitTracker {
 
         const totalAchievementValue = this.calculateAchievementTotal();
         document.getElementById('achievementTotal').textContent = `${totalAchievementValue}ギル`;
+
+        this.renderBadgeCollection();
     }
 
     // 全達成データを再計算
@@ -1857,6 +1951,119 @@ class HabitTracker {
 
         achievements.badges = Array.from(badgeSet);
         return achievements;
+    }
+
+    renderBadgeCollection() {
+        const board = document.getElementById('badgeCategoryBoard');
+        if (!board) return;
+
+        const earnedSet = new Set(Array.isArray(this.achievements?.badges) ? this.achievements.badges : []);
+        let totalBadges = 0;
+        let unlockedBadges = 0;
+        let nextTargetBadge = null;
+
+        board.innerHTML = '';
+
+        BADGE_LIBRARY.forEach(category => {
+            const categoryCard = document.createElement('div');
+            categoryCard.className = 'badge-category-card';
+
+            const header = document.createElement('div');
+            header.className = 'badge-category-header';
+
+            const title = document.createElement('div');
+            title.className = 'badge-category-title';
+            const icon = document.createElement('span');
+            icon.className = 'badge-category-icon';
+            icon.textContent = category.icon;
+            const label = document.createElement('span');
+            label.textContent = category.title;
+            title.appendChild(icon);
+            title.appendChild(label);
+
+            const categoryBadges = category.badges || [];
+            const earnedInCategory = categoryBadges.reduce((count, badge) => {
+                return count + (isBadgeUnlocked(earnedSet, badge) ? 1 : 0);
+            }, 0);
+            const progressRate = categoryBadges.length > 0
+                ? Math.round((earnedInCategory / categoryBadges.length) * 100)
+                : 0;
+
+            const progress = document.createElement('div');
+            progress.className = 'badge-category-progress';
+            const progressCount = document.createElement('span');
+            progressCount.className = 'badge-category-progress-count';
+            progressCount.textContent = `${earnedInCategory}/${categoryBadges.length}`;
+
+            const progressBar = document.createElement('div');
+            progressBar.className = 'badge-category-progress-bar';
+            const progressFill = document.createElement('div');
+            progressFill.className = 'badge-category-progress-fill';
+            progressFill.style.width = `${progressRate}%`;
+
+            progressBar.appendChild(progressFill);
+            progress.appendChild(progressCount);
+            progress.appendChild(progressBar);
+
+            header.appendChild(title);
+            header.appendChild(progress);
+
+            const grid = document.createElement('div');
+            grid.className = 'badge-card-grid';
+
+            categoryBadges.forEach(badge => {
+                totalBadges++;
+                const unlocked = isBadgeUnlocked(earnedSet, badge);
+                if (unlocked) {
+                    unlockedBadges++;
+                } else if (!nextTargetBadge) {
+                    nextTargetBadge = badge;
+                }
+
+                const card = document.createElement('div');
+                card.className = `badge-card ${unlocked ? 'unlocked' : 'locked'}`;
+                card.innerHTML = `
+                    <div class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</div>
+                    <div class="badge-card-body">
+                        <div class="badge-icon">${badge.icon}</div>
+                        <div class="badge-info">
+                            <span class="badge-name">${badge.name}</span>
+                            <span class="badge-condition">${badge.condition}</span>
+                        </div>
+                    </div>
+                    <div class="badge-card-footer">
+                        <span class="badge-reward">+${badge.gil}ギル</span>
+                        ${unlocked ? '<span class="badge-card-check">✨</span>' : '<span class="badge-card-hint">チャレンジ！</span>'}
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            categoryCard.appendChild(header);
+            categoryCard.appendChild(grid);
+            board.appendChild(categoryCard);
+        });
+
+        const earnedEl = document.getElementById('earnedBadgeCount');
+        const totalEl = document.getElementById('totalBadgeCount');
+        const rateEl = document.getElementById('badgeCompletionRate');
+        const progressEl = document.getElementById('badgeProgressFill');
+        const messageEl = document.getElementById('nextBadgeMessage');
+
+        if (earnedEl) earnedEl.textContent = unlockedBadges;
+        if (totalEl) totalEl.textContent = totalBadges;
+        const overallRate = totalBadges > 0 ? Math.round((unlockedBadges / totalBadges) * 100) : 0;
+        if (rateEl) rateEl.textContent = `${overallRate}%`;
+        if (progressEl) progressEl.style.width = `${overallRate}%`;
+
+        if (messageEl) {
+            if (nextTargetBadge) {
+                messageEl.innerHTML = `次は<span class="badge-inline-name">「${nextTargetBadge.name}」</span>（+${nextTargetBadge.gil}ギル）を狙おう！<span class="badge-inline-condition">${nextTargetBadge.condition}</span>`;
+            } else {
+                messageEl.textContent = '全バッジをコンプリートしました！ギルの雨を堪能しましょう！';
+            }
+        }
     }
 
     calculateAchievementTotal() {
