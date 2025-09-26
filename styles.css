@@ -2329,7 +2329,7 @@ body {
 
 .badge-owned-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(48px, 1fr));
     gap: 12px;
     justify-items: center;
 }
@@ -2760,21 +2760,17 @@ body {
     }
 
     .badge-owned-grid {
-        justify-content: flex-start;
-        gap: 12px;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
     }
 
     .badge-owned-item {
-        flex: 0 1 calc(33.333% - 12px);
-        padding: 10px 8px;
+        padding: 10px 6px;
+        aspect-ratio: 1 / 1;
     }
 
     .badge-owned-icon {
-        font-size: 24px;
-    }
-
-    .badge-owned-name {
-        font-size: 11px;
+        font-size: 22px;
     }
 }
 /* アプリ情報のスタイル */
