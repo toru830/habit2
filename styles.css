@@ -2296,7 +2296,7 @@ body {
 
 .badge-progress-overview {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: 1fr;
     gap: 16px;
     margin-bottom: 22px;
     align-items: stretch;
@@ -2329,12 +2329,24 @@ body {
 
 .badge-owned-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 12px;
     justify-items: center;
 }
 
 @media (max-width: 900px) {
+    .badge-owned-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .badge-owned-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 420px) {
     .badge-owned-grid {
         grid-template-columns: 1fr;
     }
@@ -2537,7 +2549,7 @@ body {
     }
 
     .badge-progress-overview {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         gap: 12px;
     }
 
@@ -2575,6 +2587,11 @@ body {
     gap: 12px;
     min-height: 168px;
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.badge-card.streak-layout {
+    gap: 10px;
+    min-height: 120px;
 }
 
 .badge-card.unlocked {
@@ -2672,6 +2689,57 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.badge-card.streak-layout .badge-streak-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.badge-card.streak-layout .badge-status {
+    align-self: auto;
+}
+
+.badge-card.streak-layout .badge-reward {
+    font-size: 12px;
+}
+
+.badge-card.streak-layout .badge-streak-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.badge-card.streak-layout .badge-icon {
+    font-size: 30px;
+}
+
+.badge-card.streak-layout .badge-streak-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.badge-card.streak-layout .badge-streak-score {
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.badge-card.locked.streak-layout .badge-streak-score {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.badge-card.streak-layout .badge-streak-description {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.badge-card.locked.streak-layout .badge-streak-description {
+    color: rgba(200, 200, 200, 0.6);
 }
 
 .badge-reward {
