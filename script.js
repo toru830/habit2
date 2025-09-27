@@ -2243,7 +2243,10 @@ class HabitTracker {
                     cardClasses.push('random-layout');
                 } else if (category.key === 'calendar') {
                     cardClasses.push('date-layout');
-                } else {
+                }
+                
+                // 標準のHTMLを適用（streak以外の全カテゴリ）
+                if (category.key !== 'streak') {
                     card.innerHTML = `
                         <div class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</div>
                         <div class="badge-card-body">
