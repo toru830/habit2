@@ -2230,6 +2230,8 @@ class HabitTracker {
                     cardClasses.push('random-layout');
                 } else if (category.key === 'calendar') {
                     cardClasses.push('date-layout');
+                } else if (category.key === 'habit') {
+                    cardClasses.push('habit-layout');
                 }
                 
                 // 統一されたHTMLを適用（全カテゴリ共通）

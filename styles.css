@@ -2576,7 +2576,8 @@ body {
 .badge-card.continuous-layout,
 .badge-card.healthcare-layout,
 .badge-card.random-layout,
-.badge-card.date-layout {
+.badge-card.date-layout,
+.badge-card.habit-layout {
     gap: 6px;
     min-height: 100px;
 }
