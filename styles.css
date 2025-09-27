@@ -2671,6 +2671,13 @@ body {
     color: rgba(200, 200, 200, 0.6);
 }
 
+.badge-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
 .badge-card-footer {
     margin-top: auto;
     display: flex;
@@ -2740,6 +2747,9 @@ body {
 }
 
 .badge-card-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
     font-size: 18px;
     color: #ffdd57;
     text-shadow: 0 0 8px rgba(255, 221, 87, 0.6);

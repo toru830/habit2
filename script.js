@@ -2217,22 +2217,9 @@ class HabitTracker {
                 const card = document.createElement('div');
                 const cardClasses = ['badge-card', unlocked ? 'unlocked' : 'locked'];
 
+                // レイアウトクラスを適用
                 if (category.key === 'streak') {
                     cardClasses.push('streak-layout');
-                    const scoreLabel = badge.name.includes('スコア') ? badge.name : `スコア ${badge.name}`;
-                    card.innerHTML = `
-                        <div class="badge-streak-top">
-                            <span class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</span>
-                            <span class="badge-reward">+${badge.gil}ギル</span>
-                        </div>
-                        <div class="badge-streak-body">
-                            <div class="badge-icon">${badge.icon}</div>
-                            <div class="badge-streak-info">
-                                <span class="badge-streak-score">${scoreLabel}</span>
-                                <span class="badge-streak-description">${badge.condition}</span>
-                            </div>
-                        </div>
-                    `;
                 } else if (category.key === 'score') {
                     cardClasses.push('score-layout');
                 } else if (category.key === 'combo') {
@@ -2245,23 +2232,21 @@ class HabitTracker {
                     cardClasses.push('date-layout');
                 }
                 
-                // 標準のHTMLを適用（streak以外の全カテゴリ）
-                if (category.key !== 'streak') {
-                    card.innerHTML = `
-                        <div class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</div>
-                        <div class="badge-card-body">
-                            <div class="badge-icon">${badge.icon}</div>
-                            <div class="badge-info">
-                                <span class="badge-name">${badge.name}</span>
-                                <span class="badge-condition">${badge.condition}</span>
-                            </div>
+                // 統一されたHTMLを適用（全カテゴリ共通）
+                card.innerHTML = `
+                    <div class="badge-card-top">
+                        <span class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</span>
+                        <span class="badge-reward">+${badge.gil}ギル</span>
+                    </div>
+                    <div class="badge-card-body">
+                        <div class="badge-icon">${badge.icon}</div>
+                        <div class="badge-info">
+                            <span class="badge-name">${badge.name}</span>
+                            <span class="badge-condition">${badge.condition}</span>
                         </div>
-                        <div class="badge-card-footer">
-                            <span class="badge-reward">+${badge.gil}ギル</span>
-                            ${unlocked ? '<span class="badge-card-check">✨</span>' : '<span class="badge-card-hint">チャレンジ！</span>'}
-                        </div>
-                    `;
-                }
+                    </div>
+                    ${unlocked ? '<div class="badge-card-check">✨</div>' : ''}
+                `;
 
                 card.className = cardClasses.join(' ');
 
