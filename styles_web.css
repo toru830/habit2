@@ -2536,8 +2536,7 @@ body {
     }
 
     .badge-card {
-        padding: 14px;
-        min-height: 150px;
+        padding: 10px;
     }
 
     .badge-card-body {
@@ -2756,7 +2755,7 @@ body {
     }
 
     .badge-card {
-        min-height: 160px;
+        min-height: 120px;
     }
 
     .badge-owned-grid {
@@ -2771,6 +2770,12 @@ body {
 
     .badge-owned-icon {
         font-size: 22px;
+    }
+}
+
+@media (max-width: 600px) {
+    .badge-card {
+        min-height: 110px;
     }
 }
 /* アプリ情報のスタイル */
