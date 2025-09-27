@@ -627,10 +627,18 @@ body {
 
 .monster-card {
     background: #1a1a1a;
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 14px 12px;
     border: 1px solid #333;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.monster-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.4);
 }
 
 .monster-name {
@@ -640,31 +648,127 @@ body {
     margin-bottom: 8px;
 }
 
+.monster-level {
+    color: #ffd700;
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
 .monster-image {
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     background: #333;
-    border-radius: 6px;
-    margin: 0 auto 8px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 26px;
     border: 2px solid #555;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
+    animation: float 4.2s ease-in-out infinite;
+}
+
+.monster-image span {
+    display: inline-block;
+    animation: breathe 3.6s ease-in-out infinite;
 }
 
 .monster-description {
     color: #ccc;
     font-size: 10px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.monster-title {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.monster-flavor {
+    color: #9ca3af;
+    font-size: 9px;
+    line-height: 1.4;
 }
 
 .monster-stats {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
     color: #4A90E2;
-    font-size: 8px;
+    font-size: 9px;
     font-weight: bold;
+    text-align: center;
+}
+
+.monster-card--legendary {
+    border: 1px solid var(--monster-legendary-color, #4A90E2);
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.06), var(--monster-legendary-gradient, rgba(74, 144, 226, 0.16)));
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.45);
+    grid-column: 1 / -1;
+}
+
+.monster-card--legendary::after {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background: radial-gradient(circle at top, var(--monster-legendary-glow, rgba(74, 144, 226, 0.35)) 0%, transparent 65%);
+    opacity: 0.85;
+    mix-blend-mode: screen;
+    animation: aurora 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.monster-card--legendary > * {
+    position: relative;
+    z-index: 1;
+}
+
+.monster-image--legendary {
+    border-color: var(--monster-legendary-color, #4A90E2) !important;
+    background: radial-gradient(circle, var(--monster-legendary-glow, rgba(74, 144, 226, 0.45)) 0%, rgba(0, 0, 0, 0.75) 70%);
+    box-shadow: 0 0 22px var(--monster-legendary-glow, rgba(74, 144, 226, 0.45));
+    animation: float 3.5s ease-in-out infinite, pulseLegendary 4.5s ease-in-out infinite;
+}
+
+.monster-card--legendary .monster-image span {
+    font-size: 32px;
+}
+
+.monster-card--legendary .monster-name {
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes breathe {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+@keyframes aurora {
+    0% { transform: translateX(-15%) rotate(0deg); opacity: 0.65; }
+    50% { transform: translateX(15%) rotate(2deg); opacity: 1; }
+    100% { transform: translateX(-15%) rotate(0deg); opacity: 0.65; }
+}
+
+@keyframes pulseLegendary {
+    0% { box-shadow: 0 0 18px var(--monster-legendary-glow, rgba(74, 144, 226, 0.35)); }
+    50% { box-shadow: 0 0 30px var(--monster-legendary-glow, rgba(74, 144, 226, 0.6)); }
+    100% { box-shadow: 0 0 18px var(--monster-legendary-glow, rgba(74, 144, 226, 0.35)); }
 }
 
 /* 同期ステータスバー */
@@ -1943,6 +2047,11 @@ body {
     color: #fff;
 }
 
+.monthly-calendar-day.has-friendparty {
+    background: #ff6f61;
+    color: #fff;
+}
+
 
 
 /* モチベーション表示のスタイル */
@@ -1961,6 +2070,26 @@ body {
     font-size: 20px;
     text-align: center;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.achievement-total {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+    color: #f1c40f;
+    font-weight: 700;
+}
+
+.achievement-total .total-label {
+    font-size: 16px;
+    letter-spacing: 0.08em;
+}
+
+.achievement-total .total-value {
+    font-size: 28px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 .motivation-stats {
@@ -2015,15 +2144,17 @@ body {
     border-radius: 3px;
 }
 
-/* 設定ビューのスタイル */
-.settings-view {
+/* 設定ビュー / バッジビューのスタイル */
+.settings-view,
+.badge-view {
     padding: 20px;
     background: #000;
     height: calc(100vh - 120px);
     overflow-y: auto;
 }
 
-.settings-view h2 {
+.settings-view h2,
+.badge-view h2 {
     color: #fff;
     margin-bottom: 30px;
     text-align: center;
@@ -2140,71 +2271,508 @@ body {
 /* バッジ一覧のスタイル */
 .badge-list-section {
     margin-bottom: 30px;
-    padding: 20px;
-    background: #1a1a1a;
-    border-radius: 12px;
-    border: 1px solid #333;
+    padding: 24px;
+    background: #121212;
+    border-radius: 16px;
+    border: 1px solid #2a2a2a;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 }
 
 .badge-list-section h3 {
     color: #fff;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     font-size: 18px;
+    text-align: center;
+    letter-spacing: 0.08em;
+}
+
+.badge-gil-note {
+    color: #ffdd57;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: -6px 0 22px;
     text-align: center;
 }
 
-.badge-categories {
+.badge-progress-overview {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 22px;
+    align-items: stretch;
+}
+
+.badge-owned-section {
+    margin-bottom: 26px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.92), rgba(18, 18, 18, 0.92));
+    border-radius: 14px;
+    border: 1px solid rgba(70, 70, 70, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.badge-owned-section h4 {
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 12px;
+    letter-spacing: 0.08em;
+}
+
+.badge-owned-note {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.badge-owned-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(48px, 1fr));
+    gap: 12px;
+    justify-items: center;
+}
+
+.badge-owned-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+}
+
+.badge-owned-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
+}
+
+.badge-owned-empty {
+    margin-top: 12px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
+}
+
+.badge-progress-card {
+    flex: 1 1 240px;
+    padding: 18px;
+    background: linear-gradient(135deg, rgba(40, 40, 40, 0.95), rgba(28, 28, 28, 0.95));
+    border-radius: 14px;
+    border: 1px solid rgba(80, 80, 80, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
     display: flex;
     flex-direction: column;
     gap: 12px;
+    height: 100%;
 }
 
-.badge-category h4 {
+.badge-progress-card.highlight {
+    background: linear-gradient(135deg, rgba(86, 54, 161, 0.95), rgba(30, 128, 210, 0.95));
+    border: 1px solid rgba(120, 170, 255, 0.5);
+    box-shadow: 0 14px 32px rgba(67, 138, 255, 0.28);
+}
+
+.badge-progress-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.badge-progress-card.highlight .badge-progress-label {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.badge-progress-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.badge-progress-value {
     color: #fff;
-    margin-bottom: 8px;
-    font-size: 14px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #444;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
 }
 
-.badge-list {
+.badge-progress-total {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.badge-progress-divider {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 18px;
+}
+
+.badge-progress-sub {
+    color: #8cd3ff;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+}
+
+.badge-progress-bar {
+    width: 100%;
+    height: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.badge-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ffdd57 0%, #ff8f4b 100%);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.badge-progress-card.highlight .badge-progress-message {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.badge-progress-card.highlight .badge-inline-name {
+    color: #ffdd57;
+    font-weight: 700;
+}
+
+.badge-progress-card.highlight .badge-inline-condition {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+}
+
+.badge-category-board {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 18px;
 }
 
-.badge-item {
+.badge-category-card {
+    padding: 18px 20px 20px;
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.92), rgba(16, 16, 16, 0.92));
+    border-radius: 14px;
+    border: 1px solid rgba(60, 60, 60, 0.6);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.badge-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.badge-category-title {
     display: flex;
     align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+}
+.badge-category-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+
+.badge-category-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge-category-progress-count {
+    color: #ffdd57;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+}
+
+.badge-category-progress-bar {
+    width: 140px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.badge-category-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #64d6ff 0%, #6e86ff 100%);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.badge-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 600px) {
+    .badge-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .badge-progress-overview {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .badge-card {
+        padding: 10px;
+        min-height: 110px;
+    }
+
+    .badge-card-body {
+        gap: 6px;
+    }
+
+    .badge-icon {
+        font-size: 26px;
+    }
+
+    .badge-name {
+        font-size: 14px;
+    }
+
+    .badge-condition {
+        font-size: 11px;
+    }
+}
+
+.badge-card {
+    position: relative;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(70, 70, 70, 0.6);
+    background: rgba(30, 30, 30, 0.92);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+    display: flex;
+    flex-direction: column;
     gap: 8px;
-    padding: 8px;
-    background: #2a2a2a;
-    border-radius: 6px;
-    border: 1px solid #444;
+    min-height: 120px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.badge-card.streak-layout {
+    gap: 6px;
+    min-height: 100px;
+}
+
+.badge-card.unlocked {
+    background: linear-gradient(135deg, rgba(53, 39, 0, 0.92), rgba(96, 69, 0, 0.92));
+    border: 1px solid rgba(255, 221, 87, 0.6);
+    box-shadow: 0 18px 30px rgba(255, 205, 80, 0.25);
+}
+
+.badge-card.locked {
+    border: 1px dashed rgba(90, 90, 90, 0.8);
+    background: linear-gradient(135deg, rgba(22, 22, 22, 0.95), rgba(18, 18, 18, 0.9));
+    opacity: 0.88;
+}
+
+.badge-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
+}
+
+.badge-card.unlocked:hover {
+    box-shadow: 0 22px 38px rgba(255, 205, 80, 0.35);
+}
+
+.badge-card.locked:hover {
+    border-color: rgba(130, 130, 130, 0.8);
+}
+
+.badge-status {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    align-self: flex-start;
+}
+
+.badge-card.unlocked .badge-status {
+    background: rgba(255, 221, 87, 0.18);
+    border: 1px solid rgba(255, 221, 87, 0.45);
+    color: #ffdd57;
+}
+
+.badge-card.locked .badge-status {
+    background: rgba(120, 120, 120, 0.14);
+    border: 1px solid rgba(120, 120, 120, 0.3);
+    color: rgba(210, 210, 210, 0.75);
+}
+
+.badge-card-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
 }
 
 .badge-icon {
-    font-size: 20px;
+    font-size: 28px;
     flex-shrink: 0;
+}
+
+.badge-card.locked .badge-icon {
+    filter: grayscale(0.6);
+    opacity: 0.7;
 }
 
 .badge-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1;
 }
 
 .badge-name {
     color: #fff;
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.badge-card.locked .badge-name {
+    color: rgba(255, 255, 255, 0.72);
 }
 
 .badge-condition {
-    color: #ccc;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.badge-card.locked .badge-condition {
+    color: rgba(200, 200, 200, 0.6);
+}
+
+.badge-card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.badge-card.streak-layout .badge-streak-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.badge-card.streak-layout .badge-status {
+    align-self: auto;
+}
+
+.badge-card.streak-layout .badge-reward {
     font-size: 12px;
 }
 
+.badge-card.streak-layout .badge-streak-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.badge-card.streak-layout .badge-icon {
+    font-size: 30px;
+}
+
+.badge-card.streak-layout .badge-streak-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.badge-card.streak-layout .badge-streak-score {
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.badge-card.locked.streak-layout .badge-streak-score {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.badge-card.streak-layout .badge-streak-description {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.badge-card.locked.streak-layout .badge-streak-description {
+    color: rgba(200, 200, 200, 0.6);
+}
+
+.badge-reward {
+    color: #ffdd57;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.badge-card.locked .badge-reward {
+    color: #ffc974;
+}
+
+.badge-card-check {
+    font-size: 18px;
+    color: #ffdd57;
+    text-shadow: 0 0 8px rgba(255, 221, 87, 0.6);
+}
+
+.badge-card-hint {
+    font-size: 12px;
+    color: #8dd5ff;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .badge-progress-overview {
+        flex-direction: column;
+    }
+
+    .badge-category-progress-bar {
+        width: 100px;
+    }
+
+    .badge-card {
+        min-height: 160px;
+    }
+
+    .badge-owned-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .badge-owned-item {
+        padding: 10px 6px;
+        aspect-ratio: 1 / 1;
+    }
+
+    .badge-owned-icon {
+        font-size: 22px;
+    }
+}
 /* アプリ情報のスタイル */
 .app-info-section {
     margin-bottom: 30px;
@@ -2424,11 +2992,17 @@ body {
     color: #fff;
 }
 
+#friendPartySummary {
+    background: #ff6f61; /* コーラルオレンジ */
+    color: #fff;
+}
+
 /* 総回数セルの文字色を強調 */
 #healthKeepingSummary .count,
 #dentalCleaningSummary .count,
 #saunaSummary .count,
-#catcafeSummary .count {
+#catcafeSummary .count,
+#friendPartySummary .count {
     color: #fff !important;
     font-weight: bold;
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
@@ -2446,6 +3020,38 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 14px;
+}
+
+.health-legend-color {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.35);
+}
+
+.health-legend-color.has-health {
+    background: #28a745;
+}
+
+.health-legend-color.has-massage {
+    background: #b8860b;
+}
+
+.health-legend-color.has-dental {
+    background: #17a2b8;
+}
+
+.health-legend-color.has-sauna {
+    background: #dc3545;
+}
+
+.health-legend-color.has-catcafe {
+    background: #6f42c1;
+}
+
+.health-legend-color.has-friendparty {
+    background: #ff6f61;
 }
 
 .summary-cell.count {
@@ -2523,5 +3129,10 @@ body {
 
 .health-selection-option.selected.catcafe {
     background: #6f42c1;
+    color: #fff;
+}
+
+.health-selection-option.selected.friend-party {
+    background: #ff6f61;
     color: #fff;
 }
