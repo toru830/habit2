@@ -2219,6 +2219,16 @@ class HabitTracker {
 
                 if (category.key === 'streak') {
                     cardClasses.push('streak-layout');
+                } else if (category.key === 'score') {
+                    cardClasses.push('score-layout');
+                } else if (category.key === 'combo') {
+                    cardClasses.push('continuous-layout');
+                } else if (category.key === 'health') {
+                    cardClasses.push('healthcare-layout');
+                } else if (category.key === 'random') {
+                    cardClasses.push('random-layout');
+                } else if (category.key === 'calendar') {
+                    cardClasses.push('date-layout');
                     const scoreLabel = badge.name.includes('スコア') ? badge.name : `スコア ${badge.name}`;
                     card.innerHTML = `
                         <div class="badge-streak-top">
