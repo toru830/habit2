@@ -15,7 +15,7 @@ const habitsData = [
     // サプリ・食事系
     { id: 'protein', name: 'プロテイン', shortName: 'ﾌﾟﾛﾃｲﾝ', category: '栄養', priority: 4, reason: '筋トレ効果を高める。運動とセットで効力大。', type: 'supplement' },
     { id: 'probiotics', name: '整腸剤', shortName: '整腸剤', category: '栄養・消化', priority: 2, reason: '腸内環境改善の補助。基本は食事で十分。', type: 'supplement' },
-    { id: 'vitamin_b', name: 'ビタミンB', shortName: 'ﾋﾞﾀﾐﾝB', category: '栄養', priority: 3, reason: 'エネルギー代謝と神経機能に重要。', type: 'supplement' },
+    { id: 'vitamin_b', name: 'ビタミンD', shortName: 'ﾋﾞﾀﾐﾝD', category: '栄養', priority: 3, reason: 'エネルギー代謝と神経機能に重要。', type: 'supplement' },
     { id: 'creatine', name: 'クレアチン', shortName: 'ｸﾚｱﾁﾝ', category: '栄養', priority: 3, reason: '筋力と筋量の向上に効果的。', type: 'supplement' },
     { id: 'ashwagandha', name: 'アシュワガンダ', shortName: 'ｱｼｭﾜｶﾞﾝﾀﾞ', category: '栄養', priority: 2, reason: 'ストレス軽減と睡眠の質向上。', type: 'supplement' },
     { id: 'magnesium', name: 'マグネシウム', shortName: 'ﾏｸﾞﾈｼｳﾑ', category: '栄養', priority: 2, reason: '筋肉のリラクゼーションと睡眠の質向上。', type: 'supplement' },
@@ -36,18 +36,341 @@ const rewards = {
 
 // モンスタータイプの定義
 const monsterTypes = {
-    0: { name: '未開封', description: 'まだ挑戦していない', emoji: '❓', color: '#666' },
-    1: { name: '弱そうな青年', description: '初心者レベル', emoji: '😊', color: '#4A90E2' },
-    2: { name: 'やる気のある青年', description: '少し成長した', emoji: '😤', color: '#28a745' },
-    3: { name: '頑張り屋', description: '継続の力', emoji: '💪', color: '#ffd700' },
-    4: { name: '努力家', description: '真面目に取り組む', emoji: '🎯', color: '#ff6b6b' },
-    5: { name: 'ちょっと強そうな青年', description: '中級者レベル', emoji: '😎', color: '#9c27b0' },
-    6: { name: '習慣マスター', description: '習慣化の達人', emoji: '🏆', color: '#ff9800' },
-    7: { name: '習慣の王', description: '完璧な習慣', emoji: '👑', color: '#e91e63' },
-    8: { name: '伝説の存在', description: '神レベルの習慣', emoji: '🌟', color: '#00bcd4' },
-    9: { name: '究極の存在', description: '究極の習慣', emoji: '⚡', color: '#795548' },
-    10: { name: '超越者', description: '人間を超越', emoji: '🚀', color: '#607d8b' }
+    0: { name: '眠れるエーテル卵', description: 'まだ力を秘めている', emoji: '🥚✨', color: '#666' },
+    1: { name: '薄翼のベビードラゴン', description: '目覚めたての炎が灯る', emoji: '🐣🐲', color: '#4A90E2' },
+    2: { name: '風駆けるルーキーペガサス', description: '空へ踏み出す小さな一歩', emoji: '🪽🦄', color: '#28a745' },
+    3: { name: '鋼翼のガーディアングリフォン', description: '継続の刃が鍛えられる', emoji: '🛡️🦅', color: '#ffd700' },
+    4: { name: '紅蓮のチャレンジドラグーン', description: '炎が大地を照らし始める', emoji: '🔥🐉', color: '#ff6b6b' },
+    5: { name: '蒼雷のスカイランサー', description: '空を切り裂く槍の閃光', emoji: '⚡🐲', color: '#9c27b0' },
+    6: { name: '黎明のオーロラヒポグリフ', description: '朝焼けのオーラをまとう', emoji: '🌅🦅', color: '#ff9800' },
+    7: { name: '星河のアークドラゴン', description: '星屑が軌跡を描く', emoji: '🌌🐉', color: '#e91e63' },
+    8: { name: '神威のセラフィックペガサス', description: '聖なる光が降り注ぐ', emoji: '👑🪽', color: '#00bcd4' },
+    9: { name: '時空を裂くクロノドラゴン', description: '時間すら味方にする', emoji: '⏳🐲', color: '#795548' },
+    10: { name: '創世のエターナルワイバーン', description: '神話を超える究極体', emoji: '🌠🐉', color: '#607d8b' }
 };
+
+const combinedMonsterStages = [
+    {
+        min: 0,
+        title: '総合シンボル:黎明翼',
+        name: '共鳴する初光のドラゴネット',
+        description: 'すべての習慣が目を覚まし始めた。',
+        emoji: '🌄🐲',
+        color: '#74b9ff',
+        glow: 'rgba(116, 185, 255, 0.45)',
+        gradient: 'rgba(116, 185, 255, 0.18)',
+        className: 'stage-dawn'
+    },
+    {
+        min: 12,
+        title: '総合シンボル:蒼天蹄',
+        name: '空駆けるシナジーペガサス',
+        description: '仲間の翼が風を切り、速度が増す。',
+        emoji: '💨🦄',
+        color: '#55efc4',
+        glow: 'rgba(85, 239, 196, 0.45)',
+        gradient: 'rgba(85, 239, 196, 0.16)',
+        className: 'stage-aurora'
+    },
+    {
+        min: 28,
+        title: '総合シンボル:紅蓮槍',
+        name: '連携のドラゴンランサー',
+        description: '炎の槍が共鳴し合い、勢いが加速する。',
+        emoji: '🔥🐉⚔️',
+        color: '#ff7675',
+        glow: 'rgba(255, 118, 117, 0.5)',
+        gradient: 'rgba(255, 118, 117, 0.18)',
+        className: 'stage-blaze'
+    },
+    {
+        min: 48,
+        title: '総合シンボル:星辰牙',
+        name: '星光守護のキマイラ',
+        description: '全習慣の力が星座のように輝き守る。',
+        emoji: '✨🗡️🦁',
+        color: '#ffeaa7',
+        glow: 'rgba(255, 234, 167, 0.55)',
+        gradient: 'rgba(255, 234, 167, 0.22)',
+        className: 'stage-stellar'
+    },
+    {
+        min: 72,
+        title: '総合シンボル:創世竜',
+        name: '時空統べるオメガドラゴン',
+        description: '神話の頂点、全習慣が一つに溶け合う。',
+        emoji: '🌌🐉✨',
+        color: '#a29bfe',
+        glow: 'rgba(162, 155, 254, 0.55)',
+        gradient: 'rgba(162, 155, 254, 0.24)',
+        className: 'stage-cosmos'
+    }
+];
+
+const HEALTH_MONSTER_DEFINITIONS = [
+    {
+        key: 'healthKeeping',
+        displayName: '🛡️ヘルスキープ',
+        title: '守護のヘルスゴーレム',
+        description: (count) => count > 0
+            ? `ヘルスキーピングを${count}日記録し、体調の盾が輝きを増している。`
+            : 'まだ体調管理の盾は眠ったまま。'
+    },
+    {
+        key: 'headMassage',
+        displayName: '💆ヘッドマッサージ',
+        title: '癒しのヘッドスピリット',
+        description: (count) => count > 0
+            ? `リラックスタイムを${count}日積み重ね、柔らかな風が吹き抜ける。`
+            : '頭皮ケアの精霊は静かに目覚めを待っている。'
+    },
+    {
+        key: 'dentalCleaning',
+        displayName: '🦷デンタルケア',
+        title: '煌きのデンタルガーディアン',
+        description: (count) => count > 0
+            ? `口元を磨いた日が${count}日、光の粒子がきらめきを放つ。`
+            : 'まだ光は弱く、磨きの力を欲している。'
+    },
+    {
+        key: 'sauna',
+        displayName: '♨️サウナタイム',
+        title: '蒸気のサウナフェニックス',
+        description: (count) => count > 0
+            ? `温かな蒸気を${count}日浴び、羽ばたきに熱が宿った。`
+            : 'フェニックスは静かな湯けむりの中で力を温めている。'
+    },
+    {
+        key: 'catcafe',
+        displayName: '🐾猫カフェ',
+        title: '星詠みのキャットスピリット',
+        description: (count) => count > 0
+            ? `猫たちと過ごした日が${count}日、柔らかな癒しが星を揺らす。`
+            : 'まだ猫たちは遠くで丸くなっている。'
+    }
+];
+
+const BADGE_GIL_VALUES = {
+    '初回達成': 50,
+    'first_completion': 50,
+    '3日連続': 120,
+    '7日連続': 250,
+    'week_streak': 250,
+    '14日連続': 400,
+    '30日連続': 650,
+    'month_streak': 650,
+    '100日連続': 900,
+    'century': 900,
+    '完璧10日': 320,
+    '完璧50日': 520,
+    '完璧100日': 820,
+    'perfect_day': 180,
+    'perfect_week': 400,
+    'スコア50': 80,
+    'score_50': 80,
+    'スコア100': 150,
+    'score_100': 150,
+    'スコア250': 260,
+    'score_250': 260,
+    'スコア500': 420,
+    'score_500': 420,
+    'スコア750': 620,
+    'score_750': 620,
+    'スコア1000': 900,
+    'score_1000': 900,
+    '10個チェック連続': 500,
+    '5個チェック連続': 420,
+    '3個チェック連続': 360,
+    '1個チェック連続': 280,
+    '初心者': 60,
+    '10回達成': 150,
+    '見習い': 260,
+    '100回達成': 360,
+    '修行者': 480,
+    '熟練者': 650,
+    'エキスパート': 820,
+    'マスター': 1100,
+    '10回連続': 220,
+    '20回連続': 360,
+    '50回連続': 540,
+    '100回連続': 800,
+    'ダブルアップ': 120,
+    'サーカス': 200,
+    'アクター': 280,
+    'アーティスト': 360,
+    'ラッキー': 480,
+    '月曜日マスター': 70,
+    '金曜日キング': 90,
+    '週末戦士': 130,
+    '平日戦士': 110,
+    '祝日マスター': 160,
+    'health_guardian_lv1': 120,
+    'health_guardian_lv2': 260,
+    'health_guardian_lv3': 420,
+    'head_massage_maestro_lv1': 120,
+    'head_massage_maestro_lv2': 260,
+    'head_massage_maestro_lv3': 420,
+    'dental_cleaning_conqueror_lv1': 120,
+    'dental_cleaning_conqueror_lv2': 260,
+    'dental_cleaning_conqueror_lv3': 420,
+    'sauna_sage_lv1': 120,
+    'sauna_sage_lv2': 260,
+    'sauna_sage_lv3': 420,
+    'catcafe_starlight_lv1': 120,
+    'catcafe_starlight_lv2': 260,
+    'catcafe_starlight_lv3': 420,
+    'friend_party_fellow_lv1': 120,
+    'friend_party_fellow_lv2': 260,
+    'friend_party_fellow_lv3': 420
+};
+
+const BADGE_LIBRARY = [
+    {
+        key: 'streak',
+        title: '🔥 連続達成バッジ',
+        icon: '🔥',
+        badges: [
+            { id: '初回達成', aliases: ['first_completion'], icon: '🥉', name: '初回達成', condition: '完璧な日を1日達成', gil: 50 },
+            { id: '3日連続', icon: '🥈', name: '3日連続', condition: '完璧な日を3日連続達成', gil: 120 },
+            { id: '7日連続', aliases: ['week_streak'], icon: '🥇', name: '7日連続', condition: '完璧な日を7日連続達成', gil: 250 },
+            { id: '14日連続', icon: '💎', name: '14日連続', condition: '完璧な日を14日連続達成', gil: 400 },
+            { id: '30日連続', aliases: ['month_streak'], icon: '👑', name: '30日連続', condition: '完璧な日を30日連続達成', gil: 650 }
+        ]
+    },
+    {
+        key: 'score',
+        title: '⭐ スコアバッジ',
+        icon: '⭐',
+        badges: [
+            { id: 'スコア50', aliases: ['score_50'], icon: '🎯', name: 'スコア50', condition: '総スコア50達成', gil: 80 },
+            { id: 'スコア100', aliases: ['score_100'], icon: '🚀', name: 'スコア100', condition: '総スコア100達成', gil: 150 },
+            { id: 'スコア250', aliases: ['score_250'], icon: '🌟', name: 'スコア250', condition: '総スコア250達成', gil: 260 },
+            { id: 'スコア500', aliases: ['score_500'], icon: '💫', name: 'スコア500', condition: '総スコア500達成', gil: 420 },
+            { id: 'スコア750', aliases: ['score_750'], icon: '⚡', name: 'スコア750', condition: '総スコア750達成', gil: 620 },
+            { id: 'スコア1000', aliases: ['score_1000'], icon: '🔥', name: 'スコア1000', condition: '総スコア1000達成', gil: 900 }
+        ]
+    },
+    {
+        key: 'combo',
+        title: '📊 連続バッジ',
+        icon: '📊',
+        badges: [
+            { id: '10個チェック連続', icon: '🔥', name: '10個チェック連続', condition: '10個チェックが付いた日が10日連続', gil: 500 },
+            { id: '5個チェック連続', icon: '⚡', name: '5個チェック連続', condition: '5個チェックが付いた日が20日連続', gil: 420 },
+            { id: '3個チェック連続', icon: '💫', name: '3個チェック連続', condition: '3個チェックが付いた日が30日連続', gil: 360 },
+            { id: '1個チェック連続', icon: '🌟', name: '1個チェック連続', condition: '1個チェックが付いた日が50日連続', gil: 280 }
+        ]
+    },
+    {
+        key: 'health',
+        title: '💖 ヘルスケアバッジ',
+        icon: '💖',
+        badges: [
+            { id: 'health_guardian_lv1', icon: '🛡️', name: 'A ヘルス守護者・初級', condition: 'ヘルスキーピングを3回記録', gil: 120 },
+            { id: 'health_guardian_lv2', icon: '🛡️', name: 'A ヘルス守護者・中級', condition: 'ヘルスキーピングを7回記録', gil: 260 },
+            { id: 'health_guardian_lv3', icon: '🛡️', name: 'A ヘルス守護者・達人', condition: 'ヘルスキーピングを15回記録', gil: 420 },
+            { id: 'head_massage_maestro_lv1', icon: '💆', name: 'B ヘッドマイスター・初級', condition: 'ヘッドマッサージを3回記録', gil: 120 },
+            { id: 'head_massage_maestro_lv2', icon: '💆', name: 'B ヘッドマイスター・中級', condition: 'ヘッドマッサージを7回記録', gil: 260 },
+            { id: 'head_massage_maestro_lv3', icon: '💆', name: 'B ヘッドマイスター・達人', condition: 'ヘッドマッサージを15回記録', gil: 420 },
+            { id: 'dental_cleaning_conqueror_lv1', icon: '🦷', name: 'C デンタルチャンピオン・初級', condition: '歯科クリーニングを3回記録', gil: 120 },
+            { id: 'dental_cleaning_conqueror_lv2', icon: '🦷', name: 'C デンタルチャンピオン・中級', condition: '歯科クリーニングを7回記録', gil: 260 },
+            { id: 'dental_cleaning_conqueror_lv3', icon: '🦷', name: 'C デンタルチャンピオン・達人', condition: '歯科クリーニングを15回記録', gil: 420 },
+            { id: 'sauna_sage_lv1', icon: '🧖', name: 'D サウナ賢者・初級', condition: 'サウナを3回記録', gil: 120 },
+            { id: 'sauna_sage_lv2', icon: '🧖', name: 'D サウナ賢者・中級', condition: 'サウナを7回記録', gil: 260 },
+            { id: 'sauna_sage_lv3', icon: '🧖', name: 'D サウナ賢者・達人', condition: 'サウナを15回記録', gil: 420 },
+            { id: 'catcafe_starlight_lv1', icon: '🐈', name: 'E キャットギルド・初級', condition: '猫カフェを3回記録', gil: 120 },
+            { id: 'catcafe_starlight_lv2', icon: '🐈', name: 'E キャットギルド・中級', condition: '猫カフェを7回記録', gil: 260 },
+            { id: 'catcafe_starlight_lv3', icon: '🐈', name: 'E キャットギルド・達人', condition: '猫カフェを15回記録', gil: 420 },
+            { id: 'friend_party_fellow_lv1', icon: '🤝', name: 'F 懇親会ギルド・初級', condition: '懇親会を3回記録', gil: 120 },
+            { id: 'friend_party_fellow_lv2', icon: '🤝', name: 'F 懇親会ギルド・中級', condition: '懇親会を7回記録', gil: 260 },
+            { id: 'friend_party_fellow_lv3', icon: '🤝', name: 'F 懇親会ギルド・達人', condition: '懇親会を15回記録', gil: 420 }
+        ]
+    },
+    {
+        key: 'habit',
+        title: '🏆 習慣達成バッジ',
+        icon: '🏆',
+        badges: [
+            { id: '初心者', icon: '🌱', name: '初心者', condition: '初回習慣を達成', gil: 60 },
+            { id: '10回達成', icon: '🔥', name: '10回達成', condition: '習慣を10回達成', gil: 150 },
+            { id: '見習い', icon: '🌿', name: '見習い', condition: '習慣を50回達成', gil: 260 },
+            { id: '100回達成', icon: '💪', name: '100回達成', condition: '習慣を100回達成', gil: 360 },
+            { id: '修行者', icon: '🌳', name: '修行者', condition: '習慣を150回達成', gil: 480 },
+            { id: '熟練者', icon: '🌲', name: '熟練者', condition: '習慣を300回達成', gil: 650 },
+            { id: 'エキスパート', icon: '⭐', name: 'エキスパート', condition: '習慣を500回達成', gil: 820 },
+            { id: 'マスター', icon: '🌟', name: 'マスター', condition: '習慣を1000回達成', gil: 1100 },
+            { id: '10回連続', icon: '🎯', name: '10回連続', condition: '習慣を10回連続達成', gil: 220 },
+            { id: '20回連続', icon: '🎲', name: '20回連続', condition: '習慣を20回連続達成', gil: 360 },
+            { id: '50回連続', icon: '🃏', name: '50回連続', condition: '習慣を50回連続達成', gil: 540 },
+            { id: '100回連続', icon: '🎰', name: '100回連続', condition: '習慣を100回連続達成', gil: 800 }
+        ]
+    },
+    {
+        key: 'random',
+        title: '🎲 ランダムバッジ',
+        icon: '🎲',
+        badges: [
+            { id: 'ダブルアップ', icon: '🎲', name: 'ダブルアップ', condition: '1日に2個以上達成', gil: 120 },
+            { id: 'サーカス', icon: '🎪', name: 'サーカス', condition: '1日に3個以上達成', gil: 200 },
+            { id: 'アクター', icon: '🎭', name: 'アクター', condition: '1日に4個以上達成', gil: 280 },
+            { id: 'アーティスト', icon: '🎨', name: 'アーティスト', condition: '1日に5個以上達成', gil: 360 },
+            { id: 'ラッキー', icon: '🍀', name: 'ラッキー', condition: '1日に6個以上達成', gil: 480 }
+        ]
+    },
+    {
+        key: 'calendar',
+        title: '📅 日付バッジ',
+        icon: '📅',
+        badges: [
+            { id: '月曜日マスター', icon: '🌙', name: '月曜日マスター', condition: '月曜日に習慣を達成', gil: 70 },
+            { id: '金曜日キング', icon: '💼', name: '金曜日キング', condition: '金曜日に習慣を達成', gil: 90 },
+            { id: '週末戦士', icon: '🗓️', name: '週末戦士', condition: '土日に習慣を達成', gil: 130 },
+            { id: '平日戦士', icon: '📊', name: '平日戦士', condition: '平日に習慣を達成', gil: 110 },
+            { id: '祝日マスター', icon: '📈', name: '祝日マスター', condition: '祝日に習慣を達成', gil: 160 }
+        ]
+    }
+];
+
+function isBadgeUnlocked(earnedSet, badge) {
+    if (earnedSet.has(badge.id)) {
+        return true;
+    }
+    if (Array.isArray(badge.aliases)) {
+        return badge.aliases.some(alias => earnedSet.has(alias));
+    }
+    return false;
+}
+
+const JAPANESE_HOLIDAY_MD = new Set([
+    '01-01', // 元日
+    '01-13', // 成人の日 (2025)
+    '02-11', // 建国記念の日
+    '02-23', // 天皇誕生日
+    '03-20', // 春分の日 (2025)
+    '04-29', // 昭和の日
+    '05-03', // 憲法記念日
+    '05-04', // みどりの日
+    '05-05', // こどもの日
+    '07-21', // 海の日 (2025)
+    '08-11', // 山の日
+    '09-15', // 敬老の日 (2025)
+    '09-23', // 秋分の日 (2025)
+    '10-13', // スポーツの日 (2025)
+    '11-03', // 文化の日
+    '11-23', // 勤労感謝の日
+    '12-23'  // 天皇誕生日 (振替用に保持)
+]);
+
+function isJapaneseHoliday(date) {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return JAPANESE_HOLIDAY_MD.has(`${month}-${day}`);
+}
+
+function getBadgeGilValue(badgeKey) {
+    if (!badgeKey) return 0;
+    return BADGE_GIL_VALUES[badgeKey] || 0;
+}
 
 // アプリの状態管理
 class HabitTracker {
@@ -995,48 +1318,143 @@ class HabitTracker {
 
         monsterGrid.innerHTML = '';
 
-        this.habits.forEach((habit, index) => {
+        const baseMonsters = this.habits.map((habit) => {
             const totalCount = this.calculateTotalAll(habit.id);
+            const level = this.getMonsterLevel(totalCount);
             const monsterType = this.getMonsterType(totalCount);
-            const bestStreak = this.getBestStreak(habit.id);
-            
+            const nextLevel = this.getNextLevel(totalCount);
+
+            return {
+                id: habit.id,
+                displayName: habit.shortName,
+                totalCount,
+                level,
+                nextLevel,
+                color: monsterType.color,
+                emoji: monsterType.emoji,
+                title: monsterType.name,
+                flavor: monsterType.description
+            };
+        });
+
+        const healthCounts = this.getHealthCounts();
+        const healthMonsters = HEALTH_MONSTER_DEFINITIONS.map((definition) => {
+            const totalCount = healthCounts[definition.key] || 0;
+            const level = this.getMonsterLevel(totalCount);
+            const monsterType = this.getMonsterType(totalCount);
+            const nextLevel = this.getNextLevel(totalCount);
+            const flavorText = typeof definition.description === 'function'
+                ? definition.description(totalCount)
+                : (definition.description || monsterType.description);
+
+            return {
+                id: definition.key,
+                displayName: definition.displayName,
+                totalCount,
+                level,
+                nextLevel,
+                color: definition.color || monsterType.color,
+                emoji: definition.emoji || monsterType.emoji,
+                title: definition.title || monsterType.name,
+                flavor: flavorText
+            };
+        });
+
+        const monsterDetails = [...baseMonsters, ...healthMonsters];
+
+        const totalLevel = monsterDetails.reduce((sum, detail) => sum + detail.level, 0);
+        const combinedStage = this.getCombinedMonsterStage(totalLevel);
+        const combinedCard = document.createElement('div');
+        const combinedClasses = ['monster-card', 'monster-card--legendary'];
+        if (combinedStage.className) {
+            combinedClasses.push(combinedStage.className);
+        }
+        combinedCard.className = combinedClasses.join(' ');
+        combinedCard.style.setProperty('--monster-legendary-color', combinedStage.color);
+        combinedCard.style.setProperty('--monster-legendary-glow', combinedStage.glow);
+        combinedCard.style.setProperty('--monster-legendary-gradient', combinedStage.gradient);
+
+        const nextStageThreshold = combinedStage.nextThreshold;
+        const levelsToNextStage = nextStageThreshold !== null && nextStageThreshold !== undefined
+            ? Math.max(0, nextStageThreshold - totalLevel)
+            : null;
+
+        combinedCard.innerHTML = `
+            <div class="monster-name">${combinedStage.title}</div>
+            <div class="monster-image monster-image--legendary">
+                <span>${combinedStage.emoji}</span>
+            </div>
+            <div class="monster-level">総合Lv.${totalLevel}</div>
+            <div class="monster-description">
+                <div class="monster-title">${combinedStage.name}</div>
+                <div class="monster-flavor">${combinedStage.description}</div>
+            </div>
+            <div class="monster-stats">
+                <span>次のレベルまで: ${levelsToNextStage !== null ? `あと${levelsToNextStage}レベル` : '伝説級達成！'}</span>
+            </div>
+        `;
+
+        monsterGrid.appendChild(combinedCard);
+
+        monsterDetails.forEach(({ displayName, totalCount, level, title, flavor, color, emoji, nextLevel }) => {
             const monsterCard = document.createElement('div');
             monsterCard.className = 'monster-card';
-            
-            // 次のレベルまでの必要日数を計算
-            const nextLevel = this.getNextLevel(totalCount);
-            const daysToNext = nextLevel - totalCount;
-            
+            const daysToNext = Math.max(0, nextLevel - totalCount);
+
             monsterCard.innerHTML = `
-                <div class="monster-name">${habit.shortName}</div>
-                <div class="monster-image" style="border-color: ${monsterType.color}; background: ${monsterType.color}20;">
-                    ${monsterType.emoji}
+                <div class="monster-name">${displayName}</div>
+                <div class="monster-image" style="border-color: ${color}; background: radial-gradient(circle, ${color}33 0%, rgba(0, 0, 0, 0.85) 70%);">
+                    <span>${emoji}</span>
                 </div>
-                <div class="monster-description">${monsterType.name}</div>
+                <div class="monster-level">Lv.${level}</div>
+                <div class="monster-description">
+                    <div class="monster-title">${title}</div>
+                    <div class="monster-flavor">${flavor}</div>
+                </div>
                 <div class="monster-stats">
-                    <span>合計: ${totalCount}</span>
-                    <span>最高: ${bestStreak}日</span>
                     <span>次のレベルまで: ${daysToNext}日</span>
                 </div>
             `;
-            
+
             monsterGrid.appendChild(monsterCard);
         });
     }
 
+    getCombinedMonsterStage(totalLevel) {
+        let currentStage = combinedMonsterStages[0];
+
+        for (const stage of combinedMonsterStages) {
+            if (totalLevel >= stage.min) {
+                currentStage = stage;
+            }
+        }
+
+        const nextStage = combinedMonsterStages.find(stage => stage.min > totalLevel);
+
+        return {
+            ...currentStage,
+            nextThreshold: nextStage ? nextStage.min : null
+        };
+    }
+
     // 合計値に基づいてモンスタータイプを取得
     getMonsterType(totalCount) {
-        if (totalCount === 0) return monsterTypes[0];
-        if (totalCount <= 1) return monsterTypes[1];
-        if (totalCount <= 2) return monsterTypes[2];
-        if (totalCount <= 3) return monsterTypes[3];
-        if (totalCount <= 4) return monsterTypes[4];
-        if (totalCount <= 5) return monsterTypes[5];
-        if (totalCount <= 6) return monsterTypes[6];
-        if (totalCount <= 7) return monsterTypes[7];
-        if (totalCount <= 8) return monsterTypes[8];
-        if (totalCount <= 9) return monsterTypes[9];
-        return monsterTypes[10];
+        const level = this.getMonsterLevel(totalCount);
+        return monsterTypes[level];
+    }
+
+    getMonsterLevel(totalCount) {
+        if (totalCount === 0) return 0;
+        if (totalCount <= 1) return 1;
+        if (totalCount <= 2) return 2;
+        if (totalCount <= 3) return 3;
+        if (totalCount <= 4) return 4;
+        if (totalCount <= 5) return 5;
+        if (totalCount <= 6) return 6;
+        if (totalCount <= 7) return 7;
+        if (totalCount <= 8) return 8;
+        if (totalCount <= 9) return 9;
+        return 10;
     }
 
     // 次のレベルまでの必要日数を取得
@@ -1451,11 +1869,22 @@ class HabitTracker {
 
 
     // ビューの切り替え
+    hideAllViews() {
+        const viewIds = ['weekView', 'statsView', 'monsterView', 'settingsView', 'badgeView'];
+        viewIds.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.style.display = 'none';
+            }
+        });
+    }
+
     showWeekView() {
-        document.getElementById('weekView').style.display = 'block';
-        document.getElementById('statsView').style.display = 'none';
-        document.getElementById('monsterView').style.display = 'none';
-        document.getElementById('badgeView').style.display = 'none';
+        this.hideAllViews();
+        const weekView = document.getElementById('weekView');
+        if (weekView) {
+            weekView.style.display = 'block';
+        }
     }
 
     showHomeView() {
@@ -1466,14 +1895,31 @@ class HabitTracker {
     }
 
     showReportView() {
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('statsView').style.display = 'block';
-        document.getElementById('monsterView').style.display = 'none';
-        document.getElementById('badgeView').style.display = 'none';
+        this.hideAllViews();
+        const statsView = document.getElementById('statsView');
+        if (statsView) {
+            statsView.style.display = 'block';
+        }
         this.renderTotalChart();
         this.renderReportTable();
         this.updateMotivationDisplay();
         this.setActiveNav('reportBtn');
+    }
+
+    showBadgeView() {
+        this.hideAllViews();
+        const badgeView = document.getElementById('badgeView');
+        if (badgeView) {
+            badgeView.style.display = 'block';
+        }
+        this.updateBadgeCenter();
+        this.setActiveNav('badgeBtn');
+    }
+
+    updateBadgeCenter() {
+        this.totalScore = this.calculateTotalScore();
+        this.achievements = this.calculateAllAchievements();
+        this.renderBadgeCollection();
     }
     
     // モチベーション表示を更新
@@ -1490,6 +1936,11 @@ class HabitTracker {
         document.getElementById('totalScore').textContent = this.totalScore;
         document.getElementById('perfectDays').textContent = this.achievements.perfectDays;
         document.getElementById('badgeCount').textContent = this.achievements.badges.length;
+
+        const totalAchievementValue = this.calculateAchievementTotal();
+        document.getElementById('achievementTotal').textContent = `${totalAchievementValue}ギル`;
+
+        this.renderBadgeCollection();
     }
 
     // 全達成データを再計算
@@ -1502,210 +1953,398 @@ class HabitTracker {
             badges: []
         };
 
-        // 完璧な日と現在の連続日数を計算
-        let currentStreak = 0;
-        let maxStreak = 0;
+        const badgeSet = new Set();
         const today = new Date();
-        
-        // 過去から現在に向かって計算（連続日数を正しく計算するため）
+        let currentPerfectStreak = 0;
+        let maxPerfectStreak = 0;
+
+        const dailyThresholds = {
+            10: { current: 0, max: 0, required: 10, name: '10個チェック連続' },
+            5: { current: 0, max: 0, required: 20, name: '5個チェック連続' },
+            3: { current: 0, max: 0, required: 30, name: '3個チェック連続' },
+            1: { current: 0, max: 0, required: 50, name: '1個チェック連続' }
+        };
+
+        const randomBadgeFlags = { 2: false, 3: false, 4: false, 5: false, 6: false };
+        const dayBadges = { monday: false, friday: false, weekend: false, weekday: false, holiday: false };
+
+        const habitStats = {};
+        this.habits.forEach(habit => {
+            habitStats[habit.id] = { total: 0, consecutive: 0, maxConsecutive: 0 };
+        });
+
+        // 過去から現在に向かって計算（連続日数などを正しく計算するため）
         for (let i = 365; i >= 0; i--) {
             const checkDate = new Date(today);
             checkDate.setDate(today.getDate() - i);
             const dateStr = checkDate.toISOString().split('T')[0];
-            const dayHabits = this.completedHabits[dateStr];
-            
-            if (dayHabits) {
-                const completedCount = Array.isArray(dayHabits) ? dayHabits.length : 
-                                     (typeof dayHabits === 'object' ? Object.values(dayHabits).filter(Boolean).length : 0);
-                
-                if (completedCount > 0) {
-                    achievements.totalDays++;
-                }
-                
-                // 完璧な日（全習慣完了）
-                if (completedCount === this.habits.length) {
-                    achievements.perfectDays++;
-                    currentStreak++;
-                    maxStreak = Math.max(maxStreak, currentStreak);
-                } else {
-                    // 完璧でない日があったら連続をリセット
-                    currentStreak = 0;
-                }
-            } else {
-                // データがない日があったら連続をリセット
-                currentStreak = 0;
+            const dayHabitsRaw = this.completedHabits[dateStr];
+            const dayHabits = Array.isArray(dayHabitsRaw)
+                ? dayHabitsRaw
+                : (typeof dayHabitsRaw === 'object'
+                    ? Object.keys(dayHabitsRaw).filter(key => dayHabitsRaw[key])
+                    : []);
+            const completedCount = dayHabits.length;
+
+            if (completedCount > 0) {
+                achievements.totalDays++;
+                const day = checkDate.getDay();
+                if (day === 1) dayBadges.monday = true;
+                if (day === 5) dayBadges.friday = true;
+                if (day === 0 || day === 6) dayBadges.weekend = true;
+                if (day >= 1 && day <= 5) dayBadges.weekday = true;
+                if (isJapaneseHoliday(checkDate)) dayBadges.holiday = true;
             }
+
+            if (completedCount === this.habits.length && this.habits.length > 0) {
+                achievements.perfectDays++;
+                currentPerfectStreak++;
+                maxPerfectStreak = Math.max(maxPerfectStreak, currentPerfectStreak);
+                badgeSet.add('perfect_day');
+            } else {
+                currentPerfectStreak = 0;
+            }
+
+            Object.keys(dailyThresholds).forEach(key => {
+                const threshold = Number(key);
+                const tracker = dailyThresholds[threshold];
+                if (completedCount >= threshold) {
+                    tracker.current++;
+                    tracker.max = Math.max(tracker.max, tracker.current);
+                } else {
+                    tracker.current = 0;
+                }
+            });
+
+            if (completedCount >= 2) randomBadgeFlags[2] = true;
+            if (completedCount >= 3) randomBadgeFlags[3] = true;
+            if (completedCount >= 4) randomBadgeFlags[4] = true;
+            if (completedCount >= 5) randomBadgeFlags[5] = true;
+            if (completedCount >= 6) randomBadgeFlags[6] = true;
+
+            this.habits.forEach(habit => {
+                const stats = habitStats[habit.id];
+                const isCompleted = dayHabits.includes(habit.id);
+                if (isCompleted) {
+                    stats.total++;
+                    stats.consecutive++;
+                    stats.maxConsecutive = Math.max(stats.maxConsecutive, stats.consecutive);
+                } else {
+                    stats.consecutive = 0;
+                }
+            });
         }
-        
-        achievements.currentStreak = currentStreak;
-        achievements.bestStreak = maxStreak;
-        
-        // バッジチェック（簡易版）
-        if (achievements.currentStreak >= 1) achievements.badges.push('初回達成');
-        if (achievements.currentStreak >= 3) achievements.badges.push('3日連続');
-        if (achievements.currentStreak >= 7) achievements.badges.push('7日連続');
-        if (achievements.currentStreak >= 30) achievements.badges.push('30日連続');
-        if (achievements.currentStreak >= 100) achievements.badges.push('100日連続');
-        if (this.totalScore >= 100) achievements.badges.push('スコア100');
-        if (this.totalScore >= 500) achievements.badges.push('スコア500');
-        if (this.totalScore >= 1000) achievements.badges.push('スコア1000');
-        if (achievements.perfectDays >= 10) achievements.badges.push('完璧10日');
-        if (achievements.perfectDays >= 50) achievements.badges.push('完璧50日');
-        if (achievements.perfectDays >= 100) achievements.badges.push('完璧100日');
-        
+
+        achievements.currentStreak = currentPerfectStreak;
+        achievements.bestStreak = maxPerfectStreak;
+
+        if (achievements.currentStreak >= 1) badgeSet.add('初回達成');
+        if (achievements.currentStreak >= 3) badgeSet.add('3日連続');
+        if (achievements.currentStreak >= 7) badgeSet.add('7日連続');
+        if (achievements.currentStreak >= 14) badgeSet.add('14日連続');
+        if (achievements.currentStreak >= 30) badgeSet.add('30日連続');
+        if (achievements.currentStreak >= 100) badgeSet.add('100日連続');
+
+        if (achievements.perfectDays >= 10) badgeSet.add('完璧10日');
+        if (achievements.perfectDays >= 50) badgeSet.add('完璧50日');
+        if (achievements.perfectDays >= 100) badgeSet.add('完璧100日');
+        if (maxPerfectStreak >= 7) badgeSet.add('perfect_week');
+
+        Object.values(dailyThresholds).forEach(tracker => {
+            if (tracker.max >= tracker.required) {
+                badgeSet.add(tracker.name);
+            }
+        });
+
+        if (randomBadgeFlags[2]) badgeSet.add('ダブルアップ');
+        if (randomBadgeFlags[3]) badgeSet.add('サーカス');
+        if (randomBadgeFlags[4]) badgeSet.add('アクター');
+        if (randomBadgeFlags[5]) badgeSet.add('アーティスト');
+        if (randomBadgeFlags[6]) badgeSet.add('ラッキー');
+
+        if (dayBadges.monday) badgeSet.add('月曜日マスター');
+        if (dayBadges.friday) badgeSet.add('金曜日キング');
+        if (dayBadges.weekend) badgeSet.add('週末戦士');
+        if (dayBadges.weekday) badgeSet.add('平日戦士');
+        if (dayBadges.holiday) badgeSet.add('祝日マスター');
+
+        const habitTotals = Object.values(habitStats).map(stat => stat.total);
+        const habitMaxStreaks = Object.values(habitStats).map(stat => stat.maxConsecutive);
+        const highestHabitTotal = habitTotals.length > 0 ? Math.max(...habitTotals) : 0;
+        const highestHabitStreak = habitMaxStreaks.length > 0 ? Math.max(...habitMaxStreaks) : 0;
+        const healthCounts = this.getHealthCounts();
+
+        if (highestHabitTotal >= 1) badgeSet.add('初心者');
+        if (highestHabitTotal >= 10) badgeSet.add('10回達成');
+        if (highestHabitTotal >= 50) badgeSet.add('見習い');
+        if (highestHabitTotal >= 100) badgeSet.add('100回達成');
+        if (highestHabitTotal >= 150) badgeSet.add('修行者');
+        if (highestHabitTotal >= 300) badgeSet.add('熟練者');
+        if (highestHabitTotal >= 500) badgeSet.add('エキスパート');
+        if (highestHabitTotal >= 1000) badgeSet.add('マスター');
+
+        if (highestHabitStreak >= 10) badgeSet.add('10回連続');
+        if (highestHabitStreak >= 20) badgeSet.add('20回連続');
+        if (highestHabitStreak >= 50) badgeSet.add('50回連続');
+        if (highestHabitStreak >= 100) badgeSet.add('100回連続');
+
+        if (this.totalScore >= 50) badgeSet.add('スコア50');
+        if (this.totalScore >= 100) badgeSet.add('スコア100');
+        if (this.totalScore >= 250) badgeSet.add('スコア250');
+        if (this.totalScore >= 500) badgeSet.add('スコア500');
+        if (this.totalScore >= 750) badgeSet.add('スコア750');
+        if (this.totalScore >= 1000) badgeSet.add('スコア1000');
+
+        if (achievements.totalDays >= 100) badgeSet.add('century');
+
+        const healthBadgeThresholds = {
+            healthKeeping: [
+                { id: 'health_guardian_lv1', threshold: 3 },
+                { id: 'health_guardian_lv2', threshold: 7 },
+                { id: 'health_guardian_lv3', threshold: 15 }
+            ],
+            headMassage: [
+                { id: 'head_massage_maestro_lv1', threshold: 3 },
+                { id: 'head_massage_maestro_lv2', threshold: 7 },
+                { id: 'head_massage_maestro_lv3', threshold: 15 }
+            ],
+            dentalCleaning: [
+                { id: 'dental_cleaning_conqueror_lv1', threshold: 3 },
+                { id: 'dental_cleaning_conqueror_lv2', threshold: 7 },
+                { id: 'dental_cleaning_conqueror_lv3', threshold: 15 }
+            ],
+            sauna: [
+                { id: 'sauna_sage_lv1', threshold: 3 },
+                { id: 'sauna_sage_lv2', threshold: 7 },
+                { id: 'sauna_sage_lv3', threshold: 15 }
+            ],
+            catcafe: [
+                { id: 'catcafe_starlight_lv1', threshold: 3 },
+                { id: 'catcafe_starlight_lv2', threshold: 7 },
+                { id: 'catcafe_starlight_lv3', threshold: 15 }
+            ],
+            friendParty: [
+                { id: 'friend_party_fellow_lv1', threshold: 3 },
+                { id: 'friend_party_fellow_lv2', threshold: 7 },
+                { id: 'friend_party_fellow_lv3', threshold: 15 }
+            ]
+        };
+
+        Object.entries(healthBadgeThresholds).forEach(([key, tiers]) => {
+            const count = healthCounts[key] || 0;
+            tiers.forEach(tier => {
+                if (count >= tier.threshold) {
+                    badgeSet.add(tier.id);
+                }
+            });
+        });
+
+        achievements.badges = Array.from(badgeSet);
         return achievements;
     }
 
+    renderBadgeCollection() {
+        const board = document.getElementById('badgeCategoryBoard');
+        if (!board) return;
+
+        const earnedSet = new Set(Array.isArray(this.achievements?.badges) ? this.achievements.badges : []);
+        let totalBadges = 0;
+        let unlockedBadges = 0;
+        let nextTargetBadge = null;
+        const unlockedBadgeMap = new Map();
+
+        board.innerHTML = '';
+
+        BADGE_LIBRARY.forEach(category => {
+            const categoryCard = document.createElement('div');
+            categoryCard.className = 'badge-category-card';
+
+            const header = document.createElement('div');
+            header.className = 'badge-category-header';
+
+            const title = document.createElement('div');
+            title.className = 'badge-category-title';
+            const icon = document.createElement('span');
+            icon.className = 'badge-category-icon';
+            icon.textContent = category.icon;
+            const label = document.createElement('span');
+            label.textContent = category.title;
+            title.appendChild(icon);
+            title.appendChild(label);
+
+            const categoryBadges = category.badges || [];
+            const earnedInCategory = categoryBadges.reduce((count, badge) => {
+                return count + (isBadgeUnlocked(earnedSet, badge) ? 1 : 0);
+            }, 0);
+            const progressRate = categoryBadges.length > 0
+                ? Math.round((earnedInCategory / categoryBadges.length) * 100)
+                : 0;
+
+            const progress = document.createElement('div');
+            progress.className = 'badge-category-progress';
+            const progressCount = document.createElement('span');
+            progressCount.className = 'badge-category-progress-count';
+            progressCount.textContent = `${earnedInCategory}/${categoryBadges.length}`;
+
+            const progressBar = document.createElement('div');
+            progressBar.className = 'badge-category-progress-bar';
+            const progressFill = document.createElement('div');
+            progressFill.className = 'badge-category-progress-fill';
+            progressFill.style.width = `${progressRate}%`;
+
+            progressBar.appendChild(progressFill);
+            progress.appendChild(progressCount);
+            progress.appendChild(progressBar);
+
+            header.appendChild(title);
+            header.appendChild(progress);
+
+            const grid = document.createElement('div');
+            grid.className = 'badge-card-grid';
+
+            categoryBadges.forEach(badge => {
+                totalBadges++;
+                const unlocked = isBadgeUnlocked(earnedSet, badge);
+                if (unlocked) {
+                    unlockedBadges++;
+                    if (!unlockedBadgeMap.has(badge.id)) {
+                        unlockedBadgeMap.set(badge.id, badge);
+                    }
+                } else if (!nextTargetBadge) {
+                    nextTargetBadge = badge;
+                }
+
+                const card = document.createElement('div');
+                const cardClasses = ['badge-card', unlocked ? 'unlocked' : 'locked'];
+
+                if (category.key === 'streak') {
+                    cardClasses.push('streak-layout');
+                    const scoreLabel = badge.name.includes('スコア') ? badge.name : `スコア ${badge.name}`;
+                    card.innerHTML = `
+                        <div class="badge-streak-top">
+                            <span class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</span>
+                            <span class="badge-reward">+${badge.gil}ギル</span>
+                        </div>
+                        <div class="badge-streak-body">
+                            <div class="badge-icon">${badge.icon}</div>
+                            <div class="badge-streak-info">
+                                <span class="badge-streak-score">${scoreLabel}</span>
+                                <span class="badge-streak-description">${badge.condition}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="badge-status">${unlocked ? '獲得済み' : '未獲得'}</div>
+                        <div class="badge-card-body">
+                            <div class="badge-icon">${badge.icon}</div>
+                            <div class="badge-info">
+                                <span class="badge-name">${badge.name}</span>
+                                <span class="badge-condition">${badge.condition}</span>
+                            </div>
+                        </div>
+                        <div class="badge-card-footer">
+                            <span class="badge-reward">+${badge.gil}ギル</span>
+                            ${unlocked ? '<span class="badge-card-check">✨</span>' : '<span class="badge-card-hint">チャレンジ！</span>'}
+                        </div>
+                    `;
+                }
+
+                card.className = cardClasses.join(' ');
+
+                grid.appendChild(card);
+            });
+
+            categoryCard.appendChild(header);
+            categoryCard.appendChild(grid);
+            board.appendChild(categoryCard);
+        });
+
+        const earnedEl = document.getElementById('earnedBadgeCount');
+        const totalEl = document.getElementById('totalBadgeCount');
+        const rateEl = document.getElementById('badgeCompletionRate');
+        const progressEl = document.getElementById('badgeProgressFill');
+        const messageEl = document.getElementById('nextBadgeMessage');
+        const ownedGrid = document.getElementById('badgeIconGrid');
+        const emptyOwnedMessage = document.getElementById('badgeIconEmpty');
+
+        if (earnedEl) earnedEl.textContent = unlockedBadges;
+        if (totalEl) totalEl.textContent = totalBadges;
+        const overallRate = totalBadges > 0 ? Math.round((unlockedBadges / totalBadges) * 100) : 0;
+        if (rateEl) rateEl.textContent = `${overallRate}%`;
+        if (progressEl) progressEl.style.width = `${overallRate}%`;
+
+        if (ownedGrid) {
+            ownedGrid.innerHTML = '';
+            const unlockedBadgeList = Array.from(unlockedBadgeMap.values());
+
+            if (unlockedBadgeList.length > 0) {
+                unlockedBadgeList
+                    .sort((a, b) => a.name.localeCompare(b.name, 'ja'))
+                    .forEach(badge => {
+                        const badgeItem = document.createElement('div');
+                        badgeItem.className = 'badge-owned-item';
+                        badgeItem.setAttribute('title', badge.name);
+                        badgeItem.innerHTML = `
+                            <span class="badge-owned-icon">${badge.icon}</span>
+                        `;
+                        ownedGrid.appendChild(badgeItem);
+                    });
+            }
+
+            if (emptyOwnedMessage) {
+                emptyOwnedMessage.style.display = unlockedBadgeList.length === 0 ? 'block' : 'none';
+            }
+        } else if (emptyOwnedMessage) {
+            emptyOwnedMessage.style.display = unlockedBadgeMap.size === 0 ? 'block' : 'none';
+        }
+
+        if (messageEl) {
+            if (nextTargetBadge) {
+                messageEl.innerHTML = `次は<span class="badge-inline-name">「${nextTargetBadge.name}」</span>（+${nextTargetBadge.gil}ギル）を狙おう！<span class="badge-inline-condition">${nextTargetBadge.condition}</span>`;
+            } else {
+                messageEl.textContent = '全バッジをコンプリートしました！ギルの雨を堪能しましょう！';
+            }
+        }
+    }
+
+    calculateAchievementTotal() {
+        const achievements = this.achievements || {};
+        const currentStreak = Math.max(0, achievements.currentStreak || 0);
+        const perfectDays = Math.max(0, achievements.perfectDays || 0);
+        const totalScore = Math.max(0, this.totalScore || 0);
+
+        const uniqueBadges = new Set(Array.isArray(achievements.badges) ? achievements.badges : []);
+        let badgeGil = 0;
+        uniqueBadges.forEach(badge => {
+            badgeGil += getBadgeGilValue(badge);
+        });
+
+        const streakBonus = currentStreak * 3;
+        const perfectionBonus = perfectDays * 5;
+        const activityBonus = totalScore * 2;
+
+        return streakBonus + perfectionBonus + activityBonus + badgeGil;
+    }
+
     showMonsterView() {
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('statsView').style.display = 'none';
-        document.getElementById('monsterView').style.display = 'block';
-        document.getElementById('badgeView').style.display = 'none';
+        this.hideAllViews();
+        const monsterView = document.getElementById('monsterView');
+        if (monsterView) {
+            monsterView.style.display = 'block';
+        }
         this.renderMonsters();
         this.setActiveNav('monsterBtn');
     }
 
-    showBadgeView() {
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('statsView').style.display = 'none';
-        document.getElementById('monsterView').style.display = 'none';
-        document.getElementById('badgeView').style.display = 'block';
-        this.renderBadgeView();
-        this.setActiveNav('badgeBtn');
-    }
-
 
     showSettingsView() {
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('statsView').style.display = 'none';
-        document.getElementById('monsterView').style.display = 'none';
-        document.getElementById('badgeView').style.display = 'none';
-        document.getElementById('settingsView').style.display = 'block';
+        this.hideAllViews();
+        const settingsView = document.getElementById('settingsView');
+        if (settingsView) {
+            settingsView.style.display = 'block';
+        }
         this.setActiveNav('settingsBtn');
-    }
-
-    // バッジビューのレンダリング
-    renderBadgeView() {
-        this.renderBadgeGallery();
-        this.renderOwnedBadges();
-    }
-
-    // バッジギャラリーのレンダリング
-    renderBadgeGallery() {
-        const completionCount = document.getElementById('completionCount');
-        const completionRate = document.getElementById('completionRate');
-        const nextGoal = document.getElementById('nextGoal');
-
-        if (completionCount) {
-            const totalBadges = this.getAllBadges().length;
-            const ownedBadges = this.getOwnedBadges().length;
-            completionCount.textContent = `${ownedBadges} / ${totalBadges}`;
-        }
-
-        if (completionRate) {
-            const totalBadges = this.getAllBadges().length;
-            const ownedBadges = this.getOwnedBadges().length;
-            const rate = totalBadges > 0 ? Math.round((ownedBadges / totalBadges) * 100) : 0;
-            completionRate.textContent = `コンプリート率 ${rate}%`;
-        }
-
-        if (nextGoal) {
-            const nextBadge = this.getNextBadge();
-            nextGoal.textContent = nextBadge ? nextBadge.name : 'すべてのバッジを獲得しました！';
-        }
-    }
-
-    // 所有バッジのレンダリング
-    renderOwnedBadges() {
-        const ownedBadgesGrid = document.getElementById('ownedBadgesGrid');
-        if (!ownedBadgesGrid) return;
-
-        const ownedBadges = this.getOwnedBadges();
-        
-        if (ownedBadges.length === 0) {
-            ownedBadgesGrid.innerHTML = '<p>まだバッジはありません。毎日のチャレンジで獲得しましょう！</p>';
-            return;
-        }
-
-        ownedBadgesGrid.innerHTML = '';
-        ownedBadges.forEach(badge => {
-            const badgeCard = document.createElement('div');
-            badgeCard.className = 'badge-card owned';
-            badgeCard.innerHTML = `
-                <div class="badge-card-icon">${badge.icon}</div>
-                <div class="badge-card-name">${badge.name}</div>
-                <div class="badge-card-condition">${badge.condition}</div>
-            `;
-            ownedBadgesGrid.appendChild(badgeCard);
-        });
-    }
-
-    // 全バッジの取得
-    getAllBadges() {
-        return [
-            // 連続達成バッジ
-            { id: 'first_perfect', name: '初回達成', icon: '🥉', condition: '完璧な日を1日達成' },
-            { id: 'three_streak', name: '3日連続', icon: '🥈', condition: '完璧な日を3日連続達成' },
-            { id: 'seven_streak', name: '7日連続', icon: '🥇', condition: '完璧な日を7日連続達成' },
-            { id: 'fourteen_streak', name: '14日連続', icon: '💎', condition: '完璧な日を14日連続達成' },
-            { id: 'thirty_streak', name: '30日連続', icon: '👑', condition: '完璧な日を30日連続達成' },
-            
-            // スコアバッジ
-            { id: 'score_50', name: 'スコア50', icon: '🎯', condition: '総スコア50達成' },
-            { id: 'score_100', name: 'スコア100', icon: '🚀', condition: '総スコア100達成' },
-            { id: 'score_250', name: 'スコア250', icon: '🌟', condition: '総スコア250達成' },
-            { id: 'score_500', name: 'スコア500', icon: '💫', condition: '総スコア500達成' },
-            { id: 'score_750', name: 'スコア750', icon: '⚡', condition: '総スコア750達成' },
-            { id: 'score_1000', name: 'スコア1000', icon: '🔥', condition: '総スコア1000達成' },
-            
-            // 連続バッジ
-            { id: 'ten_check_streak', name: '10個チェック連続', icon: '🔥', condition: '10個チェックが付いた日が10日連続' },
-            { id: 'five_check_streak', name: '5個チェック連続', icon: '⚡', condition: '5個チェックが付いた日が20日連続' },
-            { id: 'three_check_streak', name: '3個チェック連続', icon: '💫', condition: '3個チェックが付いた日が30日連続' },
-            { id: 'one_check_streak', name: '1個チェック連続', icon: '🌟', condition: '1個チェックが付いた日が50日連続' },
-            
-            // 習慣達成バッジ
-            { id: 'beginner', name: '初心者', icon: '🌱', condition: '初回習慣を達成' },
-            { id: 'ten_achievements', name: '10回達成', icon: '🔥', condition: '習慣を10回達成' },
-            { id: 'apprentice', name: '見習い', icon: '🌿', condition: '習慣を50回達成' },
-            { id: 'hundred_achievements', name: '100回達成', icon: '💪', condition: '習慣を100回達成' },
-            { id: 'practitioner', name: '修行者', icon: '🌳', condition: '習慣を150回達成' },
-            { id: 'expert', name: '熟練者', icon: '🌲', condition: '習慣を300回達成' },
-            { id: 'master', name: 'エキスパート', icon: '⭐', condition: '習慣を500回達成' },
-            { id: 'grandmaster', name: 'マスター', icon: '🌟', condition: '習慣を1000回達成' },
-            { id: 'ten_streak', name: '10回連続', icon: '🎯', condition: '習慣を10回連続達成' },
-            { id: 'twenty_streak', name: '20回連続', icon: '🎲', condition: '習慣を20回連続達成' },
-            { id: 'fifty_streak', name: '50回連続', icon: '🃏', condition: '習慣を50回連続達成' },
-            { id: 'hundred_streak', name: '100回連続', icon: '🎰', condition: '習慣を100回連続達成' },
-            
-            // ランダムバッジ
-            { id: 'double_up', name: 'ダブルアップ', icon: '🎯', condition: '1日で2つ以上の習慣を達成' },
-            { id: 'circus', name: 'サーカス', icon: '🎪', condition: '1日で3つ以上の習慣を達成' },
-            { id: 'actor', name: 'アクター', icon: '🎭', condition: '1日で4つ以上の習慣を達成' },
-            { id: 'artist', name: 'アーティスト', icon: '🎨', condition: '1日で5つ以上の習慣を達成' },
-            { id: 'lucky', name: 'ラッキー', icon: '🎲', condition: '1日で6つ以上の習慣を達成' },
-            
-            // 日付バッジ
-            { id: 'monday_master', name: '月曜日マスター', icon: '📅', condition: '月曜日に習慣を達成' },
-            { id: 'friday_king', name: '金曜日キング', icon: '📆', condition: '金曜日に習慣を達成' },
-            { id: 'weekend_warrior', name: '週末戦士', icon: '🗓️', condition: '土日に習慣を達成' },
-            { id: 'weekday_warrior', name: '平日戦士', icon: '📊', condition: '平日に習慣を達成' },
-            { id: 'holiday_master', name: '祝日マスター', icon: '📈', condition: '祝日に習慣を達成' }
-        ];
-    }
-
-    // 所有バッジの取得
-    getOwnedBadges() {
-        const allBadges = this.getAllBadges();
-        const ownedBadgeIds = this.achievements.badges || [];
-        return allBadges.filter(badge => ownedBadgeIds.includes(badge.id));
-    }
-
-    // 次のバッジの取得
-    getNextBadge() {
-        const allBadges = this.getAllBadges();
-        const ownedBadgeIds = this.achievements.badges || [];
-        return allBadges.find(badge => !ownedBadgeIds.includes(badge.id));
     }
 
 
@@ -2050,10 +2689,11 @@ class HabitTracker {
             const hasDental = healthStatus.dentalCleaning;
             const hasSauna = healthStatus.sauna;
             const hasCatcafe = healthStatus.catcafe;
-            
+            const hasFriendParty = healthStatus.friendParty;
+
             // 複数選択の組み合わせをチェック
-            const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe].filter(Boolean).length;
-            
+            const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe, hasFriendParty].filter(Boolean).length;
+
             if (selectedCount > 1) {
                 dayElement.classList.add('has-both');
                 // 複数選択の場合はグラデーション表示
@@ -2063,7 +2703,8 @@ class HabitTracker {
                 if (hasDental) colors.push('#17a2b8');
                 if (hasSauna) colors.push('#dc3545');
                 if (hasCatcafe) colors.push('#6f42c1');
-                
+                if (hasFriendParty) colors.push('#ff6f61');
+
                 if (colors.length === 2) {
                     dayElement.style.background = `linear-gradient(45deg, ${colors[0]} 50%, ${colors[1]} 50%)`;
                 } else if (colors.length === 3) {
@@ -2087,6 +2728,8 @@ class HabitTracker {
                 dayElement.classList.add('has-sauna');
             } else if (hasCatcafe) {
                 dayElement.classList.add('has-catcafe');
+            } else if (hasFriendParty) {
+                dayElement.classList.add('has-friendparty');
             }
             
             // クリックイベントを追加
@@ -2172,7 +2815,7 @@ class HabitTracker {
             this.updateHealthDisplay(dayElement, dateStr);
             dropdown.remove();
         };
-        
+
         const catcafeOption = document.createElement('div');
         catcafeOption.className = `health-selection-option ${healthStatus.catcafe ? 'selected catcafe' : ''}`;
         catcafeOption.textContent = 'E';
@@ -2181,12 +2824,22 @@ class HabitTracker {
             this.updateHealthDisplay(dayElement, dateStr);
             dropdown.remove();
         };
-        
+
+        const friendPartyOption = document.createElement('div');
+        friendPartyOption.className = `health-selection-option ${healthStatus.friendParty ? 'selected friend-party' : ''}`;
+        friendPartyOption.textContent = 'F';
+        friendPartyOption.onclick = () => {
+            this.toggleHealthData(dateStr, 'friendParty');
+            this.updateHealthDisplay(dayElement, dateStr);
+            dropdown.remove();
+        };
+
         dropdown.appendChild(healthOption);
         dropdown.appendChild(massageOption);
         dropdown.appendChild(dentalOption);
         dropdown.appendChild(saunaOption);
         dropdown.appendChild(catcafeOption);
+        dropdown.appendChild(friendPartyOption);
         
         // 日付要素に相対的に配置
         dayElement.style.position = 'relative';
@@ -2217,7 +2870,7 @@ class HabitTracker {
         const healthStatus = this.healthData[dateStr] || {};
         
         // 既存のクラスを削除
-        dayElement.classList.remove('has-health', 'has-massage', 'has-dental', 'has-sauna', 'has-catcafe', 'has-both');
+        dayElement.classList.remove('has-health', 'has-massage', 'has-dental', 'has-sauna', 'has-catcafe', 'has-friendparty', 'has-both');
         
         // 複数選択の組み合わせをチェック
         const hasHealth = healthStatus.healthKeeping;
@@ -2225,9 +2878,10 @@ class HabitTracker {
         const hasDental = healthStatus.dentalCleaning;
         const hasSauna = healthStatus.sauna;
         const hasCatcafe = healthStatus.catcafe;
-        
+        const hasFriendParty = healthStatus.friendParty;
+
         // 複数選択の組み合わせをチェック
-        const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe].filter(Boolean).length;
+        const selectedCount = [hasHealth, hasMassage, hasDental, hasSauna, hasCatcafe, hasFriendParty].filter(Boolean).length;
         
         if (selectedCount > 1) {
             dayElement.classList.add('has-both');
@@ -2238,6 +2892,7 @@ class HabitTracker {
             if (hasDental) colors.push('#17a2b8');
             if (hasSauna) colors.push('#dc3545');
             if (hasCatcafe) colors.push('#6f42c1');
+            if (hasFriendParty) colors.push('#ff6f61');
             
             if (colors.length === 2) {
                 dayElement.style.background = `linear-gradient(45deg, ${colors[0]} 50%, ${colors[1]} 50%)`;
@@ -2267,6 +2922,9 @@ class HabitTracker {
         } else if (hasCatcafe) {
             dayElement.classList.add('has-catcafe');
             dayElement.style.background = '';
+        } else if (hasFriendParty) {
+            dayElement.classList.add('has-friendparty');
+            dayElement.style.background = '';
         }
         
         // 集計表を更新
@@ -2275,49 +2933,210 @@ class HabitTracker {
 
     // ヘルス集計表をレンダリング（全期間）
     renderHealthSummary() {
-        // 各項目の集計
-        const healthKeepingData = { count: 0 };
-        const headMassageData = { count: 0 };
-        const dentalCleaningData = { count: 0 };
-        const saunaData = { count: 0 };
-        const catcafeData = { count: 0 };
-        
-        // 全期間のデータをチェック
-        for (const dateStr in this.healthData) {
-            const healthStatus = this.healthData[dateStr] || {};
-            
-            if (healthStatus.healthKeeping) {
-                healthKeepingData.count++;
-            }
-            if (healthStatus.headMassage) {
-                headMassageData.count++;
-            }
-            if (healthStatus.dentalCleaning) {
-                dentalCleaningData.count++;
-            }
-            if (healthStatus.sauna) {
-                saunaData.count++;
-            }
-            if (healthStatus.catcafe) {
-                catcafeData.count++;
-            }
-        }
-        
-        // 集計表を更新
-        this.updateSummaryRow('healthKeepingSummary', healthKeepingData);
-        this.updateSummaryRow('headMassageSummary', headMassageData);
-        this.updateSummaryRow('dentalCleaningSummary', dentalCleaningData);
-        this.updateSummaryRow('saunaSummary', saunaData);
-        this.updateSummaryRow('catcafeSummary', catcafeData);
+        const healthCounts = this.getHealthCounts();
+
+        this.updateSummaryRow('healthKeepingSummary', { count: healthCounts.healthKeeping });
+        this.updateSummaryRow('headMassageSummary', { count: healthCounts.headMassage });
+        this.updateSummaryRow('dentalCleaningSummary', { count: healthCounts.dentalCleaning });
+        this.updateSummaryRow('saunaSummary', { count: healthCounts.sauna });
+        this.updateSummaryRow('catcafeSummary', { count: healthCounts.catcafe });
+        this.updateSummaryRow('friendPartySummary', { count: healthCounts.friendParty });
+
+        this.evaluateHealthBadges(healthCounts);
     }
 
     // 集計行を更新
     updateSummaryRow(elementId, data) {
         const row = document.getElementById(elementId);
         if (!row) return;
-        
+
         const countCell = row.querySelector('.count');
         countCell.textContent = data.count;
+    }
+
+    getHealthCounts() {
+        const counts = {
+            healthKeeping: 0,
+            headMassage: 0,
+            dentalCleaning: 0,
+            sauna: 0,
+            catcafe: 0,
+            friendParty: 0
+        };
+
+        for (const dateStr in this.healthData) {
+            const healthStatus = this.healthData[dateStr] || {};
+
+            if (healthStatus.healthKeeping) counts.healthKeeping++;
+            if (healthStatus.headMassage) counts.headMassage++;
+            if (healthStatus.dentalCleaning) counts.dentalCleaning++;
+            if (healthStatus.sauna) counts.sauna++;
+            if (healthStatus.catcafe) counts.catcafe++;
+            if (healthStatus.friendParty) counts.friendParty++;
+        }
+
+        return counts;
+    }
+
+    evaluateHealthBadges(healthCounts) {
+        const definitions = [
+            {
+                key: 'healthKeeping',
+                tiers: [
+                    {
+                        id: 'health_guardian_lv1',
+                        threshold: 3,
+                        title: 'A ヘルス守護者・初級',
+                        description: 'ヘルスキーピングを3回達成しました！'
+                    },
+                    {
+                        id: 'health_guardian_lv2',
+                        threshold: 7,
+                        title: 'A ヘルス守護者・中級',
+                        description: 'ヘルスキーピングを7回達成しました！'
+                    },
+                    {
+                        id: 'health_guardian_lv3',
+                        threshold: 15,
+                        title: 'A ヘルス守護者・達人',
+                        description: 'ヘルスキーピングを15回達成しました！'
+                    }
+                ]
+            },
+            {
+                key: 'headMassage',
+                tiers: [
+                    {
+                        id: 'head_massage_maestro_lv1',
+                        threshold: 3,
+                        title: 'B ヘッドマイスター・初級',
+                        description: 'ヘッドマッサージを3回達成しました！'
+                    },
+                    {
+                        id: 'head_massage_maestro_lv2',
+                        threshold: 7,
+                        title: 'B ヘッドマイスター・中級',
+                        description: 'ヘッドマッサージを7回達成しました！'
+                    },
+                    {
+                        id: 'head_massage_maestro_lv3',
+                        threshold: 15,
+                        title: 'B ヘッドマイスター・達人',
+                        description: 'ヘッドマッサージを15回達成しました！'
+                    }
+                ]
+            },
+            {
+                key: 'dentalCleaning',
+                tiers: [
+                    {
+                        id: 'dental_cleaning_conqueror_lv1',
+                        threshold: 3,
+                        title: 'C デンタルチャンピオン・初級',
+                        description: '歯科クリーニングを3回達成しました！'
+                    },
+                    {
+                        id: 'dental_cleaning_conqueror_lv2',
+                        threshold: 7,
+                        title: 'C デンタルチャンピオン・中級',
+                        description: '歯科クリーニングを7回達成しました！'
+                    },
+                    {
+                        id: 'dental_cleaning_conqueror_lv3',
+                        threshold: 15,
+                        title: 'C デンタルチャンピオン・達人',
+                        description: '歯科クリーニングを15回達成しました！'
+                    }
+                ]
+            },
+            {
+                key: 'sauna',
+                tiers: [
+                    {
+                        id: 'sauna_sage_lv1',
+                        threshold: 3,
+                        title: 'D サウナ賢者・初級',
+                        description: 'サウナを3回達成しました！'
+                    },
+                    {
+                        id: 'sauna_sage_lv2',
+                        threshold: 7,
+                        title: 'D サウナ賢者・中級',
+                        description: 'サウナを7回達成しました！'
+                    },
+                    {
+                        id: 'sauna_sage_lv3',
+                        threshold: 15,
+                        title: 'D サウナ賢者・達人',
+                        description: 'サウナを15回達成しました！'
+                    }
+                ]
+            },
+            {
+                key: 'catcafe',
+                tiers: [
+                    {
+                        id: 'catcafe_starlight_lv1',
+                        threshold: 3,
+                        title: 'E キャットギルド・初級',
+                        description: '猫カフェを3回達成しました！'
+                    },
+                    {
+                        id: 'catcafe_starlight_lv2',
+                        threshold: 7,
+                        title: 'E キャットギルド・中級',
+                        description: '猫カフェを7回達成しました！'
+                    },
+                    {
+                        id: 'catcafe_starlight_lv3',
+                        threshold: 15,
+                        title: 'E キャットギルド・達人',
+                        description: '猫カフェを15回達成しました！'
+                    }
+                ]
+            },
+            {
+                key: 'friendParty',
+                tiers: [
+                    {
+                        id: 'friend_party_fellow_lv1',
+                        threshold: 3,
+                        title: 'F 懇親会ギルド・初級',
+                        description: '懇親会を3回達成しました！'
+                    },
+                    {
+                        id: 'friend_party_fellow_lv2',
+                        threshold: 7,
+                        title: 'F 懇親会ギルド・中級',
+                        description: '懇親会を7回達成しました！'
+                    },
+                    {
+                        id: 'friend_party_fellow_lv3',
+                        threshold: 15,
+                        title: 'F 懇親会ギルド・達人',
+                        description: '懇親会を15回達成しました！'
+                    }
+                ]
+            }
+        ];
+
+        let unlocked = false;
+
+        definitions.forEach(def => {
+            const count = healthCounts[def.key] || 0;
+            def.tiers.forEach(tier => {
+                if (count >= tier.threshold) {
+                    const granted = this.giveBadge(tier.id, tier.title, tier.description);
+                    if (granted) {
+                        unlocked = true;
+                    }
+                }
+            });
+        });
+
+        if (unlocked) {
+            this.saveAchievements();
+        }
     }
     
     // 達成システムのメソッド群
@@ -2505,7 +3324,9 @@ class HabitTracker {
         if (!this.achievements.badges.includes(badgeId)) {
             this.achievements.badges.push(badgeId);
             this.showBadgeNotification(title, description);
+            return true;
         }
+        return false;
     }
     
     showAchievementNotification() {

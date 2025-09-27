@@ -15,7 +15,7 @@ const habitsData = [
     // サプリ・食事系
     { id: 'protein', name: 'プロテイン', shortName: 'ﾌﾟﾛﾃｲﾝ', category: '栄養', priority: 4, reason: '筋トレ効果を高める。運動とセットで効力大。', type: 'supplement' },
     { id: 'probiotics', name: '整腸剤', shortName: '整腸剤', category: '栄養・消化', priority: 2, reason: '腸内環境改善の補助。基本は食事で十分。', type: 'supplement' },
-    { id: 'vitamin_b', name: 'ビタミンB', shortName: 'ﾋﾞﾀﾐﾝB', category: '栄養', priority: 3, reason: 'エネルギー代謝と神経機能に重要。', type: 'supplement' },
+    { id: 'vitamin_b', name: 'ビタミンD', shortName: 'ﾋﾞﾀﾐﾝD', category: '栄養', priority: 3, reason: 'エネルギー代謝と神経機能に重要。', type: 'supplement' },
     { id: 'creatine', name: 'クレアチン', shortName: 'ｸﾚｱﾁﾝ', category: '栄養', priority: 3, reason: '筋力と筋量の向上に効果的。', type: 'supplement' },
     { id: 'ashwagandha', name: 'アシュワガンダ', shortName: 'ｱｼｭﾜｶﾞﾝﾀﾞ', category: '栄養', priority: 2, reason: 'ストレス軽減と睡眠の質向上。', type: 'supplement' },
     { id: 'magnesium', name: 'マグネシウム', shortName: 'ﾏｸﾞﾈｼｳﾑ', category: '栄養', priority: 2, reason: '筋肉のリラクゼーションと睡眠の質向上。', type: 'supplement' },
@@ -36,18 +36,76 @@ const rewards = {
 
 // モンスタータイプの定義
 const monsterTypes = {
-    0: { name: '未開封', description: 'まだ挑戦していない', emoji: '❓', color: '#666' },
-    1: { name: '弱そうな青年', description: '初心者レベル', emoji: '😊', color: '#4A90E2' },
-    2: { name: 'やる気のある青年', description: '少し成長した', emoji: '😤', color: '#28a745' },
-    3: { name: '頑張り屋', description: '継続の力', emoji: '💪', color: '#ffd700' },
-    4: { name: '努力家', description: '真面目に取り組む', emoji: '🎯', color: '#ff6b6b' },
-    5: { name: 'ちょっと強そうな青年', description: '中級者レベル', emoji: '😎', color: '#9c27b0' },
-    6: { name: '習慣マスター', description: '習慣化の達人', emoji: '🏆', color: '#ff9800' },
-    7: { name: '習慣の王', description: '完璧な習慣', emoji: '👑', color: '#e91e63' },
-    8: { name: '伝説の存在', description: '神レベルの習慣', emoji: '🌟', color: '#00bcd4' },
-    9: { name: '究極の存在', description: '究極の習慣', emoji: '⚡', color: '#795548' },
-    10: { name: '超越者', description: '人間を超越', emoji: '🚀', color: '#607d8b' }
+    0: { name: '眠れるエーテル卵', description: 'まだ力を秘めている', emoji: '🥚✨', color: '#666' },
+    1: { name: '薄翼のベビードラゴン', description: '目覚めたての炎が灯る', emoji: '🐣🐲', color: '#4A90E2' },
+    2: { name: '風駆けるルーキーペガサス', description: '空へ踏み出す小さな一歩', emoji: '🪽🦄', color: '#28a745' },
+    3: { name: '鋼翼のガーディアングリフォン', description: '継続の刃が鍛えられる', emoji: '🛡️🦅', color: '#ffd700' },
+    4: { name: '紅蓮のチャレンジドラグーン', description: '炎が大地を照らし始める', emoji: '🔥🐉', color: '#ff6b6b' },
+    5: { name: '蒼雷のスカイランサー', description: '空を切り裂く槍の閃光', emoji: '⚡🐲', color: '#9c27b0' },
+    6: { name: '黎明のオーロラヒポグリフ', description: '朝焼けのオーラをまとう', emoji: '🌅🦅', color: '#ff9800' },
+    7: { name: '星河のアークドラゴン', description: '星屑が軌跡を描く', emoji: '🌌🐉', color: '#e91e63' },
+    8: { name: '神威のセラフィックペガサス', description: '聖なる光が降り注ぐ', emoji: '👑🪽', color: '#00bcd4' },
+    9: { name: '時空を裂くクロノドラゴン', description: '時間すら味方にする', emoji: '⏳🐲', color: '#795548' },
+    10: { name: '創世のエターナルワイバーン', description: '神話を超える究極体', emoji: '🌠🐉', color: '#607d8b' }
 };
+
+const combinedMonsterStages = [
+    {
+        min: 0,
+        title: '総合シンボル:黎明翼',
+        name: '共鳴する初光のドラゴネット',
+        description: 'すべての習慣が目を覚まし始めた。',
+        emoji: '🌄🐲',
+        color: '#74b9ff',
+        glow: 'rgba(116, 185, 255, 0.45)',
+        gradient: 'rgba(116, 185, 255, 0.18)',
+        className: 'stage-dawn'
+    },
+    {
+        min: 12,
+        title: '総合シンボル:蒼天蹄',
+        name: '空駆けるシナジーペガサス',
+        description: '仲間の翼が風を切り、速度が増す。',
+        emoji: '💨🦄',
+        color: '#55efc4',
+        glow: 'rgba(85, 239, 196, 0.45)',
+        gradient: 'rgba(85, 239, 196, 0.16)',
+        className: 'stage-aurora'
+    },
+    {
+        min: 28,
+        title: '総合シンボル:紅蓮槍',
+        name: '連携のドラゴンランサー',
+        description: '炎の槍が共鳴し合い、勢いが加速する。',
+        emoji: '🔥🐉⚔️',
+        color: '#ff7675',
+        glow: 'rgba(255, 118, 117, 0.5)',
+        gradient: 'rgba(255, 118, 117, 0.18)',
+        className: 'stage-blaze'
+    },
+    {
+        min: 48,
+        title: '総合シンボル:星辰牙',
+        name: '星光守護のキマイラ',
+        description: '全習慣の力が星座のように輝き守る。',
+        emoji: '✨🗡️🦁',
+        color: '#ffeaa7',
+        glow: 'rgba(255, 234, 167, 0.55)',
+        gradient: 'rgba(255, 234, 167, 0.22)',
+        className: 'stage-stellar'
+    },
+    {
+        min: 72,
+        title: '総合シンボル:創世竜',
+        name: '時空統べるオメガドラゴン',
+        description: '神話の頂点、全習慣が一つに溶け合う。',
+        emoji: '🌌🐉✨',
+        color: '#a29bfe',
+        glow: 'rgba(162, 155, 254, 0.55)',
+        gradient: 'rgba(162, 155, 254, 0.24)',
+        className: 'stage-cosmos'
+    }
+];
 
 // アプリの状態管理
 class HabitTracker {
@@ -875,43 +933,128 @@ class HabitTracker {
 
         monsterGrid.innerHTML = '';
 
-        this.habits.forEach((habit, index) => {
+        const monsterDetails = this.habits.map((habit) => {
             const totalCount = this.calculateTotalAll(habit.id);
+            const level = this.getMonsterLevel(totalCount);
             const monsterType = this.getMonsterType(totalCount);
-            const bestStreak = this.getBestStreak(habit.id);
-            
+            const nextLevel = this.getNextLevel(totalCount);
+
+            return {
+                habit,
+                totalCount,
+                level,
+                monsterType,
+                nextLevel
+            };
+        });
+
+        const totalLevel = monsterDetails.reduce((sum, detail) => sum + detail.level, 0);
+        const combinedStage = this.getCombinedMonsterStage(totalLevel);
+        const combinedCard = document.createElement('div');
+        const combinedClasses = ['monster-card', 'monster-card--legendary'];
+        if (combinedStage.className) {
+            combinedClasses.push(combinedStage.className);
+        }
+        combinedCard.className = combinedClasses.join(' ');
+        combinedCard.style.setProperty('--monster-legendary-color', combinedStage.color);
+        combinedCard.style.setProperty('--monster-legendary-glow', combinedStage.glow);
+        combinedCard.style.setProperty('--monster-legendary-gradient', combinedStage.gradient);
+
+        const nextStageThreshold = combinedStage.nextThreshold;
+        const levelsToNextStage = nextStageThreshold !== null && nextStageThreshold !== undefined
+            ? Math.max(0, nextStageThreshold - totalLevel)
+            : null;
+
+        combinedCard.innerHTML = `
+            <div class="monster-image monster-image--legendary">
+                <span>${combinedStage.emoji}</span>
+            </div>
+            <div class="monster-name">${combinedStage.title}</div>
+            <div class="monster-level">総合Lv.${totalLevel}</div>
+            <div class="monster-description">
+                <div class="monster-title">${combinedStage.name}</div>
+                <div class="monster-flavor">${combinedStage.description}</div>
+            </div>
+            <div class="monster-stats">
+                <span>次のレベルまで: ${levelsToNextStage !== null ? `あと${levelsToNextStage}レベル` : '伝説級達成！'}</span>
+            </div>
+        `;
+
+        monsterGrid.appendChild(combinedCard);
+
+        monsterDetails.forEach(({ habit, totalCount, level, monsterType, nextLevel }) => {
             const monsterCard = document.createElement('div');
             monsterCard.className = 'monster-card';
-            
+            const daysToNext = Math.max(0, nextLevel - totalCount);
+
             monsterCard.innerHTML = `
-                <div class="monster-image" style="border-color: ${monsterType.color}; background: ${monsterType.color}20;">
-                    ${monsterType.emoji}
+                <div class="monster-image" style="border-color: ${monsterType.color}; background: radial-gradient(circle, ${monsterType.color}33 0%, rgba(0, 0, 0, 0.85) 70%);">
+                    <span>${monsterType.emoji}</span>
                 </div>
                 <div class="monster-name">${habit.shortName}</div>
-                <div class="monster-description">${monsterType.name}</div>
+                <div class="monster-level">Lv.${level}</div>
+                <div class="monster-description">
+                    <div class="monster-title">${monsterType.name}</div>
+                    <div class="monster-flavor">${monsterType.description}</div>
+                </div>
                 <div class="monster-stats">
-                    <span>合計: ${totalCount}</span>
-                    <span>最高: ${bestStreak}日</span>
+                    <span>次のレベルまで: ${daysToNext}日</span>
                 </div>
             `;
-            
+
             monsterGrid.appendChild(monsterCard);
         });
     }
 
+    getCombinedMonsterStage(totalLevel) {
+        let currentStage = combinedMonsterStages[0];
+
+        for (const stage of combinedMonsterStages) {
+            if (totalLevel >= stage.min) {
+                currentStage = stage;
+            }
+        }
+
+        const nextStage = combinedMonsterStages.find(stage => stage.min > totalLevel);
+
+        return {
+            ...currentStage,
+            nextThreshold: nextStage ? nextStage.min : null
+        };
+    }
+
     // 合計値に基づいてモンスタータイプを取得
     getMonsterType(totalCount) {
-        if (totalCount === 0) return monsterTypes[0];
-        if (totalCount <= 1) return monsterTypes[1];
-        if (totalCount <= 2) return monsterTypes[2];
-        if (totalCount <= 3) return monsterTypes[3];
-        if (totalCount <= 4) return monsterTypes[4];
-        if (totalCount <= 5) return monsterTypes[5];
-        if (totalCount <= 6) return monsterTypes[6];
-        if (totalCount <= 7) return monsterTypes[7];
-        if (totalCount <= 8) return monsterTypes[8];
-        if (totalCount <= 9) return monsterTypes[9];
-        return monsterTypes[10];
+        const level = this.getMonsterLevel(totalCount);
+        return monsterTypes[level];
+    }
+
+    getMonsterLevel(totalCount) {
+        if (totalCount === 0) return 0;
+        if (totalCount <= 1) return 1;
+        if (totalCount <= 2) return 2;
+        if (totalCount <= 3) return 3;
+        if (totalCount <= 4) return 4;
+        if (totalCount <= 5) return 5;
+        if (totalCount <= 6) return 6;
+        if (totalCount <= 7) return 7;
+        if (totalCount <= 8) return 8;
+        if (totalCount <= 9) return 9;
+        return 10;
+    }
+
+    getNextLevel(totalCount) {
+        if (totalCount < 1) return 1;
+        if (totalCount < 2) return 2;
+        if (totalCount < 3) return 3;
+        if (totalCount < 4) return 4;
+        if (totalCount < 5) return 5;
+        if (totalCount < 6) return 6;
+        if (totalCount < 7) return 7;
+        if (totalCount < 8) return 8;
+        if (totalCount < 9) return 9;
+        if (totalCount < 10) return 10;
+        return 15;
     }
 
     // 連続日数の計算
