@@ -2245,7 +2245,6 @@ class HabitTracker {
                             <span class="badge-condition">${badge.condition}</span>
                         </div>
                     </div>
-                    ${unlocked ? '<div class="badge-card-check">✨</div>' : ''}
                 `;
 
                 card.className = cardClasses.join(' ');
