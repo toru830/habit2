@@ -1173,7 +1173,7 @@ class HabitTracker {
             html += `
                 <tr>
                     <td class="habit-number">${index + 1}</td>
-                    <td class="habit-name">${habit.shortName}<small>${habit.name}</small></td>
+                    <td class="habit-name">${habit.shortName}</td>
                     <td>
                         <div class="report-progress">
                             <div class="progress-row">
