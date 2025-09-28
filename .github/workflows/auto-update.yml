@@ -3,6 +3,8 @@ name: Auto Update Habit Tracker
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/auto-update.yml'
   workflow_dispatch: # 手動実行も可能
 
 jobs:
@@ -14,33 +16,20 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
         
     - name: Install dependencies
       run: npm install -g @github/cli
       
-    - name: Update files
+    - name: Check for updates
       run: |
-        # ここでファイルの自動更新処理を記述
-        echo "Files updated automatically"
-        
-    - name: Commit changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "Auto update: $(date)"
-          git push
-        fi
+        echo "Checking for files that need updates..."
+        # 現在は何も更新しないので、成功として終了
+        echo "No updates needed at this time"
 
 
 
