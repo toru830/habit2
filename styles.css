@@ -917,6 +917,34 @@ body {
     height: 100% !important;
 }
 
+.chart-empty-message {
+    display: none;
+    color: #dfe4ff;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.6;
+    padding: 0 16px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.chart-container--empty {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed rgba(154, 167, 194, 0.35);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.chart-container--empty canvas {
+    display: none;
+}
+
+.chart-container--empty .chart-empty-message {
+    display: block;
+}
+
 .chart-footer {
     margin-top: 16px;
     display: flex;

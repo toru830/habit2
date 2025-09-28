@@ -1239,12 +1239,45 @@ class HabitTracker {
         if (!canvas) return;
 
         const chartData = this.getTotalChartData();
+        this.updateTotalChartSummary(chartData);
+
+        const container = document.getElementById('totalChartContainer');
+        const emptyMessage = document.getElementById('totalChartEmptyMessage');
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+
+        const setEmptyState = (isEmpty, message) => {
+            if (emptyMessage && typeof message === 'string') {
+                emptyMessage.textContent = message;
+            }
+            if (container) {
+                container.classList.toggle('chart-container--empty', isEmpty);
+            }
+        };
 
         if (this.totalChart) {
             this.totalChart.destroy();
+            this.totalChart = null;
         }
+
+        if (!ctx) {
+            setEmptyState(true, 'グラフを表示できません');
+            return;
+        }
+
+        if (typeof Chart === 'undefined') {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            setEmptyState(true, 'グラフを読み込めませんでした');
+            return;
+        }
+
+        const hasData = chartData.dailyValues.some(value => value > 0);
+        if (!hasData) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            setEmptyState(true, 'まだ表示できるデータがありません');
+            return;
+        }
+
+        setEmptyState(false);
 
         const initialMin = Math.max(0, chartData.labels.length - 14);
         const initialMax = chartData.labels.length - 1;
