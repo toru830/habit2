@@ -849,18 +849,95 @@ body {
     margin: 30px 0;
 }
 
-.chart-section h3 {
-    color: white;
-    margin-bottom: 15px;
+.chart-card {
+    background: #111;
+    border-radius: 16px;
+    border: 1px solid #2a2a2a;
+    padding: 20px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.chart-header h3 {
+    color: #f5f5f5;
+    margin: 0;
     font-size: 18px;
 }
 
+.chart-summary {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.summary-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(74, 144, 226, 0.12);
+    border: 1px solid rgba(74, 144, 226, 0.35);
+    min-width: 120px;
+}
+
+.summary-chip .chip-label {
+    font-size: 11px;
+    color: #a8b7d4;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.summary-chip .chip-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
 .chart-container {
-    background: #1a1a1a;
+    position: relative;
+    height: 260px;
+    background: radial-gradient(circle at top, rgba(74, 144, 226, 0.08), rgba(0, 0, 0, 0));
     border-radius: 12px;
-    padding: 20px;
-    border: 1px solid #333;
-    text-align: center;
+    border: 1px solid #1f1f1f;
+    padding: 16px;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-footer {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    color: #9aa7c2;
+    font-size: 12px;
+}
+
+.chart-footer span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-footer .indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
 }
 
 /* レポートテーブルセクション */
@@ -868,89 +945,168 @@ body {
     margin: 30px 0;
 }
 
+.report-card {
+    background: #111;
+    border-radius: 16px;
+    border: 1px solid #2a2a2a;
+    padding: 20px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.report-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.report-card-header h3 {
+    color: #f5f5f5;
+    margin: 0;
+    font-size: 18px;
+}
+
+.report-overview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.report-metric {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 8px 12px;
+    min-width: 130px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.report-metric .metric-label {
+    font-size: 11px;
+    color: #9aa7c2;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.report-metric .metric-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
 .report-table {
-    background: #1a1a1a;
+    background: transparent;
     border-radius: 12px;
-    border: 1px solid #333;
-    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-x: auto;
 }
 
 .report-table table {
     width: 100%;
+    min-width: 520px;
     border-collapse: collapse;
 }
 
-.report-table th,
-.report-table td {
-    padding: 8px;
-    text-align: center;
-    border: 1px solid #333;
-}
-
 .report-table th {
-    background: #2a2a2a;
-    color: white;
+    background: rgba(255, 255, 255, 0.06);
+    color: #f5f5f5;
+    padding: 10px 12px;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.report-table th:last-child,
-.report-table td:last-child {
-    border-right: none;
+.report-table td {
+    background: rgba(0, 0, 0, 0.55);
+    color: #e7e7e7;
+    padding: 10px 12px;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
 }
 
 .report-table tr:last-child td {
     border-bottom: none;
 }
 
-.report-table td {
-    color: white;
-    font-size: 12px;
+.report-table .habit-number {
+    color: #9aa7c2;
+    font-weight: 600;
+    font-size: 11px;
 }
 
-/* レポートテーブル - 最上段のみ */
-.report-table {
-    background: #000;
-    border: 1px solid #333;
-    border-radius: 12px;
+.report-table .habit-name {
+    text-align: left;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.report-table .habit-name small {
+    display: block;
+    color: #9aa7c2;
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+.report-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.report-progress .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #9aa7c2;
+}
+
+.report-progress .progress-rate {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.report-progress .progress-count {
+    color: #cbd6f7;
+    font-weight: 500;
+}
+
+.progress-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
     overflow: hidden;
 }
 
-.report-table table {
-    width: 100%;
-    border-collapse: collapse;
+.progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #4a90e2, #7f53ac);
+    transition: width 0.3s ease;
 }
 
-.report-table th {
-    background: #2a2a2a;
-    color: white;
-    padding: 6px 8px;
-    text-align: center;
-    border-right: 1px solid #333;
-    font-size: 12px;
-    font-weight: bold;
+.report-table .streak-cell {
+    color: #ffffff;
+    font-weight: 600;
 }
 
-.report-table th:last-child {
-    border-right: none;
+.report-table .streak-cell small {
+    display: block;
+    color: #9aa7c2;
+    font-weight: 400;
+    margin-top: 2px;
 }
 
-.report-table td {
-    background: #000;
-    color: white;
-    padding: 6px 8px;
-    text-align: center;
-    border-right: 1px solid #333;
-    border-bottom: 1px solid #333;
-    font-size: 12px;
-}
-
-.report-table td:last-child {
-    border-right: none;
-}
-
-.report-table td:nth-child(2) {
-    text-align: left;
+.report-table .total-cell {
+    font-weight: 600;
+    color: #ffffff;
 }
 
 /* ボトムナビゲーション */
@@ -1447,51 +1603,44 @@ body {
         font-size: 12px;
     }
     
-    /* レポートテーブルのモバイル対応 */
+    .chart-card,
+    .report-card {
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    .chart-summary {
+        justify-content: flex-start;
+    }
+
+    .summary-chip {
+        min-width: 100px;
+    }
+
+    .chart-footer {
+        font-size: 11px;
+    }
+
+    .report-overview {
+        gap: 8px;
+    }
+
+    .report-metric {
+        min-width: 120px;
+    }
+
     .report-table {
-        background: #000 !important;
-        border: 1px solid #333;
+        border-width: 1px;
     }
-    
-    .report-table th {
-        background: #1a1a1a !important;
-        color: white !important;
-        font-size: 10px;
-        padding: 6px 2px;
-    }
-    
-    .report-table td {
-        background: #000 !important;
-        color: white !important;
-        font-size: 10px;
-        padding: 6px 2px;
-    }
-    
-    /* モバイル版レポートテーブル - シンプル */
+
     .report-table th,
     .report-table td {
-        padding: 6px !important;
-        font-size: 10px !important;
+        font-size: 11px;
+        padding: 8px;
     }
-    
-    .report-table .habit-number {
-        color: white !important;
-        background: #000 !important;
-    }
-    
-    .report-table .habit-name {
-        color: white !important;
-        background: #000 !important;
-    }
-    
-    .report-table .stat-value {
-        color: white !important;
-        background: #000 !important;
-    }
-    
-    .report-table .best-streak-value {
-        color: white !important;
-        background: #000 !important;
+
+    .report-progress .progress-row {
+        font-size: 10px;
     }
 }
 
