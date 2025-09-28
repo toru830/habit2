@@ -381,12 +381,13 @@ class HabitTracker {
         this.calendarMonth = new Date(); // 現在の月
         this.reportMonth = new Date(); // レポート用の月
         this.healthData = this.loadHealthData(); // ヘルスキーピングとヘッドマッサージのデータ
-        
+
         // モチベーション機能
         this.achievements = this.loadAchievements();
         this.streaks = this.calculateStreaks();
         this.totalScore = this.calculateTotalScore();
-        
+        this.totalChart = null;
+
         this.init();
     }
 
@@ -747,8 +748,24 @@ class HabitTracker {
     }
 
     // 習慣の完了状態をチェック
-    isHabitCompleted(habitId, dateStr) {
-        const habits = this.completedHabits[dateStr];
+    isHabitCompleted(habitId, dateInput) {
+        if (!dateInput) return false;
+
+        let dateKey = '';
+        if (dateInput instanceof Date) {
+            dateKey = dateInput.toISOString().split('T')[0];
+        } else if (typeof dateInput === 'string') {
+            dateKey = dateInput;
+        } else {
+            const parsed = new Date(dateInput);
+            if (!isNaN(parsed)) {
+                dateKey = parsed.toISOString().split('T')[0];
+            }
+        }
+
+        if (!dateKey) return false;
+
+        const habits = this.completedHabits[dateKey];
         if (Array.isArray(habits)) {
             return habits.includes(habitId);
         } else if (habits && typeof habits === 'object') {
@@ -1027,21 +1044,19 @@ class HabitTracker {
         const today = new Date();
         const weekStart = new Date(today);
         weekStart.setDate(today.getDate() - today.getDay());
-        
+
         const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-        
+
         let weeklyCompleted = 0;
         let weeklyTotal = 0;
         let monthlyCompleted = 0;
         let monthlyTotal = 0;
-        let currentStreak = 0;
-        
+
         // 週間統計
         for (let i = 0; i < 7; i++) {
             const date = new Date(weekStart);
             date.setDate(weekStart.getDate() + i);
-            const dateStr = date.toISOString().split('T')[0];
-            
+
             if (date <= today) {
                 weeklyTotal++;
                 if (this.isHabitCompleted(habitId, date)) {
@@ -1049,35 +1064,26 @@ class HabitTracker {
                 }
             }
         }
-        
+
         // 月間統計
         for (let d = new Date(monthStart); d <= today; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().split('T')[0];
             monthlyTotal++;
             if (this.isHabitCompleted(habitId, d)) {
                 monthlyCompleted++;
             }
         }
-        
-        // 現在の連続日数
-        const dates = Object.keys(this.completedHabits).sort().reverse();
-        for (let i = 0; i < dates.length; i++) {
-            const date = dates[i];
-            const habits = this.completedHabits[date];
-            const isCompleted = Array.isArray(habits) ? 
-                habits.includes(habitId) : 
-                (habits && typeof habits === 'object' ? !!habits[habitId] : false);
-            if (isCompleted) {
-                currentStreak++;
-            } else {
-                break;
-            }
-        }
-        
+        const currentStreak = this.getCurrentStreak(habitId);
+        const bestStreak = this.getBestStreak(habitId);
+        const totalCompleted = this.calculateTotalAll(habitId);
+
         return {
             weeklyRate: weeklyTotal > 0 ? Math.round((weeklyCompleted / weeklyTotal) * 100) : 0,
             monthlyRate: monthlyTotal > 0 ? Math.round((monthlyCompleted / monthlyTotal) * 100) : 0,
-            currentStreak: currentStreak
+            monthlyCompleted,
+            monthlyTotal,
+            currentStreak,
+            bestStreak,
+            totalCompleted
         };
     }
 
@@ -1117,33 +1123,74 @@ class HabitTracker {
     // 新しいレポートテーブルを生成
     renderReportTable() {
         const reportTableContainer = document.getElementById('reportTable');
+        const reportOverview = document.getElementById('reportOverview');
         if (!reportTableContainer) return;
 
         let html = `
-            <table class="report-table">
+            <table>
                 <thead>
                     <tr>
                         <th>No.</th>
                         <th>習慣名</th>
-                        <th>月完了率</th>
-                        <th>連続日数</th>
-                        <th>最大連続</th>
+                        <th>今月の達成状況</th>
+                        <th>連続記録</th>
+                        <th>累計達成</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
 
+        let totalMonthlyCompleted = 0;
+        let totalMonthlyPossible = 0;
+        let totalAllCompleted = 0;
+        let rateSum = 0;
+        let rateCount = 0;
+        let bestStreak = { habit: '', value: 0 };
+        let bestMonthly = { habit: '', value: 0 };
+
         this.habits.forEach((habit, index) => {
             const stats = this.getHabitStats(habit.id);
-            const bestStreak = this.getBestStreak(habit.id);
-            
+            const rateDisplay = stats.monthlyTotal > 0 ? `${stats.monthlyRate}%` : '—';
+            const countDisplay = stats.monthlyTotal > 0 ? `${stats.monthlyCompleted}/${stats.monthlyTotal}日` : '記録なし';
+            const progressWidth = stats.monthlyTotal > 0 ? Math.min(stats.monthlyRate, 100) : 0;
+
+            totalMonthlyCompleted += stats.monthlyCompleted;
+            totalMonthlyPossible += stats.monthlyTotal;
+            totalAllCompleted += stats.totalCompleted;
+
+            if (stats.monthlyTotal > 0) {
+                rateSum += stats.monthlyRate;
+                rateCount++;
+                if (stats.monthlyRate > bestMonthly.value) {
+                    bestMonthly = { habit: habit.shortName, value: stats.monthlyRate };
+                }
+            }
+
+            if (stats.bestStreak > bestStreak.value) {
+                bestStreak = { habit: habit.shortName, value: stats.bestStreak };
+            }
+
             html += `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td>${habit.shortName}</td>
-                    <td>${stats.monthlyRate}%</td>
-                    <td>${stats.currentStreak}日</td>
-                    <td>${bestStreak}日</td>
+                    <td class="habit-number">${index + 1}</td>
+                    <td class="habit-name">${habit.shortName}<small>${habit.name}</small></td>
+                    <td>
+                        <div class="report-progress">
+                            <div class="progress-row">
+                                <span class="progress-label">達成率</span>
+                                <span class="progress-rate">${rateDisplay}</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: ${progressWidth}%"></div>
+                            </div>
+                            <div class="progress-row">
+                                <span class="progress-label">実績</span>
+                                <span class="progress-count">${countDisplay}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="streak-cell">${stats.currentStreak}日<small>最長 ${stats.bestStreak}日</small></td>
+                    <td class="total-cell">${stats.totalCompleted}回</td>
                 </tr>
             `;
         });
@@ -1154,65 +1201,148 @@ class HabitTracker {
         `;
 
         reportTableContainer.innerHTML = html;
+
+        if (reportOverview) {
+            const averageRate = rateCount > 0 ? Math.round(rateSum / rateCount) : 0;
+            const monthlySummary = totalMonthlyPossible > 0
+                ? `${totalMonthlyCompleted} / ${totalMonthlyPossible}回`
+                : `${totalMonthlyCompleted}回`;
+
+            reportOverview.innerHTML = `
+                <div class="report-metric">
+                    <span class="metric-label">今月の総達成</span>
+                    <span class="metric-value">${monthlySummary}</span>
+                </div>
+                <div class="report-metric">
+                    <span class="metric-label">平均達成率</span>
+                    <span class="metric-value">${averageRate}%</span>
+                </div>
+                <div class="report-metric">
+                    <span class="metric-label">最長連続</span>
+                    <span class="metric-value">${bestStreak.value > 0 ? `${bestStreak.habit} ${bestStreak.value}日` : 'ー'}</span>
+                </div>
+                <div class="report-metric">
+                    <span class="metric-label">最多達成率</span>
+                    <span class="metric-value">${bestMonthly.value > 0 ? `${bestMonthly.habit} ${bestMonthly.value}%` : 'ー'}</span>
+                </div>
+                <div class="report-metric">
+                    <span class="metric-label">累計達成</span>
+                    <span class="metric-value">${totalAllCompleted}回</span>
+                </div>
+            `;
+        }
     }
 
     // 合計値推移グラフを生成
     renderTotalChart() {
-        const ctx = document.getElementById('totalChart');
+        const canvas = document.getElementById('totalChart');
+        if (!canvas) return;
+
+        const chartData = this.getTotalChartData();
+        const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // 過去30日分のデータを取得
-        const chartData = this.getTotalChartData();
-        
-        new Chart(ctx, {
-            type: 'line',
+        if (this.totalChart) {
+            this.totalChart.destroy();
+        }
+
+        const initialMin = Math.max(0, chartData.labels.length - 14);
+        const initialMax = chartData.labels.length - 1;
+        const cumulativeColor = '#FFB74D';
+        const dailyColor = 'rgba(74, 144, 226, 0.55)';
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, 'rgba(255, 183, 77, 0.35)');
+        gradient.addColorStop(1, 'rgba(255, 183, 77, 0)');
+
+        this.totalChart = new Chart(ctx, {
+            type: 'bar',
             data: {
                 labels: chartData.labels,
-                datasets: [{
-                    label: '合計値',
-                    data: chartData.values,
-                    borderColor: '#4A90E2',
-                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                }]
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: '日別達成',
+                        data: chartData.dailyValues,
+                        backgroundColor: dailyColor,
+                        borderRadius: 6,
+                        maxBarThickness: 16,
+                        order: 2
+                    },
+                    {
+                        type: 'line',
+                        label: '累積達成',
+                        data: chartData.cumulativeValues,
+                        borderColor: cumulativeColor,
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: cumulativeColor,
+                        pointBorderColor: '#1c1c1c',
+                        order: 1
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 10,
+                        right: 16,
+                        bottom: 0,
+                        left: 8
+                    }
+                },
                 plugins: {
                     legend: {
                         labels: {
-                            color: 'white'
+                            color: '#f5f5f5',
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#111',
+                        borderColor: '#444',
+                        borderWidth: 1,
+                        titleColor: '#ffffff',
+                        bodyColor: '#dfe4ff',
+                        callbacks: {
+                            label(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y;
+                                return `${label}: ${value}回`;
+                            }
                         }
                     }
                 },
                 scales: {
                     x: {
+                        min: initialMin,
+                        max: initialMax,
                         ticks: {
-                            color: 'white'
+                            color: '#c6d2f3',
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 10
                         },
                         grid: {
-                            color: '#333'
-                        },
-                        min: chartData.labels.length - 14, // 最初は14日分表示
-                        max: chartData.labels.length - 1
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        }
                     },
                     y: {
+                        beginAtZero: true,
                         ticks: {
-                            color: 'white',
-                            stepSize: 1, // 整数ステップ
-                            callback: function(value) {
-                                return Number.isInteger(value) ? value : null;
-                            }
+                            color: '#c6d2f3',
+                            precision: 0
                         },
                         grid: {
-                            color: '#333'
-                        },
-                        beginAtZero: true // 0から開始
+                            color: 'rgba(255, 255, 255, 0.06)'
+                        }
                     }
                 },
                 interaction: {
@@ -1220,40 +1350,33 @@ class HabitTracker {
                     mode: 'index'
                 },
                 animation: {
-                    duration: 0
-                },
-                elements: {
-                    point: {
-                        hoverRadius: 6,
-                        radius: 4
-                    }
+                    duration: 350
                 }
             },
             plugins: [{
                 id: 'dragPlugin',
-                beforeEvent(chart, args, pluginOptions) {
-                    const self = this;
+                beforeEvent(chart, args) {
                     if (args.event.type === 'mousedown' || args.event.type === 'touchstart') {
                         chart.dragStartX = args.event.x;
                         chart.dragStartY = args.event.y;
                         chart.isDragging = false;
                     }
-                    
+
                     if (args.event.type === 'mousemove' || args.event.type === 'touchmove') {
                         if (chart.dragStartX !== undefined && chart.dragStartY !== undefined) {
                             const deltaX = args.event.x - chart.dragStartX;
                             const deltaY = args.event.y - chart.dragStartY;
                             const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                            
+
                             if (distance > 5) {
                                 chart.isDragging = true;
-                                self.handleDrag(chart, deltaX);
+                                this.handleDrag(chart, deltaX);
                                 chart.dragStartX = args.event.x;
                                 chart.dragStartY = args.event.y;
                             }
                         }
                     }
-                    
+
                     if (args.event.type === 'mouseup' || args.event.type === 'touchend') {
                         chart.dragStartX = undefined;
                         chart.dragStartY = undefined;
@@ -1262,14 +1385,14 @@ class HabitTracker {
                 },
                 handleDrag(chart, deltaX) {
                     const xScale = chart.scales.x;
-                    const range = xScale.max - xScale.min;
+                    const range = Math.max(1, xScale.max - xScale.min);
                     const scale = chart.width / range;
                     const shift = -deltaX / scale;
-                    
+
                     const newMin = Math.max(0, xScale.min + shift);
                     const newMax = Math.min(chart.data.labels.length - 1, xScale.max + shift);
-                    
-                    if (newMax - newMin >= 5) { // 最小表示範囲を5日分に制限
+
+                    if (newMax - newMin >= 5) {
                         xScale.options.min = newMin;
                         xScale.options.max = newMax;
                         chart.update('none');
@@ -1277,38 +1400,107 @@ class HabitTracker {
                 }
             }]
         });
+
+        this.updateTotalChartSummary(chartData);
     }
 
     // 合計値推移のデータを取得
     getTotalChartData() {
         const labels = [];
-        const values = [];
-        const today = new Date(); // 実際の今日の日付を使用
-        
-        // 過去30日分のデータを生成
+        const dailyValues = [];
+        const cumulativeValues = [];
+        const today = new Date();
+
         let cumulativeTotal = 0;
+        let peakValue = 0;
+        let peakLabel = '';
+
         for (let i = 29; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(today.getDate() - i);
-            const dateStr = date.toISOString().split('T')[0];
-            
-            // 日付ラベル（月/日形式）
+            const dateKey = date.toISOString().split('T')[0];
             const label = `${date.getMonth() + 1}/${date.getDate()}`;
             labels.push(label);
-            
-            // その日の完了習慣数を累積合計に加算
-            const dailyCompleted = this.completedHabits[dateStr] ? this.completedHabits[dateStr].length : 0;
+
+            const habits = this.completedHabits[dateKey];
+            let dailyCompleted = 0;
+            if (Array.isArray(habits)) {
+                dailyCompleted = habits.length;
+            } else if (habits && typeof habits === 'object') {
+                dailyCompleted = Object.values(habits).filter(Boolean).length;
+            }
+
             cumulativeTotal += dailyCompleted;
-            
-            // 整数値のみを保証し、マイナス値を防ぐ
-            const safeValue = Math.max(0, Math.floor(cumulativeTotal));
-            values.push(safeValue);
-            
-            // デバッグ用ログ
-            console.log(`日付: ${dateStr}, 日完了: ${dailyCompleted}, 累積: ${safeValue}`);
+            dailyValues.push(dailyCompleted);
+            cumulativeValues.push(Math.max(0, cumulativeTotal));
+
+            if (dailyCompleted >= peakValue) {
+                peakValue = dailyCompleted;
+                peakLabel = label;
+            }
         }
-        
-        return { labels, values };
+
+        const last7Total = dailyValues.slice(-7).reduce((sum, value) => sum + value, 0);
+        const dailyAverage = dailyValues.length > 0 ? cumulativeTotal / dailyValues.length : 0;
+        const latestLabel = labels[labels.length - 1] || '';
+        const latestDaily = dailyValues[dailyValues.length - 1] || 0;
+
+        return {
+            labels,
+            dailyValues,
+            cumulativeValues,
+            meta: {
+                totalCount: cumulativeTotal,
+                last7Total,
+                dailyAverage,
+                peakValue,
+                peakLabel,
+                latestLabel,
+                latestDaily
+            }
+        };
+    }
+
+    updateTotalChartSummary(chartData) {
+        const summaryContainer = document.getElementById('totalChartSummary');
+        const footer = document.getElementById('totalChartFooter');
+        if (summaryContainer) {
+            const average = chartData.meta.dailyAverage;
+            const averageDisplay = Number.isFinite(average)
+                ? (Number.isInteger(average) ? average : average.toFixed(1))
+                : 0;
+
+            summaryContainer.innerHTML = `
+                <div class="summary-chip">
+                    <span class="chip-label">30日累計</span>
+                    <span class="chip-value">${chartData.meta.totalCount}回</span>
+                </div>
+                <div class="summary-chip">
+                    <span class="chip-label">直近7日</span>
+                    <span class="chip-value">${chartData.meta.last7Total}回</span>
+                </div>
+                <div class="summary-chip">
+                    <span class="chip-label">1日平均</span>
+                    <span class="chip-value">${averageDisplay}回</span>
+                </div>
+            `;
+        }
+
+        if (footer) {
+            const peakText = chartData.meta.peakLabel
+                ? `最多日: ${chartData.meta.peakLabel} (${chartData.meta.peakValue}回)`
+                : '最多日: ー';
+            const latestText = chartData.meta.latestLabel
+                ? `最新: ${chartData.meta.latestLabel} (${chartData.meta.latestDaily}回)`
+                : '最新: ー';
+
+            footer.innerHTML = `
+                <span><span class="indicator" style="background: #FFB74D"></span>累積達成</span>
+                <span><span class="indicator" style="background: #4A90E2"></span>日別達成</span>
+                <span>${peakText}</span>
+                <span>${latestText}</span>
+            `;
+        }
     }
 
     // モンスターを生成
