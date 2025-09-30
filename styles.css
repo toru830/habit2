@@ -1484,13 +1484,7 @@ body {
         font-size: 11px;
     }
 
-    .report-overview {
-        gap: 8px;
-    }
-
-    .report-metric {
-        min-width: 120px;
-    }
+    /* レポート関連のスタイルは削除されました */
 
 }
 
@@ -1740,16 +1734,7 @@ body {
     font-weight: 500;
 }
 
-/* 詳細レポートのスタイル */
-.detailed-report {
-    margin-top: 20px;
-}
-
-.detailed-report h3 {
-    color: #4A90E2;
-    margin-bottom: 15px;
-    font-size: 18px;
-}
+/* 詳細レポートのスタイルは削除されました */
 
 /* 習慣レポート関連のスタイルは削除されました */
 

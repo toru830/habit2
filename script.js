@@ -379,7 +379,7 @@ class HabitTracker {
         this.completedHabits = this.loadCompletedHabits();
         this.currentWeek = this.getCurrentWeek();
         this.calendarMonth = new Date(); // 現在の月
-        this.reportMonth = new Date(); // レポート用の月
+        // レポート機能は削除されました
         this.healthData = this.loadHealthData(); // ヘルスキーピングとヘッドマッサージのデータ
 
         // モチベーション機能
@@ -1035,7 +1035,7 @@ class HabitTracker {
         
         // 報酬情報はHTMLで静的に表示されるため削除
         
-        // 詳細レポートはrenderDetailReports()で表示されるため削除
+        // レポート機能は削除されました
     }
 
 
@@ -1908,14 +1908,13 @@ class HabitTracker {
     // 現在のビューを取得
     getCurrentView() {
         const weekView = document.getElementById('weekView');
-        const reportView = document.getElementById('reportView');
+        // レポート機能は削除されました
         const monsterView = document.getElementById('monsterView');
         
         // より確実な判定方法を使用
         if (weekView && weekView.style.display !== 'none' && weekView.offsetParent !== null) {
             return 'week';
-        } else if (reportView && reportView.style.display !== 'none' && reportView.offsetParent !== null) {
-            return 'report';
+        // レポート機能は削除されました
         } else if (monsterView && monsterView.style.display !== 'none' && monsterView.offsetParent !== null) {
             return 'monster';
         }
@@ -1928,9 +1927,7 @@ class HabitTracker {
             case 'week':
                 this.renderCalendar();
                 break;
-            case 'report':
-                this.updateReportView();
-                break;
+            // レポート機能は削除されました
             case 'monster':
                 this.updateMonsterView();
                 break;
@@ -2733,11 +2730,11 @@ class HabitTracker {
     // 月間カレンダーを描画
     renderMonthlyCalendar() {
         const calendarGrid = document.getElementById('monthlyCalendarGrid');
-        const monthDisplay = document.getElementById('currentMonthReport');
+        const monthDisplay = document.getElementById('currentMonth');
         if (!calendarGrid || !monthDisplay) return;
 
-        const year = this.reportMonth.getFullYear();
-        const month = this.reportMonth.getMonth();
+        const year = this.calendarMonth.getFullYear();
+        const month = this.calendarMonth.getMonth();
         
         // 月表示を更新
         monthDisplay.textContent = `${year}年${month + 1}月`;
@@ -2849,19 +2846,19 @@ class HabitTracker {
 
     // 月間カレンダーのイベント設定
     setupMonthlyCalendarEvents() {
-        const prevBtn = document.getElementById('prevMonthReport');
-        const nextBtn = document.getElementById('nextMonthReport');
+        const prevBtn = document.getElementById('prevMonth');
+        const nextBtn = document.getElementById('nextMonth');
         
         if (prevBtn) {
             prevBtn.onclick = () => {
-                this.reportMonth.setMonth(this.reportMonth.getMonth() - 1);
+                this.calendarMonth.setMonth(this.calendarMonth.getMonth() - 1);
                 this.renderMonthlyCalendar();
             };
         }
         
         if (nextBtn) {
             nextBtn.onclick = () => {
-                this.reportMonth.setMonth(this.reportMonth.getMonth() + 1);
+                this.calendarMonth.setMonth(this.calendarMonth.getMonth() + 1);
                 this.renderMonthlyCalendar();
             };
         }
