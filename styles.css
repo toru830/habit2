@@ -875,9 +875,10 @@ body {
 
 .chart-summary {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .summary-chip {
@@ -888,9 +889,8 @@ body {
     border-radius: 8px;
     background: rgba(74, 144, 226, 0.12);
     border: 1px solid rgba(74, 144, 226, 0.35);
-    min-width: 80px;
-    flex: 1;
-    max-width: 100px;
+    width: 80px;
+    flex-shrink: 0;
 }
 
 .summary-chip .chip-label {
@@ -1485,8 +1485,7 @@ body {
     }
 
     .summary-chip {
-        min-width: 70px;
-        max-width: 90px;
+        width: 70px;
         padding: 4px 8px;
     }
     
@@ -1509,8 +1508,7 @@ body {
 /* より小さな画面対応 */
 @media (max-width: 360px) {
     .summary-chip {
-        min-width: 60px;
-        max-width: 80px;
+        width: 60px;
         padding: 3px 6px;
     }
     
