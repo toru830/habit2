@@ -884,24 +884,32 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: 8px 12px;
-    border-radius: 10px;
+    padding: 6px 10px;
+    border-radius: 8px;
     background: rgba(74, 144, 226, 0.12);
     border: 1px solid rgba(74, 144, 226, 0.35);
-    min-width: 120px;
+    min-width: 80px;
+    flex: 1;
+    max-width: 100px;
 }
 
 .summary-chip .chip-label {
-    font-size: 11px;
+    font-size: 10px;
     color: #a8b7d4;
     letter-spacing: 0.05em;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .summary-chip .chip-value {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .chart-container {
@@ -1477,7 +1485,17 @@ body {
     }
 
     .summary-chip {
-        min-width: 100px;
+        min-width: 70px;
+        max-width: 90px;
+        padding: 4px 8px;
+    }
+    
+    .summary-chip .chip-label {
+        font-size: 9px;
+    }
+    
+    .summary-chip .chip-value {
+        font-size: 12px;
     }
 
     .chart-footer {
@@ -1490,6 +1508,23 @@ body {
 
 /* より小さな画面対応 */
 @media (max-width: 360px) {
+    .summary-chip {
+        min-width: 60px;
+        max-width: 80px;
+        padding: 3px 6px;
+    }
+    
+    .summary-chip .chip-label {
+        font-size: 8px;
+    }
+    
+    .summary-chip .chip-value {
+        font-size: 11px;
+    }
+    
+    .chart-summary {
+        gap: 6px;
+    }
     .grid-header,
     .date-row,
     .habit-row,
