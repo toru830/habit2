@@ -1774,7 +1774,7 @@ class HabitTracker {
         
         // ボトムナビゲーション
         document.getElementById('homeBtn').addEventListener('click', () => this.showHomeView());
-        // レポート機能は削除されました
+        document.getElementById('statsBtn').addEventListener('click', () => this.showStatsView());
         document.getElementById('monsterBtn').addEventListener('click', () => this.showMonsterView());
         document.getElementById('badgeBtn').addEventListener('click', () => this.showBadgeView());
         document.getElementById('settingsBtn').addEventListener('click', () => this.showSettingsView());
@@ -1914,7 +1914,8 @@ class HabitTracker {
         // より確実な判定方法を使用
         if (weekView && weekView.style.display !== 'none' && weekView.offsetParent !== null) {
             return 'week';
-        // レポート機能は削除されました
+        } else if (statsView && statsView.style.display !== 'none' && statsView.offsetParent !== null) {
+            return 'stats';
         } else if (monsterView && monsterView.style.display !== 'none' && monsterView.offsetParent !== null) {
             return 'monster';
         }
@@ -1927,7 +1928,9 @@ class HabitTracker {
             case 'week':
                 this.renderCalendar();
                 break;
-            // レポート機能は削除されました
+            case 'stats':
+                this.updateStatsView();
+                break;
             case 'monster':
                 this.updateMonsterView();
                 break;
@@ -2004,7 +2007,16 @@ class HabitTracker {
         this.setActiveNav('homeBtn');
     }
 
-    // レポート機能は削除されました
+    showStatsView() {
+        this.hideAllViews();
+        const statsView = document.getElementById('statsView');
+        if (statsView) {
+            statsView.style.display = 'block';
+        }
+        this.renderTotalChart();
+        this.updateMotivationDisplay();
+        this.setActiveNav('statsBtn');
+    }
 
     showBadgeView() {
         this.hideAllViews();
@@ -2424,6 +2436,11 @@ class HabitTracker {
         const activityBonus = totalScore * 2;
 
         return streakBonus + perfectionBonus + activityBonus + badgeGil;
+    }
+
+    updateStatsView() {
+        this.renderTotalChart();
+        this.updateMotivationDisplay();
     }
 
     showMonsterView() {
