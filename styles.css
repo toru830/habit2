@@ -1059,6 +1059,14 @@ body {
     vertical-align: top;
 }
 
+/* 習慣名セルの下の空白を完全に削除 */
+.report-table td:nth-child(2) {
+    background: transparent;
+    padding: 4px 8px;
+    vertical-align: top;
+    line-height: 1.2;
+}
+
 .report-table tr:last-child td {
     border-bottom: none;
 }
