@@ -1022,64 +1022,7 @@ class HabitTracker {
     }
 
 
-    // 習慣の統計を取得
-    getHabitStats(habitId) {
-        const today = new Date();
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay());
-        
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-        
-        let weeklyCompleted = 0;
-        let weeklyTotal = 0;
-        let monthlyCompleted = 0;
-        let monthlyTotal = 0;
-        let currentStreak = 0;
-        
-        // 週間統計
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(weekStart);
-            date.setDate(weekStart.getDate() + i);
-            const dateStr = date.toISOString().split('T')[0];
-            
-            if (date <= today) {
-                weeklyTotal++;
-                if (this.isHabitCompleted(habitId, date)) {
-                    weeklyCompleted++;
-                }
-            }
-        }
-        
-        // 月間統計
-        for (let d = new Date(monthStart); d <= today; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().split('T')[0];
-            monthlyTotal++;
-            if (this.isHabitCompleted(habitId, d)) {
-                monthlyCompleted++;
-            }
-        }
-        
-        // 現在の連続日数
-        const dates = Object.keys(this.completedHabits).sort().reverse();
-        for (let i = 0; i < dates.length; i++) {
-            const date = dates[i];
-            const habits = this.completedHabits[date];
-            const isCompleted = Array.isArray(habits) ? 
-                habits.includes(habitId) : 
-                (habits && typeof habits === 'object' ? !!habits[habitId] : false);
-            if (isCompleted) {
-                currentStreak++;
-            } else {
-                break;
-            }
-        }
-        
-        return {
-            weeklyRate: weeklyTotal > 0 ? Math.round((weeklyCompleted / weeklyTotal) * 100) : 0,
-            monthlyRate: monthlyTotal > 0 ? Math.round((monthlyCompleted / monthlyTotal) * 100) : 0,
-            currentStreak: currentStreak
-        };
-    }
+    // 習慣の統計機能は削除されました
 
 
     // タイプラベルを取得

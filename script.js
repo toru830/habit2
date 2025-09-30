@@ -1039,53 +1039,7 @@ class HabitTracker {
     }
 
 
-    // 習慣の統計を取得
-    getHabitStats(habitId) {
-        const today = new Date();
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay());
-        
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-        
-        let weeklyCompleted = 0;
-        let weeklyTotal = 0;
-        let monthlyCompleted = 0;
-        let monthlyTotal = 0;
-        
-        // 週間統計
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(weekStart);
-            date.setDate(weekStart.getDate() + i);
-            
-            if (date <= today) {
-                weeklyTotal++;
-                if (this.isHabitCompleted(habitId, date)) {
-                    weeklyCompleted++;
-                }
-            }
-        }
-        
-        // 月間統計
-        for (let d = new Date(monthStart); d <= today; d.setDate(d.getDate() + 1)) {
-            monthlyTotal++;
-            if (this.isHabitCompleted(habitId, d)) {
-                monthlyCompleted++;
-            }
-        }
-        const currentStreak = this.getCurrentStreak(habitId);
-        const bestStreak = this.getBestStreak(habitId);
-        const totalCompleted = this.calculateTotalAll(habitId);
-        
-        return {
-            weeklyRate: weeklyTotal > 0 ? Math.round((weeklyCompleted / weeklyTotal) * 100) : 0,
-            monthlyRate: monthlyTotal > 0 ? Math.round((monthlyCompleted / monthlyTotal) * 100) : 0,
-            monthlyCompleted,
-            monthlyTotal,
-            currentStreak,
-            bestStreak,
-            totalCompleted
-        };
-    }
+    // 習慣の統計機能は削除されました
 
 
     // タイプラベルを取得
@@ -2013,7 +1967,6 @@ class HabitTracker {
         if (statsView) {
             statsView.style.display = 'block';
         }
-        this.renderTotalChart();
         this.updateMotivationDisplay();
         this.setActiveNav('statsBtn');
     }
@@ -2439,7 +2392,6 @@ class HabitTracker {
     }
 
     updateStatsView() {
-        this.renderTotalChart();
         this.updateMotivationDisplay();
     }
 
