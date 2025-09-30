@@ -820,7 +820,7 @@ class HabitTracker {
             // 配列かオブジェクトかを判定
             if (Array.isArray(habits)) {
                 if (habits.includes(habitId)) {
-                    total++;
+                total++;
                 }
             } else if (habits && typeof habits === 'object') {
                 // オブジェクトの場合、habitIdをキーとして確認
@@ -1044,19 +1044,19 @@ class HabitTracker {
         const today = new Date();
         const weekStart = new Date(today);
         weekStart.setDate(today.getDate() - today.getDay());
-
+        
         const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-
+        
         let weeklyCompleted = 0;
         let weeklyTotal = 0;
         let monthlyCompleted = 0;
         let monthlyTotal = 0;
-
+        
         // 週間統計
         for (let i = 0; i < 7; i++) {
             const date = new Date(weekStart);
             date.setDate(weekStart.getDate() + i);
-
+            
             if (date <= today) {
                 weeklyTotal++;
                 if (this.isHabitCompleted(habitId, date)) {
@@ -1064,7 +1064,7 @@ class HabitTracker {
                 }
             }
         }
-
+        
         // 月間統計
         for (let d = new Date(monthStart); d <= today; d.setDate(d.getDate() + 1)) {
             monthlyTotal++;
@@ -1075,7 +1075,7 @@ class HabitTracker {
         const currentStreak = this.getCurrentStreak(habitId);
         const bestStreak = this.getBestStreak(habitId);
         const totalCompleted = this.calculateTotalAll(habitId);
-
+        
         return {
             weeklyRate: weeklyTotal > 0 ? Math.round((weeklyCompleted / weeklyTotal) * 100) : 0,
             monthlyRate: monthlyTotal > 0 ? Math.round((monthlyCompleted / monthlyTotal) * 100) : 0,
@@ -1120,118 +1120,6 @@ class HabitTracker {
         return null;
     }
 
-    // 新しいレポートテーブルを生成
-    renderReportTable() {
-        const reportTableContainer = document.getElementById('reportTable');
-        const reportOverview = document.getElementById('reportOverview');
-        if (!reportTableContainer) return;
-
-        let html = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>習慣名</th>
-                        <th>今月の達成状況</th>
-                        <th>連続記録</th>
-                        <th>累計達成</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        let totalMonthlyCompleted = 0;
-        let totalMonthlyPossible = 0;
-        let totalAllCompleted = 0;
-        let rateSum = 0;
-        let rateCount = 0;
-        let bestStreak = { habit: '', value: 0 };
-        let bestMonthly = { habit: '', value: 0 };
-
-        this.habits.forEach((habit, index) => {
-            const stats = this.getHabitStats(habit.id);
-            const rateDisplay = stats.monthlyTotal > 0 ? `${stats.monthlyRate}%` : '—';
-            const countDisplay = stats.monthlyTotal > 0 ? `${stats.monthlyCompleted}/${stats.monthlyTotal}日` : '記録なし';
-            const progressWidth = stats.monthlyTotal > 0 ? Math.min(stats.monthlyRate, 100) : 0;
-
-            totalMonthlyCompleted += stats.monthlyCompleted;
-            totalMonthlyPossible += stats.monthlyTotal;
-            totalAllCompleted += stats.totalCompleted;
-
-            if (stats.monthlyTotal > 0) {
-                rateSum += stats.monthlyRate;
-                rateCount++;
-                if (stats.monthlyRate > bestMonthly.value) {
-                    bestMonthly = { habit: habit.shortName, value: stats.monthlyRate };
-                }
-            }
-
-            if (stats.bestStreak > bestStreak.value) {
-                bestStreak = { habit: habit.shortName, value: stats.bestStreak };
-            }
-
-            html += `
-                <tr>
-                    <td class="habit-number">${index + 1}</td>
-                    <td class="habit-name">${habit.shortName}</td>
-                    <td>
-                        <div class="report-progress">
-                            <div class="progress-row">
-                                <span class="progress-label">達成率</span>
-                                <span class="progress-rate">${rateDisplay}</span>
-                            </div>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: ${progressWidth}%"></div>
-                            </div>
-                            <div class="progress-row">
-                                <span class="progress-label">実績</span>
-                                <span class="progress-count">${countDisplay}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="streak-cell">${stats.currentStreak}日<small>最長 ${stats.bestStreak}日</small></td>
-                    <td class="total-cell">${stats.totalCompleted}回</td>
-                </tr>
-            `;
-        });
-
-        html += `
-                </tbody>
-            </table>
-        `;
-
-        reportTableContainer.innerHTML = html;
-
-        if (reportOverview) {
-            const averageRate = rateCount > 0 ? Math.round(rateSum / rateCount) : 0;
-            const monthlySummary = totalMonthlyPossible > 0
-                ? `${totalMonthlyCompleted} / ${totalMonthlyPossible}回`
-                : `${totalMonthlyCompleted}回`;
-
-            reportOverview.innerHTML = `
-                <div class="report-metric">
-                    <span class="metric-label">今月の総達成</span>
-                    <span class="metric-value">${monthlySummary}</span>
-                </div>
-                <div class="report-metric">
-                    <span class="metric-label">平均達成率</span>
-                    <span class="metric-value">${averageRate}%</span>
-                </div>
-                <div class="report-metric">
-                    <span class="metric-label">最長連続</span>
-                    <span class="metric-value">${bestStreak.value > 0 ? `${bestStreak.habit} ${bestStreak.value}日` : 'ー'}</span>
-                </div>
-                <div class="report-metric">
-                    <span class="metric-label">最多達成率</span>
-                    <span class="metric-value">${bestMonthly.value > 0 ? `${bestMonthly.habit} ${bestMonthly.value}%` : 'ー'}</span>
-                </div>
-                <div class="report-metric">
-                    <span class="metric-label">累計達成</span>
-                    <span class="metric-value">${totalAllCompleted}回</span>
-                </div>
-            `;
-        }
-    }
 
     // 合計値推移グラフを生成
     renderTotalChart() {
@@ -1307,10 +1195,10 @@ class HabitTracker {
                         data: chartData.cumulativeValues,
                         borderColor: cumulativeColor,
                         backgroundColor: gradient,
-                        borderWidth: 2,
-                        fill: true,
+                    borderWidth: 2,
+                    fill: true,
                         tension: 0.35,
-                        pointRadius: 3,
+                    pointRadius: 3,
                         pointHoverRadius: 6,
                         pointBackgroundColor: cumulativeColor,
                         pointBorderColor: '#1c1c1c',
@@ -1394,13 +1282,13 @@ class HabitTracker {
                         chart.dragStartY = args.event.y;
                         chart.isDragging = false;
                     }
-
+                    
                     if (args.event.type === 'mousemove' || args.event.type === 'touchmove') {
                         if (chart.dragStartX !== undefined && chart.dragStartY !== undefined) {
                             const deltaX = args.event.x - chart.dragStartX;
                             const deltaY = args.event.y - chart.dragStartY;
                             const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
+                            
                             if (distance > 5) {
                                 chart.isDragging = true;
                                 this.handleDrag(chart, deltaX);
@@ -1409,7 +1297,7 @@ class HabitTracker {
                             }
                         }
                     }
-
+                    
                     if (args.event.type === 'mouseup' || args.event.type === 'touchend') {
                         chart.dragStartX = undefined;
                         chart.dragStartY = undefined;
@@ -1421,10 +1309,10 @@ class HabitTracker {
                     const range = Math.max(1, xScale.max - xScale.min);
                     const scale = chart.width / range;
                     const shift = -deltaX / scale;
-
+                    
                     const newMin = Math.max(0, xScale.min + shift);
                     const newMax = Math.min(chart.data.labels.length - 1, xScale.max + shift);
-
+                    
                     if (newMax - newMin >= 5) {
                         xScale.options.min = newMin;
                         xScale.options.max = newMax;
@@ -1443,7 +1331,7 @@ class HabitTracker {
         const dailyValues = [];
         const cumulativeValues = [];
         const today = new Date();
-
+        
         let cumulativeTotal = 0;
         let peakValue = 0;
         let peakLabel = '';
@@ -1454,7 +1342,7 @@ class HabitTracker {
             const dateKey = date.toISOString().split('T')[0];
             const label = `${date.getMonth() + 1}/${date.getDate()}`;
             labels.push(label);
-
+            
             const habits = this.completedHabits[dateKey];
             let dailyCompleted = 0;
             if (Array.isArray(habits)) {
@@ -1625,7 +1513,7 @@ class HabitTracker {
             const monsterCard = document.createElement('div');
             monsterCard.className = 'monster-card';
             const daysToNext = Math.max(0, nextLevel - totalCount);
-
+            
             monsterCard.innerHTML = `
                 <div class="monster-name">${displayName}</div>
                 <div class="monster-image" style="border-color: ${color}; background: radial-gradient(circle, ${color}33 0%, rgba(0, 0, 0, 0.85) 70%);">
@@ -1640,7 +1528,7 @@ class HabitTracker {
                     <span>次のレベルまで: ${daysToNext}日</span>
                 </div>
             `;
-
+            
             monsterGrid.appendChild(monsterCard);
         });
     }
@@ -1886,7 +1774,7 @@ class HabitTracker {
         
         // ボトムナビゲーション
         document.getElementById('homeBtn').addEventListener('click', () => this.showHomeView());
-        document.getElementById('reportBtn').addEventListener('click', () => this.showReportView());
+        // レポート機能は削除されました
         document.getElementById('monsterBtn').addEventListener('click', () => this.showMonsterView());
         document.getElementById('badgeBtn').addEventListener('click', () => this.showBadgeView());
         document.getElementById('settingsBtn').addEventListener('click', () => this.showSettingsView());
@@ -1914,7 +1802,7 @@ class HabitTracker {
     // オプション同期機能の設定（自動同期を無効化）
     setupOptionalSync() {
         console.log('自動同期は無効化されています');
-        return;
+            return;
         
         console.log('同期機能の設定を開始');
         
@@ -2119,17 +2007,7 @@ class HabitTracker {
         this.setActiveNav('homeBtn');
     }
 
-    showReportView() {
-        this.hideAllViews();
-        const statsView = document.getElementById('statsView');
-        if (statsView) {
-            statsView.style.display = 'block';
-        }
-        this.renderTotalChart();
-        this.renderReportTable();
-        this.updateMotivationDisplay();
-        this.setActiveNav('reportBtn');
-    }
+    // レポート機能は削除されました
 
     showBadgeView() {
         this.hideAllViews();
@@ -2581,7 +2459,7 @@ class HabitTracker {
     // ローカルストレージから完了した習慣を読み込み
     loadCompletedHabits() {
         try {
-            const saved = localStorage.getItem('habitTrackerData');
+        const saved = localStorage.getItem('habitTrackerData');
             console.log('ローカルストレージから読み込み:', saved);
             const result = saved ? JSON.parse(saved) : {};
             console.log('読み込み結果:', result);
@@ -2596,7 +2474,7 @@ class HabitTracker {
     loadHealthData() {
         try {
             const saved = localStorage.getItem('healthData');
-            return saved ? JSON.parse(saved) : {};
+        return saved ? JSON.parse(saved) : {};
         } catch (error) {
             console.error('ヘルスデータ読み込みエラー:', error);
             return {};

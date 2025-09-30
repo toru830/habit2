@@ -729,47 +729,6 @@ class HabitTracker {
         return null;
     }
 
-    // 新しいレポートテーブルを生成
-    renderReportTable() {
-        const reportTableContainer = document.getElementById('reportTable');
-        if (!reportTableContainer) return;
-
-        let html = `
-            <table class="report-table">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>習慣名</th>
-                        <th>月完了率</th>
-                        <th>連続日数</th>
-                        <th>最高連続</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        this.habits.forEach((habit, index) => {
-            const stats = this.getHabitStats(habit.id);
-            const bestStreak = this.getBestStreak(habit.id);
-            
-            html += `
-                <tr>
-                    <td class="habit-number">${index + 1}</td>
-                    <td class="habit-name">${habit.shortName}</td>
-                    <td class="stat-value">${stats.monthlyRate}%</td>
-                    <td class="stat-value">${stats.currentStreak}日</td>
-                    <td class="best-streak-value">${bestStreak}日</td>
-                </tr>
-            `;
-        });
-
-        html += `
-                </tbody>
-            </table>
-        `;
-
-        reportTableContainer.innerHTML = html;
-    }
 
     // 合計値推移グラフを生成
     renderTotalChart() {
@@ -1125,7 +1084,7 @@ class HabitTracker {
         
         // ボトムナビゲーション
         document.getElementById('homeBtn').addEventListener('click', () => this.showHomeView());
-        document.getElementById('reportBtn').addEventListener('click', () => this.showReportView());
+        // レポート機能は削除されました
         document.getElementById('monsterBtn').addEventListener('click', () => this.showMonsterView());
         document.getElementById('settingsBtn').addEventListener('click', () => this.showSettingsView());
     }
@@ -1141,14 +1100,7 @@ class HabitTracker {
         this.setActiveNav('homeBtn');
     }
 
-    showReportView() {
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('statsView').style.display = 'block';
-        document.getElementById('monsterView').style.display = 'none';
-        this.renderTotalChart();
-        this.renderReportTable();
-        this.setActiveNav('reportBtn');
-    }
+    // レポート機能は削除されました
 
     showMonsterView() {
         document.getElementById('weekView').style.display = 'none';

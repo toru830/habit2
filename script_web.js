@@ -1114,47 +1114,6 @@ class HabitTracker {
         return null;
     }
 
-    // 新しいレポートテーブルを生成
-    renderReportTable() {
-        const reportTableContainer = document.getElementById('reportTable');
-        if (!reportTableContainer) return;
-
-        let html = `
-            <table class="report-table">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>習慣名</th>
-                        <th>月完了率</th>
-                        <th>連続日数</th>
-                        <th>最大連続</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        this.habits.forEach((habit, index) => {
-            const stats = this.getHabitStats(habit.id);
-            const bestStreak = this.getBestStreak(habit.id);
-            
-            html += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${habit.shortName}</td>
-                    <td>${stats.monthlyRate}%</td>
-                    <td>${stats.currentStreak}日</td>
-                    <td>${bestStreak}日</td>
-                </tr>
-            `;
-        });
-
-        html += `
-                </tbody>
-            </table>
-        `;
-
-        reportTableContainer.innerHTML = html;
-    }
 
     // 合計値推移グラフを生成
     renderTotalChart() {
@@ -1661,7 +1620,7 @@ class HabitTracker {
         
         // ボトムナビゲーション
         document.getElementById('homeBtn').addEventListener('click', () => this.showHomeView());
-        document.getElementById('reportBtn').addEventListener('click', () => this.showReportView());
+        // レポート機能は削除されました
         document.getElementById('monsterBtn').addEventListener('click', () => this.showMonsterView());
         document.getElementById('badgeBtn').addEventListener('click', () => this.showBadgeView());
         document.getElementById('settingsBtn').addEventListener('click', () => this.showSettingsView());
@@ -1894,17 +1853,7 @@ class HabitTracker {
         this.setActiveNav('homeBtn');
     }
 
-    showReportView() {
-        this.hideAllViews();
-        const statsView = document.getElementById('statsView');
-        if (statsView) {
-            statsView.style.display = 'block';
-        }
-        this.renderTotalChart();
-        this.renderReportTable();
-        this.updateMotivationDisplay();
-        this.setActiveNav('reportBtn');
-    }
+    // レポート機能は削除されました
 
     showBadgeView() {
         this.hideAllViews();
