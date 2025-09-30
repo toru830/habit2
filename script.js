@@ -1967,6 +1967,7 @@ class HabitTracker {
         if (statsView) {
             statsView.style.display = 'block';
         }
+        this.renderTotalChart();
         this.updateMotivationDisplay();
         this.setActiveNav('statsBtn');
     }
@@ -2392,6 +2393,7 @@ class HabitTracker {
     }
 
     updateStatsView() {
+        this.renderTotalChart();
         this.updateMotivationDisplay();
     }
 
