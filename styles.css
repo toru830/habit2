@@ -527,6 +527,17 @@ body {
     border-bottom: 1px solid #333;
 }
 
+/* レポートテーブル内の習慣名は特別扱い */
+.report-table .habit-name {
+    background: transparent !important;
+    padding: 4px 8px !important;
+    line-height: 1.2 !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    border-bottom: none !important;
+}
+
 .habit-cell {
     padding: 1px 2px;
     text-align: center;
@@ -1060,11 +1071,15 @@ body {
 }
 
 /* 習慣名セルの下の空白を完全に削除 */
-.report-table td:nth-child(2) {
-    background: transparent;
-    padding: 4px 8px;
-    vertical-align: top;
-    line-height: 1.2;
+.report-table td:nth-child(2),
+.report-table .habit-name {
+    background: transparent !important;
+    padding: 4px 8px !important;
+    vertical-align: top !important;
+    line-height: 1.2 !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
 }
 
 .report-table tr:last-child td {
