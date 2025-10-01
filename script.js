@@ -858,9 +858,691 @@ class HabitTracker {
     calculateAllTimeTotal() {
         let total = 0;
         for (const dateStr in this.completedHabits) {
-            total += this.completedHabits[dateStr].length;
+            const habits = this.normalizeHabitEntries(this.completedHabits[dateStr]);
+            total += habits.length;
         }
         return total;
+    }
+
+    normalizeHabitEntries(habitValue) {
+        if (!habitValue) return [];
+        if (Array.isArray(habitValue)) {
+            return habitValue.filter(Boolean);
+        }
+        if (typeof habitValue === 'object') {
+            return Object.entries(habitValue)
+                .filter(([, completed]) => !!completed)
+                .map(([habitId]) => habitId);
+        }
+        return [];
+    }
+
+    formatDateKey(inputDate) {
+        if (!inputDate) return '';
+        const date = new Date(inputDate);
+        if (Number.isNaN(date.getTime())) return '';
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    getHabitIdsForDate(date) {
+        const dateKey = this.formatDateKey(date);
+        if (!dateKey) return [];
+        const habits = this.completedHabits[dateKey];
+        return this.normalizeHabitEntries(habits);
+    }
+
+    getHabitById(habitId) {
+        return this.habits.find(habit => habit.id === habitId);
+    }
+
+    calculateHabitStreak(dateSet) {
+        if (!dateSet || dateSet.size === 0) {
+            return 0;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let streak = 0;
+        const cursor = new Date(today);
+
+        while (true) {
+            const key = this.formatDateKey(cursor);
+            if (dateSet.has(key)) {
+                streak++;
+                cursor.setDate(cursor.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+
+        return streak;
+    }
+
+    formatRelativeDate(date) {
+        if (!date) return '';
+        const target = new Date(date);
+        if (Number.isNaN(target.getTime())) return '';
+        target.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const diffMs = today.getTime() - target.getTime();
+        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return '最終: 今日';
+        if (diffDays === 1) return '最終: 昨日';
+        if (diffDays < 7) return `最終: ${diffDays}日前`;
+        return `最終: ${target.getMonth() + 1}/${target.getDate()}`;
+    }
+
+    calculateHomeStats() {
+        const statsByHabit = {};
+        this.habits.forEach(habit => {
+            statsByHabit[habit.id] = {
+                totalAll: 0,
+                last30: 0,
+                last7: 0,
+                prev7: 0,
+                lastCompleted: null,
+                dates: new Set()
+            };
+        });
+
+        const entries = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const last30Start = new Date(today);
+        last30Start.setDate(today.getDate() - 29);
+        const last7Start = new Date(today);
+        last7Start.setDate(today.getDate() - 6);
+        const prev7Start = new Date(last7Start);
+        prev7Start.setDate(prev7Start.getDate() - 7);
+
+        const weekdayTrend = Array.from({ length: 7 }, (_, dayIndex) => ({
+            dayIndex,
+            label: ['日', '月', '火', '水', '木', '金', '土'][dayIndex],
+            allTime: 0,
+            recent: 0,
+            activeDays: 0,
+            recentActiveDays: 0,
+            averageAll: 0,
+            averageRecent: 0
+        }));
+
+        const activeByDay = Array.from({ length: 7 }, () => new Set());
+        const recentActiveByDay = Array.from({ length: 7 }, () => new Set());
+
+        for (const [dateStr, habitValue] of Object.entries(this.completedHabits)) {
+            const date = new Date(dateStr);
+            if (Number.isNaN(date.getTime())) continue;
+            date.setHours(0, 0, 0, 0);
+            const habitIds = this.normalizeHabitEntries(habitValue);
+            if (habitIds.length === 0) continue;
+
+            entries.push({ date, dateStr, habits: habitIds });
+
+            const isLast30 = date >= last30Start;
+            const isLast7 = date >= last7Start;
+            const isPrev7 = date >= prev7Start && date < last7Start;
+
+            const dayOfWeek = date.getDay();
+            weekdayTrend[dayOfWeek].allTime += habitIds.length;
+            activeByDay[dayOfWeek].add(dateStr);
+            if (isLast30) {
+                weekdayTrend[dayOfWeek].recent += habitIds.length;
+                recentActiveByDay[dayOfWeek].add(dateStr);
+            }
+
+            habitIds.forEach(habitId => {
+                const stats = statsByHabit[habitId];
+                if (!stats) return;
+                stats.totalAll += 1;
+                if (isLast30) stats.last30 += 1;
+                if (isLast7) stats.last7 += 1;
+                if (isPrev7) stats.prev7 += 1;
+                stats.dates.add(dateStr);
+                if (!stats.lastCompleted || stats.lastCompleted < date) {
+                    stats.lastCompleted = new Date(date);
+                }
+            });
+        }
+
+        entries.sort((a, b) => a.date - b.date);
+
+        const totalActiveDays = new Set(entries.map(entry => entry.dateStr));
+        const recentActiveDays = new Set(entries.filter(entry => entry.date >= last30Start).map(entry => entry.dateStr));
+
+        weekdayTrend.forEach((dayStat, index) => {
+            const activeCount = activeByDay[index].size;
+            const recentActiveCount = recentActiveByDay[index].size;
+            dayStat.activeDays = activeCount;
+            dayStat.recentActiveDays = recentActiveCount;
+            dayStat.averageAll = activeCount > 0 ? dayStat.allTime / activeCount : 0;
+            dayStat.averageRecent = recentActiveCount > 0 ? dayStat.recent / recentActiveCount : 0;
+        });
+
+        const statsList = this.habits.map(habit => {
+            const stats = statsByHabit[habit.id];
+            const currentStreak = this.calculateHabitStreak(stats.dates);
+            return {
+                id: habit.id,
+                name: habit.name,
+                shortName: habit.shortName,
+                category: habit.category,
+                priority: habit.priority,
+                totalAll: stats.totalAll,
+                last30: stats.last30,
+                last7: stats.last7,
+                prev7: stats.prev7,
+                currentStreak,
+                lastCompleted: stats.lastCompleted,
+                activeDays: stats.dates.size,
+                pace: stats.dates.size > 0 ? stats.totalAll / stats.dates.size : 0
+            };
+        });
+
+        const categoryMap = {};
+        statsList.forEach(stat => {
+            if (!categoryMap[stat.category]) {
+                categoryMap[stat.category] = {
+                    category: stat.category,
+                    totalAll: 0,
+                    last30: 0,
+                    prev7: 0,
+                    habitCount: 0,
+                    activeHabits: 0,
+                    focusHabit: null,
+                    topHabit: null
+                };
+            }
+
+            const categoryStats = categoryMap[stat.category];
+            categoryStats.totalAll += stat.totalAll;
+            categoryStats.last30 += stat.last30;
+            categoryStats.prev7 += stat.prev7;
+            categoryStats.habitCount += 1;
+            if (stat.last30 > 0) {
+                categoryStats.activeHabits += 1;
+            }
+
+            if (!categoryStats.topHabit || stat.last30 > categoryStats.topHabit.last30) {
+                categoryStats.topHabit = {
+                    id: stat.id,
+                    name: stat.name,
+                    last30: stat.last30
+                };
+            }
+
+            if (stat.priority >= 4 && stat.last30 === 0) {
+                if (!categoryStats.focusHabit || stat.priority > categoryStats.focusHabit.priority) {
+                    categoryStats.focusHabit = {
+                        id: stat.id,
+                        name: stat.name,
+                        priority: stat.priority
+                    };
+                }
+            }
+        });
+
+        const recentTotal = statsList.reduce((sum, stat) => sum + stat.last30, 0);
+        const categorySummary = Object.values(categoryMap).map(category => {
+            const momentum = category.last30 - category.prev7;
+            const recentShare = recentTotal > 0 ? Math.round((category.last30 / recentTotal) * 100) : 0;
+            return {
+                ...category,
+                momentum,
+                recentShare
+            };
+        }).sort((a, b) => b.last30 - a.last30);
+
+        const normalizeDates = dates => dates.map(date => {
+            const normalized = new Date(date);
+            normalized.setHours(0, 0, 0, 0);
+            return normalized;
+        });
+
+        const thisWeekDates = (this.currentWeek && this.currentWeek.length)
+            ? normalizeDates(this.currentWeek)
+            : normalizeDates(this.getCurrentWeek());
+
+        const lastWeekStart = thisWeekDates.length
+            ? new Date(thisWeekDates[0].getTime() - 7 * 24 * 60 * 60 * 1000)
+            : new Date();
+
+        const lastWeekDates = this.getWeekFromDate(lastWeekStart).map(date => {
+            const normalized = new Date(date);
+            normalized.setHours(0, 0, 0, 0);
+            return normalized;
+        });
+
+        const computeWeekStats = (dates) => {
+            let total = 0;
+            const habitCountMap = new Map();
+            let activeDaysCount = 0;
+
+            dates.forEach(date => {
+                const habitIds = this.getHabitIdsForDate(date);
+                if (habitIds.length > 0) {
+                    activeDaysCount += 1;
+                    total += habitIds.length;
+                    habitIds.forEach(id => {
+                        habitCountMap.set(id, (habitCountMap.get(id) || 0) + 1);
+                    });
+                }
+            });
+
+            return { total, habitCountMap, activeDays: activeDaysCount, totalDays: dates.length };
+        };
+
+        const thisWeekStats = computeWeekStats(thisWeekDates);
+        const lastWeekStats = computeWeekStats(lastWeekDates);
+        const diff = thisWeekStats.total - lastWeekStats.total;
+        const trend = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
+        const diffPercent = lastWeekStats.total > 0
+            ? Math.round((diff / lastWeekStats.total) * 100)
+            : null;
+
+        const bestHabitEntry = Array.from(thisWeekStats.habitCountMap.entries())
+            .sort((a, b) => b[1] - a[1])[0];
+        const bestHabit = bestHabitEntry
+            ? {
+                id: bestHabitEntry[0],
+                name: (this.getHabitById(bestHabitEntry[0]) || {}).name || bestHabitEntry[0],
+                count: bestHabitEntry[1]
+            }
+            : null;
+
+        const weeklyComparison = {
+            thisWeekTotal: thisWeekStats.total,
+            lastWeekTotal: lastWeekStats.total,
+            diff,
+            diffPercent,
+            trend,
+            bestHabit,
+            activeDays: thisWeekStats.activeDays,
+            totalDays: thisWeekStats.totalDays,
+            averagePerDay: thisWeekStats.totalDays > 0 ? thisWeekStats.total / thisWeekStats.totalDays : 0
+        };
+
+        let insightMessage = '';
+        if (trend === 'up' && diff > 0) {
+            insightMessage = `先週より${diff}件多くチェックできています。`;
+        } else if (trend === 'down' && diff < 0) {
+            insightMessage = `先週より${Math.abs(diff)}件少ないペースです。`;
+        } else {
+            insightMessage = '先週と同じペースを維持しています。';
+        }
+
+        if (bestHabit) {
+            insightMessage += ` 今週よくできているのは「${bestHabit.name}」です。`;
+        }
+
+        weeklyComparison.insight = insightMessage;
+
+        const bestRecentDay = weekdayTrend.reduce((best, day) => {
+            if (!best || day.recent > best.recent) return day;
+            return best;
+        }, null);
+
+        const calmRecentDay = weekdayTrend
+            .filter(day => day.recent > 0)
+            .reduce((calm, day) => {
+                if (!calm || day.recent < calm.recent) return day;
+                return calm;
+            }, null);
+
+        const totals = {
+            allTime: statsList.reduce((sum, stat) => sum + stat.totalAll, 0),
+            last30: recentTotal,
+            last7: statsList.reduce((sum, stat) => sum + stat.last7, 0),
+            activeDays: totalActiveDays.size,
+            recentActiveDays: recentActiveDays.size,
+            habitCount: this.habits.length,
+            bestRecentDay,
+            calmRecentDay
+        };
+
+        const maxWeekdayRecent = weekdayTrend.reduce((max, day) => Math.max(max, day.recent), 0);
+
+        return {
+            hasData: entries.length > 0,
+            habitList: statsList,
+            categorySummary,
+            weekdayTrend,
+            weeklyComparison,
+            totals,
+            maxWeekdayRecent
+        };
+    }
+
+    updateStatsAnalysis() {
+        const statsView = document.getElementById('statsView');
+        if (!statsView) return;
+
+        const stats = this.calculateHomeStats();
+        this.renderOverallSummary(stats);
+        this.renderHabitHighlights(stats);
+        this.renderCategorySummary(stats);
+        this.renderWeekdayTrend(stats);
+        this.renderWeeklyComparison(stats);
+    }
+
+    renderOverallSummary(stats) {
+        const container = document.getElementById('overallSummary');
+        if (!container) return;
+
+        container.innerHTML = '';
+        if (!stats.hasData) {
+            container.innerHTML = '<p class="analysis-empty">まだ集計できるデータがありません。ホームで記録を追加してみましょう。</p>';
+            return;
+        }
+
+        const { totals } = stats;
+        const recentPace = totals.recentActiveDays > 0
+            ? (totals.last30 / totals.recentActiveDays)
+            : 0;
+        const weeklyAvg = totals.last7 / 7;
+
+        const metrics = document.createElement('div');
+        metrics.className = 'overall-metrics';
+        metrics.innerHTML = `
+            <div class="overall-metric">
+                <span class="metric-label">総チェック数</span>
+                <span class="metric-value">${totals.allTime}</span>
+                <span class="metric-note">記録日数 ${totals.activeDays}日</span>
+            </div>
+            <div class="overall-metric">
+                <span class="metric-label">直近30日</span>
+                <span class="metric-value">${totals.last30}</span>
+                <span class="metric-note">アクティブ日 ${totals.recentActiveDays}日</span>
+            </div>
+            <div class="overall-metric">
+                <span class="metric-label">平均ペース</span>
+                <span class="metric-value">${recentPace.toFixed(1)}件/日</span>
+                <span class="metric-note">最近30日間の平均</span>
+            </div>
+            <div class="overall-metric">
+                <span class="metric-label">週間平均</span>
+                <span class="metric-value">${weeklyAvg.toFixed(1)}件</span>
+                <span class="metric-note">直近7日の合計から算出</span>
+            </div>
+        `;
+
+        container.appendChild(metrics);
+
+        if (totals.bestRecentDay || totals.calmRecentDay) {
+            const note = document.createElement('div');
+            note.className = 'analysis-note';
+            const bestDayText = totals.bestRecentDay
+                ? `最近もっとも取り組めているのは${totals.bestRecentDay.label}曜日です。`
+                : '';
+            const calmDayText = totals.calmRecentDay
+                ? `余白があるのは${totals.calmRecentDay.label}曜日。チャンスです。`
+                : '';
+            note.textContent = `${bestDayText} ${calmDayText}`.trim();
+            container.appendChild(note);
+        }
+    }
+
+    renderHabitHighlights(stats) {
+        const container = document.getElementById('habitHighlights');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!stats.hasData) {
+            container.innerHTML = '<p class="analysis-empty">習慣の記録がまだありません。ホームでチェックしてみましょう。</p>';
+            return;
+        }
+
+        const successGroup = document.createElement('div');
+        successGroup.className = 'highlight-group';
+
+        const successTitle = document.createElement('div');
+        successTitle.className = 'highlight-title';
+        successTitle.textContent = 'よく続けられている項目';
+        successGroup.appendChild(successTitle);
+
+        const topHabits = stats.habitList
+            .filter(habit => habit.last30 > 0)
+            .sort((a, b) => (b.last30 - a.last30) || (b.totalAll - a.totalAll))
+            .slice(0, 3);
+
+        const successList = document.createElement('div');
+        successList.className = 'highlight-list';
+
+        if (topHabits.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'analysis-empty';
+            empty.textContent = '直近30日でチェックされた項目がまだありません。';
+            successList.appendChild(empty);
+        } else {
+            topHabits.forEach(habit => {
+                const item = document.createElement('div');
+                item.className = 'highlight-item';
+                item.innerHTML = `
+                    <div class="highlight-header">
+                        <span class="highlight-name">${habit.name}</span>
+                        <span class="highlight-tag priority-${habit.priority}">優先度${habit.priority}</span>
+                    </div>
+                    <div class="highlight-metrics">
+                        <div class="metric">
+                            <span class="metric-label">30日</span>
+                            <span class="metric-value">${habit.last30}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">総計</span>
+                            <span class="metric-value">${habit.totalAll}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">連続</span>
+                            <span class="metric-value">${habit.currentStreak}日</span>
+                        </div>
+                    </div>
+                    <div class="highlight-footer">
+                        <span class="highlight-category">${habit.category}</span>
+                        <span class="highlight-updated">${habit.lastCompleted ? this.formatRelativeDate(habit.lastCompleted) : '記録なし'}</span>
+                    </div>
+                `;
+                successList.appendChild(item);
+            });
+        }
+
+        successGroup.appendChild(successList);
+        container.appendChild(successGroup);
+
+        const focusGroup = document.createElement('div');
+        focusGroup.className = 'highlight-group';
+
+        const focusTitle = document.createElement('div');
+        focusTitle.className = 'highlight-title';
+        focusTitle.textContent = 'これから力を入れたい項目';
+        focusGroup.appendChild(focusTitle);
+
+        const attentionHabits = stats.habitList
+            .filter(habit => habit.priority >= 4 && habit.last30 === 0)
+            .sort((a, b) => (b.priority - a.priority) || (a.totalAll - b.totalAll))
+            .slice(0, 3);
+
+        const focusList = document.createElement('div');
+        focusList.className = 'highlight-list';
+
+        if (attentionHabits.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'analysis-empty';
+            empty.textContent = '優先度の高い未着手項目はありません。バランス良く進められています。';
+            focusList.appendChild(empty);
+        } else {
+            attentionHabits.forEach(habit => {
+                const item = document.createElement('div');
+                item.className = 'highlight-item';
+                item.innerHTML = `
+                    <div class="highlight-header">
+                        <span class="highlight-name">${habit.name}</span>
+                        <span class="highlight-tag priority-${habit.priority}">優先度${habit.priority}</span>
+                    </div>
+                    <div class="highlight-metrics">
+                        <div class="metric">
+                            <span class="metric-label">総計</span>
+                            <span class="metric-value">${habit.totalAll}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">直近7日</span>
+                            <span class="metric-value">${habit.last7}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">記録日数</span>
+                            <span class="metric-value">${habit.activeDays}</span>
+                        </div>
+                    </div>
+                    <div class="highlight-footer">
+                        <span class="highlight-category">${habit.category}</span>
+                        <span class="highlight-updated ${habit.lastCompleted ? '' : 'no-data'}">${habit.lastCompleted ? this.formatRelativeDate(habit.lastCompleted) : 'まだ記録がありません'}</span>
+                    </div>
+                `;
+                focusList.appendChild(item);
+            });
+        }
+
+        focusGroup.appendChild(focusList);
+        container.appendChild(focusGroup);
+    }
+
+    renderCategorySummary(stats) {
+        const container = document.getElementById('categorySummary');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!stats.hasData) {
+            container.innerHTML = '<p class="analysis-empty">まだカテゴリーごとの分析ができません。チェックを追加すると自動的に表示されます。</p>';
+            return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'category-grid';
+
+        stats.categorySummary.forEach(category => {
+            const item = document.createElement('div');
+            item.className = 'category-item';
+            item.innerHTML = `
+                <div class="category-header">
+                    <span class="category-name">${category.category}</span>
+                    <span class="category-score">30日 ${category.last30}件</span>
+                </div>
+                <div class="category-body">
+                    <div class="category-metrics">
+                        <div class="category-metric">
+                            <span class="category-label">総計</span>
+                            <span class="category-value">${category.totalAll}</span>
+                        </div>
+                        <div class="category-metric">
+                            <span class="category-label">アクティブ習慣</span>
+                            <span class="category-value">${category.activeHabits}/${category.habitCount}</span>
+                        </div>
+                    </div>
+                    <div class="category-progress">
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: ${category.recentShare}%"></div>
+                        </div>
+                        <span class="category-progress-label">最近シェア ${category.recentShare}%</span>
+                    </div>
+                    ${category.focusHabit ? `<div class="category-focus">注目: ${category.focusHabit.name}（優先度${category.focusHabit.priority}）</div>` : ''}
+                </div>
+            `;
+            grid.appendChild(item);
+        });
+
+        container.appendChild(grid);
+    }
+
+    renderWeekdayTrend(stats) {
+        const container = document.getElementById('weekdayTrend');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!stats.hasData) {
+            container.innerHTML = '<p class="analysis-empty">曜日ごとの傾向を表示するには記録が必要です。</p>';
+            return;
+        }
+
+        const list = document.createElement('div');
+        list.className = 'weekday-list';
+
+        stats.weekdayTrend.forEach(dayStat => {
+            const item = document.createElement('div');
+            item.className = 'weekday-item';
+            const ratio = stats.maxWeekdayRecent > 0
+                ? Math.max(0.08, dayStat.recent / stats.maxWeekdayRecent)
+                : 0;
+
+            item.innerHTML = `
+                <div class="weekday-header">
+                    <span>${dayStat.label}曜日</span>
+                    <span>${dayStat.recent}件</span>
+                </div>
+                <div class="weekday-bar">
+                    <div class="weekday-bar-fill" style="transform: scaleX(${ratio});"></div>
+                </div>
+                <div class="weekday-footer">
+                    <span>平均 ${dayStat.averageRecent.toFixed(1)}件/日</span>
+                    <span>記録日 ${dayStat.recentActiveDays}日</span>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+
+        container.appendChild(list);
+    }
+
+    renderWeeklyComparison(stats) {
+        const container = document.getElementById('weeklyComparison');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!stats.hasData) {
+            container.innerHTML = '<p class="analysis-empty">週間比較はまだ表示できません。ホームで1週間分の記録を作ってみましょう。</p>';
+            return;
+        }
+
+        const comparison = document.createElement('div');
+        comparison.className = 'weekly-comparison';
+
+        const diffPercentText = stats.weeklyComparison.diffPercent === null
+            ? '先週データなし'
+            : `${stats.weeklyComparison.diffPercent >= 0 ? '+' : ''}${stats.weeklyComparison.diffPercent}%`;
+
+        comparison.innerHTML = `
+            <div class="weekly-headline">
+                <div class="weekly-total">
+                    <span class="weekly-label">今週のチェック</span>
+                    <span class="weekly-value">${stats.weeklyComparison.thisWeekTotal}</span>
+                    <span class="weekly-sub">アクティブ日数 ${stats.weeklyComparison.activeDays}/${stats.weeklyComparison.totalDays}日</span>
+                </div>
+                <div class="weekly-diff trend-${stats.weeklyComparison.trend}">
+                    <span class="diff-label">先週比</span>
+                    <span class="diff-value">${stats.weeklyComparison.diff >= 0 ? '+' : ''}${stats.weeklyComparison.diff}</span>
+                    <span class="diff-percent">${diffPercentText}</span>
+                </div>
+            </div>
+            <div class="weekly-details">
+                <div class="weekly-detail-item">
+                    <span class="weekly-detail-label">先週</span>
+                    <span>${stats.weeklyComparison.lastWeekTotal}</span>
+                </div>
+                <div class="weekly-detail-item">
+                    <span class="weekly-detail-label">平均ペース</span>
+                    <span>1日あたり${stats.weeklyComparison.averagePerDay.toFixed(1)}件</span>
+                </div>
+                <div class="weekly-detail-item">
+                    <span class="weekly-detail-label">最多項目</span>
+                    <span>${stats.weeklyComparison.bestHabit ? `${stats.weeklyComparison.bestHabit.name} (${stats.weeklyComparison.bestHabit.count})` : '―'}</span>
+                </div>
+            </div>
+            <div class="weekly-insight">${stats.weeklyComparison.insight}</div>
+        `;
+
+        container.appendChild(comparison);
     }
 
     // 習慣の連続日数を計算（今日のチェックのみ）
@@ -2007,6 +2689,7 @@ class HabitTracker {
         document.getElementById('achievementTotal').textContent = `${totalAchievementValue}ギル`;
 
         this.renderBadgeCollection();
+        this.updateStatsAnalysis();
     }
 
     // 全達成データを再計算
