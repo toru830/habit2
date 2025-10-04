@@ -729,9 +729,12 @@ class HabitTracker {
         const habitHabits = this.habits.filter(h => h.type === 'habit');
         habitHabits.forEach((habit, index) => {
             const habitRow = this.createHabitRow(habit, habitIndex, 'habit');
-            // グループ1のスタイル
-            habitRow.style.backgroundColor = '#0a0a0a';
-            habitRow.style.borderLeft = '4px solid #4CAF50';
+            // グループ1のスタイル（薄い緑の背景）
+            if (index === 0) {
+                habitRow.style.backgroundColor = '#0d1a0d';
+            } else {
+                habitRow.style.backgroundColor = '#0a0a0a';
+            }
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
@@ -740,9 +743,12 @@ class HabitTracker {
         const noHabits = this.habits.filter(h => h.type === 'no');
         noHabits.forEach((habit, index) => {
             const habitRow = this.createHabitRow(habit, habitIndex, 'no');
-            // グループ2のスタイル
-            habitRow.style.backgroundColor = '#0a0a0a';
-            habitRow.style.borderLeft = '4px solid #FF9800';
+            // グループ2のスタイル（薄いオレンジの背景）
+            if (index === 0) {
+                habitRow.style.backgroundColor = '#1a0d0a';
+            } else {
+                habitRow.style.backgroundColor = '#0a0a0a';
+            }
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
@@ -751,9 +757,12 @@ class HabitTracker {
         const supplementHabits = this.habits.filter(h => h.type === 'supplement');
         supplementHabits.forEach((habit, index) => {
             const habitRow = this.createHabitRow(habit, habitIndex, 'supplement');
-            // グループ3のスタイル
-            habitRow.style.backgroundColor = '#0a0a0a';
-            habitRow.style.borderLeft = '4px solid #2196F3';
+            // グループ3のスタイル（薄い青の背景）
+            if (index === 0) {
+                habitRow.style.backgroundColor = '#0a0d1a';
+            } else {
+                habitRow.style.backgroundColor = '#0a0a0a';
+            }
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
