@@ -417,6 +417,9 @@ class HabitTracker {
         if (restoreBtn) {
             restoreBtn.onclick = () => this.restoreFromBackup();
         }
+        
+        // デバッグ用のデータクリア機能を追加
+        this.addDebugFunctions();
     }
     
     // データをエクスポート
@@ -494,6 +497,76 @@ class HabitTracker {
             this.updateMotivationDisplay();
             alert('バックアップから復元しました！');
         }
+    }
+
+    // デバッグ用の機能を追加
+    addDebugFunctions() {
+        // グローバルにデバッグ関数を追加
+        window.debugHabitTracker = {
+            // 現在のデータを表示
+            showData: () => {
+                console.log('=== 習慣トラッカーデバッグ情報 ===');
+                console.log('完了した習慣:', this.completedHabits);
+                console.log('ヘルスデータ:', this.healthData);
+                console.log('現在の週:', this.currentWeek);
+                console.log('今日の日付:', new Date().toISOString().split('T')[0]);
+                
+                // 未来の日付のデータをチェック
+                const today = new Date().toISOString().split('T')[0];
+                const futureDates = Object.keys(this.completedHabits).filter(date => date > today);
+                if (futureDates.length > 0) {
+                    console.warn('⚠️ 未来の日付のデータを検出:', futureDates);
+                    futureDates.forEach(date => {
+                        console.log(`  ${date}:`, this.completedHabits[date]);
+                    });
+                }
+            },
+            
+            // 未来の日付のデータをクリア
+            clearFutureData: () => {
+                const today = new Date().toISOString().split('T')[0];
+                const futureDates = Object.keys(this.completedHabits).filter(date => date > today);
+                
+                if (futureDates.length > 0) {
+                    console.log('未来の日付のデータをクリアします:', futureDates);
+                    futureDates.forEach(date => {
+                        delete this.completedHabits[date];
+                    });
+                    this.saveCompletedHabits();
+                    this.renderCalendar();
+                    alert(`${futureDates.length}件の未来のデータをクリアしました`);
+                } else {
+                    alert('未来の日付のデータは見つかりませんでした');
+                }
+            },
+            
+            // 全データをクリア
+            clearAllData: () => {
+                if (confirm('⚠️ 全てのデータを削除しますか？この操作は取り消せません。')) {
+                    localStorage.removeItem('habitTrackerData');
+                    localStorage.removeItem('healthData');
+                    localStorage.removeItem('achievements');
+                    this.completedHabits = {};
+                    this.healthData = {};
+                    this.achievements = this.loadAchievements();
+                    this.renderCalendar();
+                    this.updateMotivationDisplay();
+                    alert('全てのデータをクリアしました');
+                }
+            },
+            
+            // データの整合性をチェック
+            validateData: () => {
+                this.validateHabitData(this.completedHabits);
+                alert('データの整合性チェックが完了しました。コンソールを確認してください。');
+            }
+        };
+        
+        console.log('🔧 デバッグ機能が利用可能です:');
+        console.log('  debugHabitTracker.showData() - 現在のデータを表示');
+        console.log('  debugHabitTracker.clearFutureData() - 未来のデータをクリア');
+        console.log('  debugHabitTracker.clearAllData() - 全データをクリア');
+        console.log('  debugHabitTracker.validateData() - データの整合性をチェック');
     }
 
     // 現在の週を取得（月曜日開始）
@@ -3114,11 +3187,60 @@ class HabitTracker {
             console.log('ローカルストレージから読み込み:', saved);
             const result = saved ? JSON.parse(saved) : {};
             console.log('読み込み結果:', result);
+            
+            // データの整合性をチェック
+            this.validateHabitData(result);
+            
             return result;
         } catch (error) {
             console.error('ローカル読み込みエラー:', error);
             return {};
         }
+    }
+
+    // 習慣データの整合性をチェック
+    validateHabitData(data) {
+        if (!data || typeof data !== 'object') {
+            console.log('データが無効です。空のオブジェクトにリセットします。');
+            return {};
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        const invalidDates = [];
+        
+        for (const [dateStr, habits] of Object.entries(data)) {
+            // 日付形式をチェック
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                console.warn(`無効な日付形式: ${dateStr}`);
+                invalidDates.push(dateStr);
+                continue;
+            }
+            
+            // 未来の日付をチェック
+            if (dateStr > today) {
+                console.warn(`未来の日付のデータを検出: ${dateStr}`, habits);
+                invalidDates.push(dateStr);
+                continue;
+            }
+            
+            // 習慣データの形式をチェック
+            if (!Array.isArray(habits) && typeof habits !== 'object') {
+                console.warn(`無効な習慣データ形式: ${dateStr}`, habits);
+                invalidDates.push(dateStr);
+            }
+        }
+        
+        // 無効なデータを削除
+        if (invalidDates.length > 0) {
+            console.log('無効なデータを削除します:', invalidDates);
+            invalidDates.forEach(dateStr => {
+                delete data[dateStr];
+            });
+            this.completedHabits = data;
+            this.saveCompletedHabits();
+        }
+        
+        return data;
     }
 
     // ヘルスデータの読み込み
