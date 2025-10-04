@@ -721,22 +721,21 @@ class HabitTracker {
 
         let habitIndex = 1;
 
-        // 習慣系を描画
+        // 習慣系を描画（1-6番）
         habitHabits.forEach(habit => {
             const habitRow = this.createHabitRow(habit, habitIndex);
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
 
-        // No系の習慣を個別に描画（7番から開始）
-        let noIndex = 7;
+        // No系の習慣を描画（7-9番）
         noHabits.forEach(habit => {
-            const habitRow = this.createHabitRow(habit, noIndex, 'no');
+            const habitRow = this.createHabitRow(habit, habitIndex, 'no');
             habitsGrid.appendChild(habitRow);
-            noIndex++;
+            habitIndex++;
         });
 
-        // サプリ・食事系を描画（No系の後から続きの番号）
+        // サプリ・食事系を描画（10-15番）
         supplementHabits.forEach(habit => {
             const habitRow = this.createHabitRow(habit, habitIndex, 'supplement');
             habitsGrid.appendChild(habitRow);
