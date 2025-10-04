@@ -2097,12 +2097,12 @@ body {
 
 /* グループ化のスタイル */
 .no-habit-row {
-    background: #333 !important;
+    background: #0a0a0a !important;
     border-left: 4px solid #888;
 }
 
 .no-habit-cell {
-    background: #333 !important;
+    background: #0a0a0a !important;
     border-left-color: #888;
 }
 
@@ -2335,12 +2335,12 @@ body {
     }
     
     .no-habit-row {
-        background: #333 !important;
+        background: #0a0a0a !important;
         border-left: 4px solid #888;
     }
     
     .no-habit-cell {
-        background: #333 !important;
+        background: #0a0a0a !important;
         border-left-color: #888;
     }
     
