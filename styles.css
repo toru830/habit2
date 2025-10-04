@@ -2324,13 +2324,11 @@ body {
     }
     
     .supplement-habit-row {
-        background: #f8f9fa;
-        border-left-color: #4A90E2;
+        background: #000;
     }
     
     .supplement-habit-cell {
         background: #000 !important;
-        border-left-color: #4A90E2;
     }
     
     
