@@ -3635,7 +3635,7 @@ body {
 
 .habit-rate {
     font-size: 14px;
-    color: #ccc;
+    color: #fff;
 }
 
 .trend-text {
@@ -3647,7 +3647,7 @@ body {
 
 .trend-detail {
     font-size: 14px;
-    color: #ccc;
+    color: #fff;
 }
 
 .streak-text {
@@ -3659,7 +3659,7 @@ body {
 
 .streak-detail {
     font-size: 14px;
-    color: #ccc;
+    color: #fff;
 }
 
 /* アドバイスセクション */
@@ -3773,7 +3773,7 @@ body {
 
 .motivation-detail {
     font-size: 14px;
-    color: #ccc;
+    color: #fff;
 }
 
 /* レスポンシブデザイン */
@@ -3808,6 +3808,7 @@ body {
     .trend-detail,
     .streak-detail {
         font-size: 13px;
+        color: #fff;
     }
     
     .advice-card {
@@ -3846,5 +3847,6 @@ body {
     
     .motivation-detail {
         font-size: 13px;
+        color: #fff;
     }
 }
