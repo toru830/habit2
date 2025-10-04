@@ -2095,26 +2095,7 @@ body {
     font-size: 14px;
 }
 
-/* サプリ・食事系習慣のスタイル */
-.supplement-habit-item {
-    color: white !important;
-    font-weight: 500;
-}
-
-.supplement-habit-cell {
-    background: #000 !important;
-}
-
-.supplement-habit-cell.completed {
-    background: #000 !important;
-}
-
-.supplement-habit-cell.completed::after {
-    content: '✓';
-    color: #ff6b6b;
-    font-weight: bold;
-    font-size: 14px;
-}
+/* サプリ・食事系習慣のスタイル - 削除 */
 
 /* 日計セル */
 .daily-total-cell {
@@ -2323,13 +2304,7 @@ body {
         border-left-color: #ff6b6b;
     }
     
-    .supplement-habit-row {
-        background: #000;
-    }
-    
-    .supplement-habit-cell {
-        background: #000 !important;
-    }
+    /* supplement-habit-row と supplement-habit-cell のスタイルを削除 */
     
     
     .reward-info {
