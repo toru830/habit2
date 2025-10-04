@@ -345,7 +345,7 @@ body {
     text-align: center;
     color: white;
     font-weight: bold;
-    background: #1a1a1a;
+    background: #2a4a6b;
     border-bottom: 1px solid #333;
     border-right: 1px solid #333;
     display: flex;
@@ -360,7 +360,7 @@ body {
     text-align: center;
     color: white;
     font-weight: bold;
-    background: #1a1a1a;
+    background: #2a4a6b;
     border-bottom: 1px solid #333;
     border-right: 1px solid #333;
     display: flex;
@@ -374,7 +374,7 @@ body {
 
 .group-header-empty-cell {
     padding: 4px 2px;
-    background: #1a1a1a;
+    background: #2a4a6b;
     border-bottom: 1px solid #333;
     border-right: 1px solid #333;
     height: 35px;

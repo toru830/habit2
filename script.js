@@ -737,12 +737,17 @@ class HabitTracker {
             habitIndex++;
         });
 
-        // No系の習慣を描画（7-9番）
-        noHabits.forEach(habit => {
-            const habitRow = this.createHabitRow(habit, habitIndex, 'no');
-            habitsGrid.appendChild(habitRow);
-            habitIndex++;
-        });
+        // No系の習慣を描画（7-9番）- グループ化
+        if (noHabits.length > 0) {
+            const groupHeader = this.createGroupHeader('No', habitIndex, noHabits.length);
+            habitsGrid.appendChild(groupHeader);
+            
+            noHabits.forEach(habit => {
+                const habitRow = this.createHabitRow(habit, habitIndex, 'no');
+                habitsGrid.appendChild(habitRow);
+                habitIndex++;
+            });
+        }
 
         // サプリ・食事系を描画（10-15番）
         supplementHabits.forEach(habit => {
