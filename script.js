@@ -725,26 +725,35 @@ class HabitTracker {
 
         let habitIndex = 1;
 
-        // 習慣系を描画（1-6番）
+        // 習慣系を描画（1-6番）- グループ1
         const habitHabits = this.habits.filter(h => h.type === 'habit');
-        habitHabits.forEach(habit => {
+        habitHabits.forEach((habit, index) => {
             const habitRow = this.createHabitRow(habit, habitIndex, 'habit');
+            // グループ1のスタイル
+            habitRow.style.backgroundColor = '#0a0a0a';
+            habitRow.style.borderLeft = '4px solid #4CAF50';
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
 
-        // No系の習慣を描画（7-9番）
+        // No系の習慣を描画（7-9番）- グループ2
         const noHabits = this.habits.filter(h => h.type === 'no');
-        noHabits.forEach(habit => {
+        noHabits.forEach((habit, index) => {
             const habitRow = this.createHabitRow(habit, habitIndex, 'no');
+            // グループ2のスタイル
+            habitRow.style.backgroundColor = '#0a0a0a';
+            habitRow.style.borderLeft = '4px solid #FF9800';
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
 
-        // サプリ・食事系を描画（10-15番）
+        // サプリ・食事系を描画（10-15番）- グループ3
         const supplementHabits = this.habits.filter(h => h.type === 'supplement');
-        supplementHabits.forEach(habit => {
+        supplementHabits.forEach((habit, index) => {
             const habitRow = this.createHabitRow(habit, habitIndex, 'supplement');
+            // グループ3のスタイル
+            habitRow.style.backgroundColor = '#0a0a0a';
+            habitRow.style.borderLeft = '4px solid #2196F3';
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
