@@ -725,15 +725,32 @@ class HabitTracker {
 
         let habitIndex = 1;
 
-        // すべての習慣を順番に描画
-        this.habits.forEach((habit, index) => {
-            // 7番の前にグループヘッダーを挿入
-            if (habitIndex === 7) {
-                const groupHeader = this.createGroupHeader('No', 7, 3);
-                habitsGrid.appendChild(groupHeader);
-            }
+        // 習慣系を描画（1-6番）
+        const habitHabits = this.habits.filter(h => h.type === 'habit');
+        habitHabits.forEach(habit => {
+            const habitRow = this.createHabitRow(habit, habitIndex, 'habit');
+            habitsGrid.appendChild(habitRow);
+            habitIndex++;
+        });
+
+        // No系の習慣を描画（7-9番）- グループ化
+        const noHabits = this.habits.filter(h => h.type === 'no');
+        if (noHabits.length > 0) {
+            // グループヘッダーを挿入
+            const groupHeader = this.createGroupHeader('No', 7, noHabits.length);
+            habitsGrid.appendChild(groupHeader);
             
-            const habitRow = this.createHabitRow(habit, habitIndex, habit.type);
+            noHabits.forEach(habit => {
+                const habitRow = this.createHabitRow(habit, habitIndex, 'no');
+                habitsGrid.appendChild(habitRow);
+                habitIndex++;
+            });
+        }
+
+        // サプリ・食事系を描画（10-15番）
+        const supplementHabits = this.habits.filter(h => h.type === 'supplement');
+        supplementHabits.forEach(habit => {
+            const habitRow = this.createHabitRow(habit, habitIndex, 'supplement');
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
