@@ -559,6 +559,48 @@ class HabitTracker {
             validateData: () => {
                 this.validateHabitData(this.completedHabits);
                 alert('データの整合性チェックが完了しました。コンソールを確認してください。');
+            },
+            
+            // 古いIDを強制的にクリア
+            clearOldIds: () => {
+                const oldIds = ['ashwagandha', 'magnesium'];
+                let hasChanges = false;
+                
+                for (const [dateStr, habits] of Object.entries(this.completedHabits)) {
+                    if (Array.isArray(habits)) {
+                        const filteredHabits = habits.filter(habitId => !oldIds.includes(habitId));
+                        if (filteredHabits.length !== habits.length) {
+                            this.completedHabits[dateStr] = filteredHabits;
+                            hasChanges = true;
+                            console.log(`${dateStr}から古いIDを削除:`, habits.filter(id => oldIds.includes(id)));
+                        }
+                    } else if (habits && typeof habits === 'object') {
+                        const filteredHabits = {};
+                        let hasObjectChanges = false;
+                        
+                        for (const [habitId, value] of Object.entries(habits)) {
+                            if (!oldIds.includes(habitId)) {
+                                filteredHabits[habitId] = value;
+                            } else {
+                                hasObjectChanges = true;
+                                console.log(`${dateStr}から古いIDを削除: ${habitId}`);
+                            }
+                        }
+                        
+                        if (hasObjectChanges) {
+                            this.completedHabits[dateStr] = filteredHabits;
+                            hasChanges = true;
+                        }
+                    }
+                }
+                
+                if (hasChanges) {
+                    this.saveCompletedHabits();
+                    this.renderCalendar();
+                    alert('古いIDをクリアしました。ページをリフレッシュしてください。');
+                } else {
+                    alert('古いIDは見つかりませんでした。');
+                }
             }
         };
         
@@ -567,6 +609,7 @@ class HabitTracker {
         console.log('  debugHabitTracker.clearFutureData() - 未来のデータをクリア');
         console.log('  debugHabitTracker.clearAllData() - 全データをクリア');
         console.log('  debugHabitTracker.validateData() - データの整合性をチェック');
+        console.log('  debugHabitTracker.clearOldIds() - 古いIDをクリア');
     }
 
     // 現在の週を取得（月曜日開始）
@@ -3245,8 +3288,27 @@ class HabitTracker {
                 
                 // 重複を除去
                 const uniqueHabits = [...new Set(updatedHabits)];
-                if (uniqueHabits.length !== habits.length) {
+                if (uniqueHabits.length !== habits.length || updatedHabits.some((id, index) => id !== habits[index])) {
                     data[dateStr] = uniqueHabits;
+                    hasChanges = true;
+                }
+            } else if (habits && typeof habits === 'object') {
+                // オブジェクト形式の場合も処理
+                const updatedHabits = {};
+                let hasObjectChanges = false;
+                
+                for (const [habitId, value] of Object.entries(habits)) {
+                    if (habitId === 'ashwagandha' || habitId === 'magnesium') {
+                        console.log(`古いIDを移行: ${habitId} -> ashwagandha_magnesium`);
+                        updatedHabits['ashwagandha_magnesium'] = value;
+                        hasObjectChanges = true;
+                    } else {
+                        updatedHabits[habitId] = value;
+                    }
+                }
+                
+                if (hasObjectChanges) {
+                    data[dateStr] = updatedHabits;
                     hasChanges = true;
                 }
             }
