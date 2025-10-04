@@ -734,11 +734,11 @@ class HabitTracker {
                 // グループ1（1-6番）：習慣系
                 habitRow.style.backgroundColor = '#0a0a0a';
             } else if (habitIndex >= 7 && habitIndex <= 9) {
-                // グループ2（7-9番）：No系
-                habitRow.style.backgroundColor = '#0a0a0a';
+                // グループ2（7-9番）：No系 - 灰色の枠
+                habitRow.classList.add('no-habit-row');
             } else if (habitIndex >= 10 && habitIndex <= 15) {
-                // グループ3（10-15番）：サプリ系
-                habitRow.style.backgroundColor = '#0a0a0a';
+                // グループ3（10-15番）：サプリ系 - 緑の枠
+                habitRow.classList.add('supplement-habit-row-10-15');
             }
             
             habitsGrid.appendChild(habitRow);
@@ -812,6 +812,14 @@ class HabitTracker {
         this.currentWeek.forEach(date => {
             const habitCell = document.createElement('div');
             habitCell.className = `habit-cell ${habitType}-habit-cell`;
+            
+            // 10-15番の場合は特別なクラスを追加
+            if (index >= 10 && index <= 15) {
+                habitCell.classList.add('supplement-habit-cell-10-15');
+            } else if (index >= 7 && index <= 9) {
+                habitCell.classList.add('no-habit-cell');
+            }
+            
             habitCell.dataset.habitId = habit.id;
             habitCell.dataset.date = date.toISOString().split('T')[0];
             habitCell.classList.add(`priority-${habit.priority}`);

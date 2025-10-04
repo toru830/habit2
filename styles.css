@@ -2116,6 +2116,17 @@ body {
     border-left-color: #4CAF50;
 }
 
+/* 10-15番の緑の枠 */
+.supplement-habit-row-10-15 {
+    background: #0d1a0d !important;
+    border-left: 4px solid #4CAF50;
+}
+
+.supplement-habit-cell-10-15 {
+    background: #0d1a0d !important;
+    border-left-color: #4CAF50;
+}
+
 /* 日計セル */
 .daily-total-cell {
     padding: 4px 2px;
@@ -2339,6 +2350,16 @@ body {
     }
     
     .supplement-habit-cell {
+        background: #0d1a0d !important;
+        border-left-color: #4CAF50;
+    }
+    
+    .supplement-habit-row-10-15 {
+        background: #0d1a0d !important;
+        border-left: 4px solid #4CAF50;
+    }
+    
+    .supplement-habit-cell-10-15 {
         background: #0d1a0d !important;
         border-left-color: #4CAF50;
     }
