@@ -599,25 +599,13 @@ body {
 
 /* 統計ビュー */
 .stats-view {
-    padding: 20px;
+    padding: 0;
     background: #000;
     height: calc(100vh - 120px);
     overflow-y: auto;
 }
 
-.analysis-section {
-    margin-top: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.analysis-section > h3 {
-    color: #fff;
-    font-size: 20px;
-    margin: 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
+/* 重複したスタイルを削除 - 新しいスタイルで上書き */
 
 .analysis-overview-card {
     background: linear-gradient(135deg, rgba(41, 128, 185, 0.25), rgba(52, 152, 219, 0.12));
@@ -3589,6 +3577,10 @@ body {
 .analysis-section {
     margin: 20px 0;
     padding: 0 20px;
+    background: #111;
+    border-radius: 16px;
+    margin: 20px 16px;
+    padding: 20px 16px;
 }
 
 .analysis-section h3 {
@@ -3596,19 +3588,21 @@ body {
     margin-bottom: 15px;
     color: #fff;
     text-align: center;
+    font-weight: 600;
 }
 
 .analysis-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 12px;
 }
 
 .analysis-card {
-    background: #1a1a1a;
+    background: #222;
     border-radius: 12px;
-    padding: 15px;
-    border: 1px solid #333;
+    padding: 16px;
+    border: 1px solid #444;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .analysis-header {
@@ -3623,7 +3617,7 @@ body {
 }
 
 .analysis-header h4 {
-    font-size: 14px;
+    font-size: 16px;
     color: #fff;
     font-weight: 600;
 }
@@ -3633,45 +3627,49 @@ body {
 }
 
 .habit-name {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #4A90E2;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .habit-rate {
-    font-size: 12px;
-    color: #888;
+    font-size: 14px;
+    color: #ccc;
 }
 
 .trend-text {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #4CAF50;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .trend-detail {
-    font-size: 12px;
-    color: #888;
+    font-size: 14px;
+    color: #ccc;
 }
 
 .streak-text {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #FF9800;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .streak-detail {
-    font-size: 12px;
-    color: #888;
+    font-size: 14px;
+    color: #ccc;
 }
 
 /* アドバイスセクション */
 .advice-section {
     margin: 20px 0;
     padding: 0 20px;
+    background: #111;
+    border-radius: 16px;
+    margin: 20px 16px;
+    padding: 20px 16px;
 }
 
 .advice-section h3 {
@@ -3679,16 +3677,18 @@ body {
     margin-bottom: 15px;
     color: #fff;
     text-align: center;
+    font-weight: 600;
 }
 
 .advice-card {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    background: linear-gradient(135deg, #222 0%, #333 100%);
     border-radius: 16px;
     padding: 20px;
-    border: 1px solid #333;
+    border: 1px solid #444;
     display: flex;
     align-items: flex-start;
     gap: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .advice-icon {
@@ -3701,22 +3701,26 @@ body {
 }
 
 .advice-title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #4A90E2;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .advice-text {
-    font-size: 14px;
-    color: #ccc;
-    line-height: 1.5;
+    font-size: 16px;
+    color: #fff;
+    line-height: 1.6;
 }
 
 /* モチベーション分析セクション */
 .motivation-analysis {
     margin: 20px 0;
     padding: 0 20px;
+    background: #111;
+    border-radius: 16px;
+    margin: 20px 16px;
+    padding: 20px 16px;
 }
 
 .motivation-analysis h3 {
@@ -3724,6 +3728,7 @@ body {
     margin-bottom: 15px;
     color: #fff;
     text-align: center;
+    font-weight: 600;
 }
 
 .motivation-grid {
@@ -3733,13 +3738,14 @@ body {
 }
 
 .motivation-card {
-    background: #1a1a1a;
+    background: #222;
     border-radius: 12px;
-    padding: 15px;
-    border: 1px solid #333;
+    padding: 16px;
+    border: 1px solid #444;
     display: flex;
     align-items: center;
     gap: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .motivation-icon {
@@ -3752,50 +3758,93 @@ body {
 }
 
 .motivation-content h4 {
-    font-size: 14px;
+    font-size: 16px;
     color: #fff;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .motivation-value {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: #4A90E2;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .motivation-detail {
-    font-size: 12px;
-    color: #888;
+    font-size: 14px;
+    color: #ccc;
 }
 
 /* レスポンシブデザイン */
 @media (max-width: 600px) {
+    .analysis-section,
+    .advice-section,
+    .motivation-analysis {
+        margin: 16px 8px;
+        padding: 16px 12px;
+    }
+    
     .analysis-grid {
         grid-template-columns: 1fr;
         gap: 10px;
     }
     
     .analysis-card {
-        padding: 12px;
+        padding: 16px;
+    }
+    
+    .analysis-header h4 {
+        font-size: 15px;
+    }
+    
+    .habit-name,
+    .trend-text,
+    .streak-text {
+        font-size: 16px;
+    }
+    
+    .habit-rate,
+    .trend-detail,
+    .streak-detail {
+        font-size: 13px;
     }
     
     .advice-card {
-        padding: 15px;
+        padding: 16px;
         flex-direction: column;
         text-align: center;
     }
     
     .advice-icon {
-        font-size: 20px;
+        font-size: 24px;
+    }
+    
+    .advice-title {
+        font-size: 16px;
+    }
+    
+    .advice-text {
+        font-size: 15px;
     }
     
     .motivation-card {
-        padding: 12px;
+        padding: 16px;
     }
     
     .motivation-icon {
-        font-size: 20px;
+        font-size: 22px;
+    }
+    
+    .motivation-content h4 {
+        font-size: 15px;
+    }
+    
+    .motivation-value {
+        font-size: 18px;
+    }
+    
+    .motivation-detail {
+        font-size: 13px;
     }
 }
