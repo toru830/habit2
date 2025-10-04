@@ -601,6 +601,14 @@ class HabitTracker {
                 } else {
                     alert('古いIDは見つかりませんでした。');
                 }
+            },
+            
+            // アプリを強制リセット
+            forceReset: () => {
+                if (confirm('アプリを完全にリセットしますか？全てのデータが削除されます。')) {
+                    localStorage.clear();
+                    location.reload();
+                }
             }
         };
         
@@ -610,6 +618,7 @@ class HabitTracker {
         console.log('  debugHabitTracker.clearAllData() - 全データをクリア');
         console.log('  debugHabitTracker.validateData() - データの整合性をチェック');
         console.log('  debugHabitTracker.clearOldIds() - 古いIDをクリア');
+        console.log('  debugHabitTracker.forceReset() - アプリを強制リセット');
     }
 
     // 現在の週を取得（月曜日開始）
