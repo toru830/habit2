@@ -768,14 +768,10 @@ class HabitTracker {
         noCell.className = 'group-header-no-cell';
         groupRow.appendChild(noCell);
         
-        // グループ名セル（縦書き）
+        // グループ名セル
         const groupCell = document.createElement('div');
         groupCell.className = 'group-header-cell';
-        
-        // 縦書きの文字を1文字ずつ分割
-        const chars = groupName.split('');
-        const verticalText = chars.join('\n');
-        groupCell.textContent = verticalText;
+        groupCell.textContent = groupName;
         groupRow.appendChild(groupCell);
         
         // 日付列（月〜日7列）
