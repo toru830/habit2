@@ -778,12 +778,22 @@ class HabitTracker {
         groupCell.textContent = verticalText;
         groupRow.appendChild(groupCell);
         
-        // 残りのセルを空で作成
-        for (let i = 0; i < 9; i++) { // No., 項目, 月〜日, 週計, 連続
+        // 日付列（月〜日7列）
+        for (let i = 0; i < 7; i++) {
             const emptyCell = document.createElement('div');
             emptyCell.className = 'group-header-empty-cell';
             groupRow.appendChild(emptyCell);
         }
+        
+        // 週計列
+        const weeklyCell = document.createElement('div');
+        weeklyCell.className = 'group-header-empty-cell';
+        groupRow.appendChild(weeklyCell);
+        
+        // 合計列
+        const totalCell = document.createElement('div');
+        totalCell.className = 'group-header-empty-cell';
+        groupRow.appendChild(totalCell);
         
         return groupRow;
     }
