@@ -736,7 +736,7 @@ class HabitTracker {
             noIndex++;
         });
 
-        // サプリ・食事系を描画
+        // サプリ・食事系を描画（No系の後から続きの番号）
         supplementHabits.forEach(habit => {
             const habitRow = this.createHabitRow(habit, habitIndex, 'supplement');
             habitsGrid.appendChild(habitRow);
@@ -2174,6 +2174,30 @@ class HabitTracker {
                 <span>${peakText}</span>
                 <span>${latestText}</span>
             `;
+        }
+        
+        // 統計カードの更新
+        this.updateStatsCards(chartData);
+    }
+    
+    // 統計カードの更新
+    updateStatsCards(chartData) {
+        const total30Days = document.getElementById('total30Days');
+        const total7Days = document.getElementById('total7Days');
+        const dailyAverage = document.getElementById('dailyAverage');
+        
+        if (total30Days) {
+            total30Days.textContent = chartData.meta.totalCount;
+        }
+        if (total7Days) {
+            total7Days.textContent = chartData.meta.last7Total;
+        }
+        if (dailyAverage) {
+            const average = chartData.meta.dailyAverage;
+            const averageDisplay = Number.isFinite(average)
+                ? (Number.isInteger(average) ? average : average.toFixed(1))
+                : 0;
+            dailyAverage.textContent = averageDisplay;
         }
     }
 
