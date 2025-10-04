@@ -761,33 +761,41 @@ class HabitTracker {
     createGroupHeader(groupName, startIndex, count) {
         const groupRow = document.createElement('div');
         groupRow.className = 'group-header-row';
+        groupRow.style.backgroundColor = '#2a4a6b';
+        groupRow.style.border = '2px solid #4a90e2';
         
         // No.セル（空）
         const noCell = document.createElement('div');
         noCell.className = 'group-header-no-cell';
+        noCell.textContent = '';
         groupRow.appendChild(noCell);
         
         // グループ名セル
         const groupCell = document.createElement('div');
         groupCell.className = 'group-header-cell';
-        groupCell.textContent = groupName;
+        groupCell.textContent = `【${groupName}グループ】`;
+        groupCell.style.fontWeight = 'bold';
+        groupCell.style.fontSize = '14px';
         groupRow.appendChild(groupCell);
         
         // 日付列（月〜日7列）
         for (let i = 0; i < 7; i++) {
             const emptyCell = document.createElement('div');
             emptyCell.className = 'group-header-empty-cell';
+            emptyCell.textContent = '';
             groupRow.appendChild(emptyCell);
         }
         
         // 週計列
         const weeklyCell = document.createElement('div');
         weeklyCell.className = 'group-header-empty-cell';
+        weeklyCell.textContent = '';
         groupRow.appendChild(weeklyCell);
         
         // 合計列
         const totalCell = document.createElement('div');
         totalCell.className = 'group-header-empty-cell';
+        totalCell.textContent = '';
         groupRow.appendChild(totalCell);
         
         return groupRow;
