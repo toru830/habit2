@@ -2791,6 +2791,11 @@ class HabitTracker {
         }
         this.renderTotalChart();
         this.updateMotivationDisplay();
+        
+        // 統計カードの更新
+        const chartData = this.getTotalChartData();
+        this.updateStatsCards(chartData);
+        
         this.setActiveNav('statsBtn');
     }
 
@@ -3218,6 +3223,10 @@ class HabitTracker {
     updateStatsView() {
         this.renderTotalChart();
         this.updateMotivationDisplay();
+        
+        // 統計カードの更新
+        const chartData = this.getTotalChartData();
+        this.updateStatsCards(chartData);
     }
 
     showMonsterView() {
