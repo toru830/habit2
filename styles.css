@@ -3584,3 +3584,218 @@ body {
     background: #ff6f61;
     color: #fff;
 }
+
+/* 統計分析セクション */
+.analysis-section {
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+.analysis-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #fff;
+    text-align: center;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.analysis-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid #333;
+}
+
+.analysis-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.analysis-icon {
+    font-size: 16px;
+    margin-right: 8px;
+}
+
+.analysis-header h4 {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 600;
+}
+
+.analysis-content {
+    text-align: center;
+}
+
+.habit-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4A90E2;
+    margin-bottom: 4px;
+}
+
+.habit-rate {
+    font-size: 12px;
+    color: #888;
+}
+
+.trend-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4CAF50;
+    margin-bottom: 4px;
+}
+
+.trend-detail {
+    font-size: 12px;
+    color: #888;
+}
+
+.streak-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FF9800;
+    margin-bottom: 4px;
+}
+
+.streak-detail {
+    font-size: 12px;
+    color: #888;
+}
+
+/* アドバイスセクション */
+.advice-section {
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+.advice-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #fff;
+    text-align: center;
+}
+
+.advice-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #333;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.advice-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.advice-content {
+    flex: 1;
+}
+
+.advice-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4A90E2;
+    margin-bottom: 8px;
+}
+
+.advice-text {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.5;
+}
+
+/* モチベーション分析セクション */
+.motivation-analysis {
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+.motivation-analysis h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #fff;
+    text-align: center;
+}
+
+.motivation-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.motivation-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.motivation-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.motivation-content {
+    flex: 1;
+}
+
+.motivation-content h4 {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.motivation-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #4A90E2;
+    margin-bottom: 4px;
+}
+
+.motivation-detail {
+    font-size: 12px;
+    color: #888;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 600px) {
+    .analysis-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .analysis-card {
+        padding: 12px;
+    }
+    
+    .advice-card {
+        padding: 15px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .advice-icon {
+        font-size: 20px;
+    }
+    
+    .motivation-card {
+        padding: 12px;
+    }
+    
+    .motivation-icon {
+        font-size: 20px;
+    }
+}

@@ -2209,6 +2209,373 @@ class HabitTracker {
         }
     }
 
+    // 習慣分析を更新
+    updateHabitAnalysis() {
+        this.updateBestWorstHabits();
+        this.updateGrowthTrend();
+        this.updateStreakRecord();
+    }
+
+    // 最も得意・苦手な習慣を更新
+    updateBestWorstHabits() {
+        const habitStats = this.getHabitStats();
+        const bestHabit = habitStats.best;
+        const worstHabit = habitStats.worst;
+
+        // 最も得意な習慣
+        const bestElement = document.getElementById('bestHabit');
+        if (bestElement && bestHabit) {
+            bestElement.innerHTML = `
+                <div class="habit-name">${bestHabit.name}</div>
+                <div class="habit-rate">達成率: ${Math.round(bestHabit.rate)}%</div>
+            `;
+        }
+
+        // 改善が必要な習慣
+        const worstElement = document.getElementById('worstHabit');
+        if (worstElement && worstHabit) {
+            worstElement.innerHTML = `
+                <div class="habit-name">${worstHabit.name}</div>
+                <div class="habit-rate">達成率: ${Math.round(worstHabit.rate)}%</div>
+            `;
+        }
+    }
+
+    // 成長トレンドを更新
+    updateGrowthTrend() {
+        const trend = this.calculateGrowthTrend();
+        const trendElement = document.getElementById('growthTrend');
+        if (trendElement) {
+            trendElement.innerHTML = `
+                <div class="trend-text">${trend.text}</div>
+                <div class="trend-detail">${trend.detail}</div>
+            `;
+        }
+    }
+
+    // 連続記録を更新
+    updateStreakRecord() {
+        const streak = this.calculateStreakRecord();
+        const streakElement = document.getElementById('streakRecord');
+        if (streakElement) {
+            streakElement.innerHTML = `
+                <div class="streak-text">${streak.text}</div>
+                <div class="streak-detail">${streak.detail}</div>
+            `;
+        }
+    }
+
+    // アドバイスを更新
+    updateAdvice() {
+        const advice = this.generatePersonalizedAdvice();
+        const adviceElement = document.getElementById('adviceCard');
+        if (adviceElement) {
+            adviceElement.innerHTML = `
+                <div class="advice-icon">${advice.icon}</div>
+                <div class="advice-content">
+                    <div class="advice-title">${advice.title}</div>
+                    <div class="advice-text">${advice.text}</div>
+                </div>
+            `;
+        }
+    }
+
+    // モチベーション分析を更新
+    updateMotivationAnalysis() {
+        this.updateWeeklyMood();
+        this.updateNextGoal();
+        this.updateConsistencyLevel();
+    }
+
+    // 今週の調子を更新
+    updateWeeklyMood() {
+        const mood = this.calculateWeeklyMood();
+        const moodElement = document.getElementById('weeklyMood');
+        const moodDetailElement = document.getElementById('weeklyMoodDetail');
+        if (moodElement && moodDetailElement) {
+            moodElement.textContent = mood.level;
+            moodDetailElement.textContent = mood.detail;
+        }
+    }
+
+    // 次の目標を更新
+    updateNextGoal() {
+        const goal = this.calculateNextGoal();
+        const goalElement = document.getElementById('nextGoal');
+        const goalDetailElement = document.getElementById('nextGoalDetail');
+        if (goalElement && goalDetailElement) {
+            goalElement.textContent = goal.target;
+            goalDetailElement.textContent = goal.detail;
+        }
+    }
+
+    // 継続力レベルを更新
+    updateConsistencyLevel() {
+        const level = this.calculateConsistencyLevel();
+        const levelElement = document.getElementById('consistencyLevel');
+        const levelDetailElement = document.getElementById('consistencyLevelDetail');
+        if (levelElement && levelDetailElement) {
+            levelElement.textContent = level.level;
+            levelDetailElement.textContent = level.detail;
+        }
+    }
+
+    // 習慣統計を取得
+    getHabitStats() {
+        const stats = this.habits.map(habit => {
+            const completedDays = this.getCompletedDaysForHabit(habit.id);
+            const totalDays = this.getTotalDays();
+            const rate = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
+            
+            return {
+                id: habit.id,
+                name: habit.name,
+                completedDays,
+                totalDays,
+                rate
+            };
+        });
+
+        const best = stats.reduce((max, current) => current.rate > max.rate ? current : max);
+        const worst = stats.reduce((min, current) => current.rate < min.rate ? current : min);
+
+        return { best, worst, stats };
+    }
+
+    // 特定の習慣の完了日数を取得
+    getCompletedDaysForHabit(habitId) {
+        let count = 0;
+        for (const [dateStr, habits] of Object.entries(this.completedHabits)) {
+            if (Array.isArray(habits) && habits.includes(habitId)) {
+                count++;
+            } else if (habits && typeof habits === 'object' && habits[habitId]) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // 総日数を取得
+    getTotalDays() {
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        let count = 0;
+        for (let d = new Date(thirtyDaysAgo); d <= today; d.setDate(d.getDate() + 1)) {
+            count++;
+        }
+        return count;
+    }
+
+    // 成長トレンドを計算
+    calculateGrowthTrend() {
+        const chartData = this.getTotalChartData();
+        const dailyValues = chartData.dailyValues;
+        
+        if (dailyValues.length < 7) {
+            return {
+                text: "データ不足",
+                detail: "7日以上のデータが必要です"
+            };
+        }
+
+        const recent7 = dailyValues.slice(-7);
+        const previous7 = dailyValues.slice(-14, -7);
+        
+        const recentAvg = recent7.reduce((a, b) => a + b, 0) / recent7.length;
+        const previousAvg = previous7.length > 0 ? previous7.reduce((a, b) => a + b, 0) / previous7.length : 0;
+        
+        const change = recentAvg - previousAvg;
+        const changePercent = previousAvg > 0 ? (change / previousAvg) * 100 : 0;
+
+        if (changePercent > 10) {
+            return {
+                text: "急上昇中！",
+                detail: `前週比 +${Math.round(changePercent)}%`
+            };
+        } else if (changePercent > 0) {
+            return {
+                text: "順調に成長",
+                detail: `前週比 +${Math.round(changePercent)}%`
+            };
+        } else if (changePercent > -10) {
+            return {
+                text: "安定維持",
+                detail: `前週比 ${Math.round(changePercent)}%`
+            };
+        } else {
+            return {
+                text: "要注意",
+                detail: `前週比 ${Math.round(changePercent)}%`
+            };
+        }
+    }
+
+    // 連続記録を計算
+    calculateStreakRecord() {
+        const chartData = this.getTotalChartData();
+        const dailyValues = chartData.dailyValues;
+        
+        if (dailyValues.length === 0) {
+            return {
+                text: "記録なし",
+                detail: "まだデータがありません"
+            };
+        }
+
+        let currentStreak = 0;
+        let maxStreak = 0;
+        let tempStreak = 0;
+
+        for (let i = dailyValues.length - 1; i >= 0; i--) {
+            if (dailyValues[i] > 0) {
+                if (i === dailyValues.length - 1) {
+                    currentStreak++;
+                }
+                tempStreak++;
+                maxStreak = Math.max(maxStreak, tempStreak);
+            } else {
+                tempStreak = 0;
+            }
+        }
+
+        return {
+            text: `${currentStreak}日連続`,
+            detail: `最高記録: ${maxStreak}日`
+        };
+    }
+
+    // パーソナライズされたアドバイスを生成
+    generatePersonalizedAdvice() {
+        const habitStats = this.getHabitStats();
+        const worstHabit = habitStats.worst;
+        const bestHabit = habitStats.best;
+        const trend = this.calculateGrowthTrend();
+
+        if (worstHabit.rate < 30) {
+            return {
+                icon: "🎯",
+                title: "集中して改善しよう",
+                text: `「${worstHabit.name}」の達成率が${Math.round(worstHabit.rate)}%と低めです。まずは1週間続けることを目標に、小さなステップから始めてみましょう。`
+            };
+        } else if (worstHabit.rate < 60) {
+            return {
+                icon: "⚡",
+                title: "バランスを整えよう",
+                text: `「${worstHabit.name}」をもう少し頑張れば、全体的なバランスが良くなりそうです。完璧を目指さず、継続を重視しましょう。`
+            };
+        } else if (trend.text.includes("急上昇") || trend.text.includes("成長")) {
+            return {
+                icon: "🚀",
+                title: "素晴らしい調子！",
+                text: `現在の成長トレンドを維持しましょう。特に「${bestHabit.name}」が好調なので、この勢いを他の習慣にも活かしてみてください。`
+            };
+        } else {
+            return {
+                icon: "💪",
+                title: "安定した継続中",
+                text: `全体的にバランス良く習慣化できています。この調子で継続し、さらなる成長を目指しましょう。`
+            };
+        }
+    }
+
+    // 今週の調子を計算
+    calculateWeeklyMood() {
+        const chartData = this.getTotalChartData();
+        const dailyValues = chartData.dailyValues;
+        const recent7 = dailyValues.slice(-7);
+        const avg = recent7.reduce((a, b) => a + b, 0) / recent7.length;
+
+        if (avg >= 10) {
+            return {
+                level: "絶好調！",
+                detail: "今週は素晴らしい成果です"
+            };
+        } else if (avg >= 7) {
+            return {
+                level: "好調",
+                detail: "順調に習慣化できています"
+            };
+        } else if (avg >= 4) {
+            return {
+                level: "普通",
+                detail: "もう少し頑張ってみましょう"
+            };
+        } else {
+            return {
+                level: "不調",
+                detail: "無理せず少しずつ始めましょう"
+            };
+        }
+    }
+
+    // 次の目標を計算
+    calculateNextGoal() {
+        const chartData = this.getTotalChartData();
+        const dailyValues = chartData.dailyValues;
+        const recent7 = dailyValues.slice(-7);
+        const avg = recent7.reduce((a, b) => a + b, 0) / recent7.length;
+
+        if (avg < 5) {
+            return {
+                target: "1日5つ",
+                detail: "まずは基本的な習慣を定着させましょう"
+            };
+        } else if (avg < 10) {
+            return {
+                target: "1日10つ",
+                detail: "現在の2倍を目指してみましょう"
+            };
+        } else if (avg < 15) {
+            return {
+                target: "1日15つ",
+                detail: "全ての習慣を完璧にこなしましょう"
+            };
+        } else {
+            return {
+                target: "継続維持",
+                detail: "現在のペースを維持しましょう"
+            };
+        }
+    }
+
+    // 継続力レベルを計算
+    calculateConsistencyLevel() {
+        const chartData = this.getTotalChartData();
+        const dailyValues = chartData.dailyValues;
+        const completedDays = dailyValues.filter(value => value > 0).length;
+        const totalDays = dailyValues.length;
+        const consistency = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
+
+        if (consistency >= 90) {
+            return {
+                level: "S級",
+                detail: "完璧な継続力です！"
+            };
+        } else if (consistency >= 70) {
+            return {
+                level: "A級",
+                detail: "優秀な継続力です"
+            };
+        } else if (consistency >= 50) {
+            return {
+                level: "B級",
+                detail: "良好な継続力です"
+            };
+        } else if (consistency >= 30) {
+            return {
+                level: "C級",
+                detail: "もう少し頑張りましょう"
+            };
+        } else {
+            return {
+                level: "D級",
+                detail: "継続力を向上させましょう"
+            };
+        }
+    }
+
     // モンスターを生成
     renderMonsters() {
         const monsterGrid = document.getElementById('monsterGrid');
@@ -2805,6 +3172,11 @@ class HabitTracker {
         const chartData = this.getTotalChartData();
         this.updateStatsCards(chartData);
         
+        // 新しい分析セクションの更新
+        this.updateHabitAnalysis();
+        this.updateAdvice();
+        this.updateMotivationAnalysis();
+        
         this.setActiveNav('statsBtn');
     }
 
@@ -3236,6 +3608,11 @@ class HabitTracker {
         // 統計カードの更新
         const chartData = this.getTotalChartData();
         this.updateStatsCards(chartData);
+        
+        // 新しい分析セクションの更新
+        this.updateHabitAnalysis();
+        this.updateAdvice();
+        this.updateMotivationAnalysis();
     }
 
     showMonsterView() {
