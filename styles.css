@@ -388,14 +388,15 @@ body {
     background: #000 !important;
 }
 
-/* No.から5行目までを一つの黒四角で囲む */
+/* No.から6行目までを一つの黒四角で囲む */
 .grid-header,
 .date-row,
 .habit-row:nth-child(1),
 .habit-row:nth-child(2),
 .habit-row:nth-child(3),
 .habit-row:nth-child(4),
-.habit-row:nth-child(5) {
+.habit-row:nth-child(5),
+.habit-row:nth-child(6) {
     border-left: 3px solid #000;
     border-right: 3px solid #000;
     background: #1a1a1a;
@@ -414,11 +415,12 @@ body {
 .habit-row:nth-child(1),
 .habit-row:nth-child(2),
 .habit-row:nth-child(3),
-.habit-row:nth-child(4) {
+.habit-row:nth-child(4),
+.habit-row:nth-child(5) {
     margin: 0;
 }
 
-.habit-row:nth-child(5) {
+.habit-row:nth-child(6) {
     border-bottom: 3px solid #000;
     margin: 0 0 2px 0;
 }
@@ -428,21 +430,25 @@ body {
 .habit-row:nth-child(3) .habit-cell,
 .habit-row:nth-child(4) .habit-cell,
 .habit-row:nth-child(5) .habit-cell,
+.habit-row:nth-child(6) .habit-cell,
 .habit-row:nth-child(1) .habit-no-cell,
 .habit-row:nth-child(2) .habit-no-cell,
 .habit-row:nth-child(3) .habit-no-cell,
 .habit-row:nth-child(4) .habit-no-cell,
 .habit-row:nth-child(5) .habit-no-cell,
+.habit-row:nth-child(6) .habit-no-cell,
 .habit-row:nth-child(1) .habit-item-cell,
 .habit-row:nth-child(2) .habit-item-cell,
 .habit-row:nth-child(3) .habit-item-cell,
 .habit-row:nth-child(4) .habit-item-cell,
 .habit-row:nth-child(5) .habit-item-cell,
+.habit-row:nth-child(6) .habit-item-cell,
 .habit-row:nth-child(1) .habit-total-cell,
 .habit-row:nth-child(2) .habit-total-cell,
 .habit-row:nth-child(3) .habit-total-cell,
 .habit-row:nth-child(4) .habit-total-cell,
-.habit-row:nth-child(5) .habit-total-cell {
+.habit-row:nth-child(5) .habit-total-cell,
+.habit-row:nth-child(6) .habit-total-cell {
     height: 32px;
     padding: 1px 2px;
 }
@@ -1712,8 +1718,8 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* 6-8行目のグループ枠線（グレー） */
-.habit-row:nth-child(6) {
+/* 7-9行目のグループ枠線（グレー） */
+.habit-row:nth-child(7) {
     border-top: 3px solid #666;
     border-left: 3px solid #666;
     border-right: 3px solid #666;
@@ -1722,7 +1728,7 @@ body {
     min-height: 32px;
 }
 
-.habit-row:nth-child(7) {
+.habit-row:nth-child(8) {
     border-left: 3px solid #666;
     border-right: 3px solid #666;
     margin: 0;
@@ -1730,7 +1736,7 @@ body {
     min-height: 32px;
 }
 
-.habit-row:nth-child(8) {
+.habit-row:nth-child(9) {
     border-bottom: 3px solid #666;
     border-left: 3px solid #666;
     border-right: 3px solid #666;
@@ -1740,8 +1746,8 @@ body {
 }
 
 
-/* 9-15行目のグループ枠線（濃い緑） */
-.habit-row:nth-child(9) {
+/* 10-15行目のグループ枠線（濃い緑） */
+.habit-row:nth-child(10) {
     border-top: 3px solid #1a5f1a;
     border-left: 3px solid #1a5f1a;
     border-right: 3px solid #1a5f1a;
@@ -1749,7 +1755,6 @@ body {
     background: #1a1a1a;
 }
 
-.habit-row:nth-child(10),
 .habit-row:nth-child(11),
 .habit-row:nth-child(12),
 .habit-row:nth-child(13),
