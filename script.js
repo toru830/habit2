@@ -725,44 +725,22 @@ class HabitTracker {
 
         let habitIndex = 1;
 
-        // 習慣系を描画（1-6番）- グループ1
-        const habitHabits = this.habits.filter(h => h.type === 'habit');
-        habitHabits.forEach((habit, index) => {
-            const habitRow = this.createHabitRow(habit, habitIndex, 'habit');
-            // グループ1のスタイル（薄い緑の背景）
-            if (index === 0) {
-                habitRow.style.backgroundColor = '#0d1a0d';
-            } else {
+        // すべての習慣を順番に描画
+        this.habits.forEach((habit, index) => {
+            const habitRow = this.createHabitRow(habit, habitIndex, habit.type);
+            
+            // グループ化のスタイル
+            if (habitIndex >= 1 && habitIndex <= 6) {
+                // グループ1（1-6番）：習慣系
+                habitRow.style.backgroundColor = '#0a0a0a';
+            } else if (habitIndex >= 7 && habitIndex <= 9) {
+                // グループ2（7-9番）：No系
+                habitRow.style.backgroundColor = '#0a0a0a';
+            } else if (habitIndex >= 10 && habitIndex <= 15) {
+                // グループ3（10-15番）：サプリ系
                 habitRow.style.backgroundColor = '#0a0a0a';
             }
-            habitsGrid.appendChild(habitRow);
-            habitIndex++;
-        });
-
-        // No系の習慣を描画（7-9番）- グループ2
-        const noHabits = this.habits.filter(h => h.type === 'no');
-        noHabits.forEach((habit, index) => {
-            const habitRow = this.createHabitRow(habit, habitIndex, 'no');
-            // グループ2のスタイル（薄いオレンジの背景）
-            if (index === 0) {
-                habitRow.style.backgroundColor = '#1a0d0a';
-            } else {
-                habitRow.style.backgroundColor = '#0a0a0a';
-            }
-            habitsGrid.appendChild(habitRow);
-            habitIndex++;
-        });
-
-        // サプリ・食事系を描画（10-15番）- グループ3
-        const supplementHabits = this.habits.filter(h => h.type === 'supplement');
-        supplementHabits.forEach((habit, index) => {
-            const habitRow = this.createHabitRow(habit, habitIndex, 'supplement');
-            // グループ3のスタイル（薄い青の背景）
-            if (index === 0) {
-                habitRow.style.backgroundColor = '#0a0d1a';
-            } else {
-                habitRow.style.backgroundColor = '#0a0a0a';
-            }
+            
             habitsGrid.appendChild(habitRow);
             habitIndex++;
         });
