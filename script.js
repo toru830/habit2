@@ -685,11 +685,12 @@ class HabitTracker {
             habitIndex++;
         });
 
-        // No系の習慣を個別に描画
+        // No系の習慣を個別に描画（7番から開始）
+        let noIndex = 7;
         noHabits.forEach(habit => {
-            const habitRow = this.createHabitRow(habit, habitIndex, 'no');
+            const habitRow = this.createHabitRow(habit, noIndex, 'no');
             habitsGrid.appendChild(habitRow);
-            habitIndex++;
+            noIndex++;
         });
 
         // サプリ・食事系を描画
@@ -3207,6 +3208,7 @@ class HabitTracker {
 
         const today = new Date().toISOString().split('T')[0];
         const invalidDates = [];
+        let hasChanges = false;
         
         for (const [dateStr, habits] of Object.entries(data)) {
             // 日付形式をチェック
@@ -3227,6 +3229,26 @@ class HabitTracker {
             if (!Array.isArray(habits) && typeof habits !== 'object') {
                 console.warn(`無効な習慣データ形式: ${dateStr}`, habits);
                 invalidDates.push(dateStr);
+                continue;
+            }
+            
+            // 古いIDを新しいIDに移行
+            if (Array.isArray(habits)) {
+                const updatedHabits = habits.map(habitId => {
+                    if (habitId === 'ashwagandha' || habitId === 'magnesium') {
+                        console.log(`古いIDを移行: ${habitId} -> ashwagandha_magnesium`);
+                        hasChanges = true;
+                        return 'ashwagandha_magnesium';
+                    }
+                    return habitId;
+                });
+                
+                // 重複を除去
+                const uniqueHabits = [...new Set(updatedHabits)];
+                if (uniqueHabits.length !== habits.length) {
+                    data[dateStr] = uniqueHabits;
+                    hasChanges = true;
+                }
             }
         }
         
@@ -3236,6 +3258,12 @@ class HabitTracker {
             invalidDates.forEach(dateStr => {
                 delete data[dateStr];
             });
+            hasChanges = true;
+        }
+        
+        // 変更があった場合は保存
+        if (hasChanges) {
+            console.log('データの移行が完了しました');
             this.completedHabits = data;
             this.saveCompletedHabits();
         }
