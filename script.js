@@ -396,6 +396,7 @@ class HabitTracker {
     }
 
     init() {
+        console.log('🔐 アプリ初期化開始');
         this.renderCalendar();
         this.setupEventListeners();
         this.setupDataManagement();
@@ -405,6 +406,7 @@ class HabitTracker {
         
         // 初期化時に認証UIを更新
         this.updateAuthUI();
+        console.log('🔐 アプリ初期化完了');
     }
     
     // データ管理機能の設定
@@ -3156,8 +3158,14 @@ class HabitTracker {
         // 認証ボタン
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
+        
+        console.log('🔐 ログインボタン要素:', loginBtn);
+        console.log('🔐 ログアウトボタン要素:', logoutBtn);
+        
         if (loginBtn) {
-            loginBtn.addEventListener('click', () => {
+            console.log('🔐 ログインボタンのイベントリスナーを追加中...');
+            loginBtn.addEventListener('click', (event) => {
+                event.preventDefault();
                 console.log('🔐 ログインボタンがクリックされました');
                 console.log('🔐 現在の認証状態:', this.currentUser ? 'ログイン済み' : '未ログイン');
                 console.log('🔐 Firebase認証オブジェクト:', window.firebaseAuth);
@@ -3165,9 +3173,17 @@ class HabitTracker {
                 console.log('🔐 signInWithRedirect関数:', typeof window.firebaseSignInRedirect);
                 this.signInWithGoogle();
             });
+            console.log('🔐 ログインボタンのイベントリスナー追加完了');
+        } else {
+            console.error('🔐 ログインボタンが見つかりません！');
         }
+        
         if (logoutBtn) {
+            console.log('🔐 ログアウトボタンのイベントリスナーを追加中...');
             logoutBtn.addEventListener('click', () => this.signOut());
+            console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
+        } else {
+            console.warn('🔐 ログアウトボタンが見つかりません');
         }
         
         // Firebaseテストボタン
