@@ -987,11 +987,17 @@ class HabitTracker {
     // ログイン処理（マルチデバイス対応）
     async login(email, password) {
         try {
+            console.log('🔐 ログイン試行:', email);
+            
             // ローカルストレージからユーザー情報を取得
             const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            console.log('🔐 登録済みユーザー:', Object.keys(users));
+            
             const userRecord = users[email];
+            console.log('🔐 ユーザーレコード:', userRecord);
             
             if (userRecord && userRecord.passwordHash === btoa(password)) {
+                console.log('🔐 パスワード認証成功');
                 this.currentUser = { id: userRecord.id, email: userRecord.email };
                 localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
                 
@@ -1003,12 +1009,13 @@ class HabitTracker {
                 this.showAuthMessage('ログイン成功！データを同期しました。', 'success');
                 return true;
             } else {
+                console.log('🔐 認証失敗 - ユーザー:', !!userRecord, 'パスワード:', userRecord ? userRecord.passwordHash === btoa(password) : 'N/A');
                 this.showAuthMessage('メールアドレスまたはパスワードが間違っています。');
                 return false;
             }
         } catch (error) {
             console.error('ログインエラー:', error);
-            this.showAuthMessage('ログインに失敗しました。');
+            this.showAuthMessage('ログインに失敗しました: ' + error.message);
             return false;
         }
     }
@@ -1016,14 +1023,19 @@ class HabitTracker {
     // 新規登録処理（マルチデバイス対応）
     async signup(email, password) {
         try {
+            console.log('🔐 新規登録試行:', email);
+            
             const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            console.log('🔐 既存ユーザー:', Object.keys(users));
             
             if (users[email]) {
+                console.log('🔐 ユーザー既存');
                 this.showAuthMessage('このメールアドレスは既に登録されています。');
                 return false;
             }
             
             if (password.length < 6) {
+                console.log('🔐 パスワード短すぎ');
                 this.showAuthMessage('パスワードは6文字以上で入力してください。');
                 return false;
             }
@@ -1032,6 +1044,7 @@ class HabitTracker {
             const newUser = { id: userId, email: email };
             users[email] = { ...newUser, passwordHash: btoa(password) };
             
+            console.log('🔐 新規ユーザー作成:', newUser);
             localStorage.setItem('habit_users', JSON.stringify(users));
             this.currentUser = newUser;
             localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
@@ -1050,7 +1063,7 @@ class HabitTracker {
             return true;
         } catch (error) {
             console.error('新規登録エラー:', error);
-            this.showAuthMessage('新規登録に失敗しました。');
+            this.showAuthMessage('新規登録に失敗しました: ' + error.message);
             return false;
         }
     }
