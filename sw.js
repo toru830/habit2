@@ -41,7 +41,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Firebase関連のリクエストは削除済み
+  // 外部API関連のリクエストは削除済み
   
   event.respondWith(
     caches.match(event.request)

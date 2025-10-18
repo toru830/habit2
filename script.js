@@ -394,6 +394,7 @@ class HabitTracker {
         this.guestUserId = 'guest_' + Date.now();
         this.apiBaseUrl = 'https://api.github.com';
 
+        this.setupAuth();
         this.init();
     }
 
@@ -534,6 +535,8 @@ class HabitTracker {
             this.currentUser = JSON.parse(savedUser);
             this.updateAuthUI();
             console.log('🔐 保存されたユーザー情報を読み込みました:', this.currentUser.email);
+            // ログイン済みの場合はクラウドからデータを同期
+            this.syncFromCloud();
         }
         
         // ゲストモードの確認
@@ -542,6 +545,59 @@ class HabitTracker {
             this.isGuestMode = true;
             this.updateAuthUI();
             console.log('🔐 ゲストモードで起動');
+        }
+    }
+
+    // クラウドからデータを同期
+    async syncFromCloud() {
+        if (!this.currentUser || this.isGuestMode) return;
+        
+        try {
+            if (window.cloudSync && window.cloudSync.loadConfig()) {
+                const cloudData = await window.cloudSync.loadData();
+                if (cloudData) {
+                    // クラウドデータをローカルに適用
+                    this.completedHabits = cloudData.completedHabits || {};
+                    this.healthData = cloudData.healthData || {};
+                    this.achievements = cloudData.achievements || {};
+                    
+                    // ローカルストレージを更新
+                    this.saveCompletedHabits();
+                    this.saveHealthData();
+                    this.saveAchievements();
+                    
+                    // UIを更新
+                    this.renderCalendar();
+                    this.updateStatsView();
+                    
+                    console.log('🔐 クラウドからデータを同期しました');
+                }
+            }
+        } catch (error) {
+            console.error('クラウド同期エラー:', error);
+        }
+    }
+
+    // クラウドにデータを同期
+    async syncToCloud() {
+        if (!this.currentUser || this.isGuestMode) return;
+        
+        try {
+            if (window.cloudSync && window.cloudSync.loadConfig()) {
+                const data = {
+                    userId: this.currentUser.id,
+                    email: this.currentUser.email,
+                    completedHabits: this.completedHabits,
+                    healthData: this.healthData,
+                    achievements: this.achievements,
+                    lastSync: new Date().toISOString()
+                };
+                
+                await window.cloudSync.saveData(data);
+                console.log('🔐 クラウドにデータを同期しました');
+            }
+        } catch (error) {
+            console.error('クラウド同期エラー:', error);
         }
     }
 
@@ -738,10 +794,125 @@ class HabitTracker {
         console.log('🔐 ゲストモード終了');
     }
 
+    // クラウド同期モーダルを表示
+    showCloudSyncModal() {
+        const modal = document.getElementById('cloudSyncModal');
+        if (modal) {
+            modal.style.display = 'block';
+            // 既存の設定を読み込み
+            const apiKey = localStorage.getItem('jsonbin_api_key');
+            if (apiKey) {
+                document.getElementById('jsonbinApiKey').value = apiKey;
+            }
+        }
+    }
+
+    // クラウド同期モーダルを非表示
+    hideCloudSyncModal() {
+        const modal = document.getElementById('cloudSyncModal');
+        if (modal) {
+            modal.style.display = 'none';
+            this.hideCloudSyncMessage();
+        }
+    }
+
+    // クラウド同期メッセージを表示
+    showCloudSyncMessage(message, isError = false) {
+        const messageDiv = document.getElementById('cloudSyncMessage');
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.backgroundColor = isError ? '#ff4444' : '#44ff44';
+            messageDiv.style.color = 'white';
+        }
+    }
+
+    // クラウド同期メッセージを非表示
+    hideCloudSyncMessage() {
+        const messageDiv = document.getElementById('cloudSyncMessage');
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
+        }
+    }
+
+    // クラウド同期接続テスト
+    async testCloudSyncConnection() {
+        const apiKey = document.getElementById('jsonbinApiKey').value;
+        if (!apiKey) {
+            this.showCloudSyncMessage('API Keyを入力してください。', true);
+            return;
+        }
+
+        try {
+            // 一時的にAPI Keyを設定してテスト
+            const originalApiKey = window.cloudSync.apiKey;
+            window.cloudSync.apiKey = apiKey;
+            
+            const isConnected = await window.cloudSync.testConnection();
+            
+            if (isConnected) {
+                this.showCloudSyncMessage('接続テスト成功！', false);
+            } else {
+                this.showCloudSyncMessage('接続テスト失敗。API Keyを確認してください。', true);
+            }
+            
+            // 元のAPI Keyに戻す
+            window.cloudSync.apiKey = originalApiKey;
+        } catch (error) {
+            console.error('接続テストエラー:', error);
+            this.showCloudSyncMessage('接続テストエラー: ' + error.message, true);
+        }
+    }
+
+    // クラウド同期設定を保存
+    async saveCloudSyncConfig() {
+        const apiKey = document.getElementById('jsonbinApiKey').value;
+        if (!apiKey) {
+            this.showCloudSyncMessage('API Keyを入力してください。', true);
+            return;
+        }
+
+        try {
+            // 接続テスト
+            const originalApiKey = window.cloudSync.apiKey;
+            window.cloudSync.apiKey = apiKey;
+            
+            const isConnected = await window.cloudSync.testConnection();
+            if (!isConnected) {
+                this.showCloudSyncMessage('接続テスト失敗。API Keyを確認してください。', true);
+                window.cloudSync.apiKey = originalApiKey;
+                return;
+            }
+
+            // 新しいBinを作成
+            const data = {
+                userId: this.currentUser.id,
+                email: this.currentUser.email,
+                completedHabits: this.completedHabits,
+                healthData: this.healthData,
+                achievements: this.achievements,
+                lastSync: new Date().toISOString()
+            };
+
+            const binId = await window.cloudSync.createBin(data);
+            
+            // 設定を保存
+            window.cloudSync.saveConfig(apiKey, binId);
+            
+            this.hideCloudSyncModal();
+            this.showAuthMessage('クラウド同期設定が完了しました！', false);
+            console.log('🔐 クラウド同期設定完了');
+        } catch (error) {
+            console.error('設定保存エラー:', error);
+            this.showCloudSyncMessage('設定保存エラー: ' + error.message, true);
+        }
+    }
+
     // 認証UIの更新
     updateAuthUI() {
         const authBtn = document.getElementById('authBtn');
         const logoutBtn = document.getElementById('logoutBtn');
+        const cloudSyncBtn = document.getElementById('cloudSyncBtn');
         const guestModeBtn = document.getElementById('guestModeBtn');
         
         if (this.currentUser || this.isGuestMode) {
@@ -755,11 +926,16 @@ class HabitTracker {
                     logoutBtn.textContent = `ログアウト (${this.currentUser.email})`;
                 }
             }
+            // ログイン済みの場合はクラウド同期ボタンを表示
+            if (cloudSyncBtn) {
+                cloudSyncBtn.style.display = this.currentUser ? 'inline-block' : 'none';
+            }
             if (guestModeBtn) guestModeBtn.style.display = 'none';
         } else {
             // 未ログイン状態：ログインボタンとゲストボタンを表示、ログアウトボタンを非表示
             if (authBtn) authBtn.style.display = 'inline-block';
             if (logoutBtn) logoutBtn.style.display = 'none';
+            if (cloudSyncBtn) cloudSyncBtn.style.display = 'none';
             if (guestModeBtn) guestModeBtn.style.display = 'inline-block';
         }
     }
@@ -3524,6 +3700,46 @@ class HabitTracker {
                 });
             }
 
+            // クラウド同期ボタン
+            const cloudSyncBtn = document.getElementById('cloudSyncBtn');
+            if (cloudSyncBtn) {
+                console.log('🔐 クラウド同期ボタンのイベントリスナーを追加中...');
+                cloudSyncBtn.addEventListener('click', (event) => {
+                    console.log('🔐 クラウド同期ボタンがクリックされました！');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.showCloudSyncModal();
+                });
+                console.log('🔐 クラウド同期ボタンのイベントリスナー追加完了');
+            }
+
+            // クラウド同期モーダルボタン
+            const cloudSyncTest = document.getElementById('cloudSyncTest');
+            const cloudSyncSave = document.getElementById('cloudSyncSave');
+            const cloudSyncCancel = document.getElementById('cloudSyncCancel');
+            
+            if (cloudSyncTest) {
+                cloudSyncTest.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    await this.testCloudSyncConnection();
+                });
+            }
+            if (cloudSyncSave) {
+                cloudSyncSave.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    await this.saveCloudSyncConfig();
+                });
+            }
+            if (cloudSyncCancel) {
+                cloudSyncCancel.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.hideCloudSyncModal();
+                });
+            }
+
             // ゲストモードボタン
             const guestModeBtn = document.getElementById('guestModeBtn');
             if (guestModeBtn) {
@@ -4426,6 +4642,11 @@ class HabitTracker {
                 
                 // メイン保存
                 localStorage.setItem('habitTrackerData', dataToSave);
+                
+                // 認証済みの場合はクラウドに同期
+                if (this.currentUser && !this.isGuestMode) {
+                    this.syncToCloud();
+                }
                 
                 // バックアップ保存（タイムスタンプ付き）
                 const timestamp = new Date().toISOString();
