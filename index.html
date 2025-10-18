@@ -21,7 +21,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         // Firebase設定（実際のプロジェクト設定に置き換えてください）
@@ -46,6 +46,8 @@
         window.firebaseDb = db;
         window.firebaseProvider = provider;
         window.firebaseSignIn = signInWithPopup;
+        window.firebaseSignInRedirect = signInWithRedirect;
+        window.firebaseGetRedirectResult = getRedirectResult;
         window.firebaseSignOut = signOut;
         window.firebaseOnAuthStateChanged = onAuthStateChanged;
         window.firebaseDoc = doc;

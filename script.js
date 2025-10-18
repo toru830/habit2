@@ -518,6 +518,19 @@ class HabitTracker {
                     console.log('ユーザーがログアウトしました');
                 }
             });
+            
+            // リダイレクト結果の処理
+            if (typeof window.firebaseGetRedirectResult === 'function') {
+                window.firebaseGetRedirectResult(window.firebaseAuth)
+                    .then((result) => {
+                        if (result && result.user) {
+                            console.log('リダイレクトログイン成功:', result.user);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('リダイレクトログインエラー:', error);
+                    });
+            }
         }
     }
 
@@ -539,9 +552,21 @@ class HabitTracker {
     async signInWithGoogle() {
         try {
             if (typeof window.firebaseSignIn === 'function') {
-                const result = await window.firebaseSignIn(window.firebaseAuth, window.firebaseProvider);
-                console.log('ログイン成功:', result.user);
-                return result.user;
+                // まずポップアップで試行
+                try {
+                    const result = await window.firebaseSignIn(window.firebaseAuth, window.firebaseProvider);
+                    console.log('ログイン成功:', result.user);
+                    return result.user;
+                } catch (popupError) {
+                    // ポップアップが失敗した場合はリダイレクトを使用
+                    if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user') {
+                        console.log('ポップアップがブロックされました。リダイレクトを使用します。');
+                        await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
+                        return null; // リダイレクトの場合は結果は別途処理
+                    } else {
+                        throw popupError;
+                    }
+                }
             } else {
                 console.error('Firebase認証が利用できません');
             }
