@@ -5189,28 +5189,10 @@ class HabitTracker {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔐 DOMContentLoaded: アプリ初期化開始');
     
-    // Firebase認証の初期化を待つ
-    const initApp = () => {
-        console.log('🔐 Firebase認証オブジェクトの確認:', {
-            firebaseAuth: !!window.firebaseAuth,
-            firebaseProvider: !!window.firebaseProvider,
-            firebaseDb: !!window.firebaseDb
-        });
-        
-        if (window.firebaseAuth && window.firebaseProvider && window.firebaseDb) {
-            console.log('🔐 Firebase認証オブジェクトが利用可能です');
-            const app = new HabitTracker();
-            window.habitTracker = app; // グローバルに保存
-            
-            // データ更新イベントは無効化（データ上書きを防ぐため）
-            console.log('データ更新イベントは無効化されています');
-        } else {
-            console.log('🔐 Firebase認証オブジェクトを待機中...');
-            setTimeout(initApp, 100);
-        }
-    };
-    
-    initApp();
+    // アプリを直接初期化（Firebase待機なし）
+    const app = new HabitTracker();
+    window.habitTracker = app; // グローバルに保存
+    console.log('🔐 アプリ初期化完了');
 });
 
 // サービスワーカーの登録（PWA対応）
