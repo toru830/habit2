@@ -412,7 +412,7 @@ class HabitTracker {
         setTimeout(() => {
             const authBtn = document.getElementById('authBtn');
             if (authBtn) {
-                authBtn.style.display = 'inline-block';
+                authBtn.style.display = 'flex';
                 console.log('🔐 認証ボタンを強制表示しました');
             } else {
                 console.error('🔐 認証ボタンが見つかりません');
@@ -888,13 +888,20 @@ class HabitTracker {
             // ログイン済み：ログアウトボタンと同期ボタンを表示
             if (authBtn) authBtn.style.display = 'none';
             if (logoutBtn) {
-                logoutBtn.style.display = 'inline-block';
-                logoutBtn.textContent = `ログアウト (${this.currentUser.email})`;
+                logoutBtn.style.display = 'flex';
+                logoutBtn.textContent = '✓';
+                logoutBtn.title = `ログアウト (${this.currentUser.email})`;
             }
-            if (cloudSyncBtn) cloudSyncBtn.style.display = 'inline-block';
+            if (cloudSyncBtn) {
+                cloudSyncBtn.style.display = 'flex';
+                cloudSyncBtn.title = 'データ同期';
+            }
         } else {
             // 未ログイン状態：ログインボタンのみ表示
-            if (authBtn) authBtn.style.display = 'inline-block';
+            if (authBtn) {
+                authBtn.style.display = 'flex';
+                authBtn.title = 'ログイン';
+            }
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (cloudSyncBtn) cloudSyncBtn.style.display = 'none';
         }
