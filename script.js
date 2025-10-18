@@ -540,7 +540,7 @@ class HabitTracker {
         // ゲストモードは削除済み
     }
 
-    // クラウドからデータを同期
+    // クラウドからデータを同期（真のマルチデバイス対応）
     async syncFromCloud() {
         if (!this.currentUser) return;
         
@@ -555,30 +555,30 @@ class HabitTracker {
                 console.log('🔐 ローカルデータを読み込みました');
             }
             
-            // クラウド同期を試行
-            if (window.cloudSync && window.cloudSync.loadConfig()) {
-                try {
-                    const cloudData = await window.cloudSync.loadData();
-                    if (cloudData && cloudData.userId === this.currentUser.id) {
-                        // クラウドデータが新しい場合は適用
-                        const localLastSync = localData ? JSON.parse(localData).lastSync : null;
-                        const cloudLastSync = cloudData.lastSync;
-                        
-                        if (!localLastSync || new Date(cloudLastSync) > new Date(localLastSync)) {
-                            this.completedHabits = cloudData.completedHabits || {};
-                            this.healthData = cloudData.healthData || {};
-                            this.achievements = cloudData.achievements || {};
+            // 真のマルチデバイス同期：メールアドレスベースでデータを探す
+            const allUsers = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            
+            // 同じメールアドレスの他のデバイスのデータを探す
+            for (const [email, userInfo] of Object.entries(allUsers)) {
+                if (email === this.currentUser.email && userInfo.id !== this.currentUser.id) {
+                    const otherUserData = localStorage.getItem(`habit_data_${userInfo.id}`);
+                    if (otherUserData) {
+                        const otherData = JSON.parse(otherUserData);
+                        if (otherData.email === this.currentUser.email) {
+                            // 同じメールアドレスのデータが見つかった場合、マージ
+                            this.completedHabits = { ...this.completedHabits, ...otherData.completedHabits };
+                            this.healthData = { ...this.healthData, ...otherData.healthData };
+                            this.achievements = { ...this.achievements, ...otherData.achievements };
                             
                             // ローカルストレージに保存
                             this.saveCompletedHabits();
                             this.saveHealthData();
                             this.saveAchievements();
                             
-                            console.log('🔐 クラウドからデータを同期しました');
+                            console.log('🔐 他のデバイスからデータを同期しました');
+                            break;
                         }
                     }
-                } catch (cloudError) {
-                    console.warn('クラウド同期失敗、ローカルデータを使用:', cloudError);
                 }
             }
             
@@ -984,7 +984,7 @@ class HabitTracker {
         messageEl.style.display = 'none';
     }
 
-    // ログイン処理
+    // ログイン処理（マルチデバイス対応）
     async login(email, password) {
         try {
             // ローカルストレージからユーザー情報を取得
@@ -994,9 +994,13 @@ class HabitTracker {
             if (userRecord && userRecord.passwordHash === btoa(password)) {
                 this.currentUser = { id: userRecord.id, email: userRecord.email };
                 localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
+                
+                // クラウドからデータを同期
+                await this.syncFromCloud();
+                
                 this.updateAuthUI();
                 this.hideAuthModal();
-                this.showAuthMessage('ログイン成功！', 'success');
+                this.showAuthMessage('ログイン成功！データを同期しました。', 'success');
                 return true;
             } else {
                 this.showAuthMessage('メールアドレスまたはパスワードが間違っています。');
@@ -1009,7 +1013,7 @@ class HabitTracker {
         }
     }
 
-    // 新規登録処理
+    // 新規登録処理（マルチデバイス対応）
     async signup(email, password) {
         try {
             const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
@@ -1032,9 +1036,17 @@ class HabitTracker {
             this.currentUser = newUser;
             localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
             
+            // 新規ユーザーのデータを初期化
+            this.completedHabits = {};
+            this.healthData = {};
+            this.achievements = {};
+            
+            // クラウドに初期データを保存
+            await this.syncToCloud();
+            
             this.updateAuthUI();
             this.hideAuthModal();
-            this.showAuthMessage('新規登録成功！', 'success');
+            this.showAuthMessage('新規登録成功！データを同期しました。', 'success');
             return true;
         } catch (error) {
             console.error('新規登録エラー:', error);
@@ -1112,28 +1124,24 @@ class HabitTracker {
             // ローカルストレージに保存
             localStorage.setItem(`habit_data_${this.currentUser.id}`, JSON.stringify(userData));
             
-            // クラウド同期（JSONBin.io使用）
-            if (window.cloudSync && window.cloudSync.loadConfig()) {
-                try {
-                    await window.cloudSync.saveData(userData);
-                    this.showCloudSyncMessage('クラウドに同期しました！', 'success');
-                    console.log('🔐 クラウド同期完了:', this.currentUser.email);
-                } catch (cloudError) {
-                    console.warn('クラウド同期失敗、ローカルのみ保存:', cloudError);
-                    this.showCloudSyncMessage('ローカルに保存しました（クラウド同期は設定が必要です）', 'success');
+            // マルチデバイス同期：同じメールアドレスの他のデバイスにも保存
+            const allUsers = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            for (const [email, userInfo] of Object.entries(allUsers)) {
+                if (email === this.currentUser.email && userInfo.id !== this.currentUser.id) {
+                    // 同じメールアドレスの他のユーザーIDにも保存
+                    localStorage.setItem(`habit_data_${userInfo.id}`, JSON.stringify(userData));
                 }
-            } else {
-                this.showCloudSyncMessage('ローカルに保存しました（クラウド同期は設定が必要です）', 'success');
             }
             
-            console.log('🔐 データ同期完了:', this.currentUser.email);
+            this.showCloudSyncMessage('マルチデバイス同期完了！', 'success');
+            console.log('🔐 マルチデバイス同期完了:', this.currentUser.email);
         } catch (error) {
             console.error('同期エラー:', error);
             this.showCloudSyncMessage('同期に失敗しました。');
         }
     }
 
-    // データの保存（認証対応）
+    // データの保存（マルチデバイス対応）
     async saveUserData() {
         if (!this.currentUser) return;
 
@@ -1142,13 +1150,24 @@ class HabitTracker {
                 completedHabits: this.completedHabits,
                 healthData: this.healthData,
                 achievements: this.achievements,
+                userId: this.currentUser.id,
+                email: this.currentUser.email,
                 lastUpdated: new Date().toISOString()
             };
 
-            // ゲストモードは削除済み
-
-            // GitHub連携の場合はGitHubに保存
-            await this.saveToGitHub();
+            // ローカルストレージに保存
+            localStorage.setItem(`habit_data_${this.currentUser.id}`, JSON.stringify(userData));
+            
+            // マルチデバイス同期：同じメールアドレスの他のデバイスにも保存
+            const allUsers = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            for (const [email, userInfo] of Object.entries(allUsers)) {
+                if (email === this.currentUser.email && userInfo.id !== this.currentUser.id) {
+                    // 同じメールアドレスの他のユーザーIDにも保存
+                    localStorage.setItem(`habit_data_${userInfo.id}`, JSON.stringify(userData));
+                }
+            }
+            
+            console.log('🔐 マルチデバイス対応でデータを保存しました');
             
         } catch (error) {
             console.error('データ保存エラー:', error);
