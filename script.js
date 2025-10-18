@@ -543,7 +543,6 @@ class HabitTracker {
 
     // 認証UIの更新
     updateAuthUI() {
-        const authContainer = document.querySelector('.auth-container');
         const githubConnectBtn = document.getElementById('githubConnectBtn');
         const githubDisconnectBtn = document.getElementById('githubDisconnectBtn');
         const guestModeBtn = document.getElementById('guestModeBtn');
@@ -554,15 +553,17 @@ class HabitTracker {
             if (githubDisconnectBtn) {
                 githubDisconnectBtn.style.display = 'inline-block';
                 if (this.isGuestMode) {
-                    githubDisconnectBtn.textContent = 'ゲストモード終了';
+                    githubDisconnectBtn.textContent = 'ゲスト終了';
                 } else {
                     githubDisconnectBtn.textContent = `連携解除 (${this.githubUser})`;
                 }
             }
+            if (guestModeBtn) guestModeBtn.style.display = 'none';
         } else {
-            // 未連携状態：GitHub連携ボタンを表示、連携解除ボタンを非表示
+            // 未連携状態：GitHub連携ボタンとゲストボタンを表示、連携解除ボタンを非表示
             if (githubConnectBtn) githubConnectBtn.style.display = 'inline-block';
             if (githubDisconnectBtn) githubDisconnectBtn.style.display = 'none';
+            if (guestModeBtn) guestModeBtn.style.display = 'inline-block';
         }
     }
 
