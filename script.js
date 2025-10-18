@@ -390,8 +390,6 @@ class HabitTracker {
 
         // 認証システム
         this.currentUser = null;
-        this.isGuestMode = false;
-        this.guestUserId = 'guest_' + Date.now();
         this.apiBaseUrl = 'https://api.github.com';
 
         this.setupAuth();
@@ -539,18 +537,12 @@ class HabitTracker {
             this.syncFromCloud();
         }
         
-        // ゲストモードの確認
-        const isGuest = localStorage.getItem('habit_guest_mode');
-        if (isGuest === 'true') {
-            this.isGuestMode = true;
-            this.updateAuthUI();
-            console.log('🔐 ゲストモードで起動');
-        }
+        // ゲストモードは削除済み
     }
 
     // クラウドからデータを同期
     async syncFromCloud() {
-        if (!this.currentUser || this.isGuestMode) return;
+        if (!this.currentUser) return;
         
         try {
             if (window.cloudSync && window.cloudSync.loadConfig()) {
@@ -580,7 +572,7 @@ class HabitTracker {
 
     // クラウドにデータを同期
     async syncToCloud() {
-        if (!this.currentUser || this.isGuestMode) return;
+        if (!this.currentUser) return;
         
         try {
             if (window.cloudSync && window.cloudSync.loadConfig()) {
@@ -760,11 +752,6 @@ class HabitTracker {
     // ログアウト処理
     async logout() {
         try {
-            if (this.isGuestMode) {
-                this.endGuestMode();
-                return;
-            }
-            
             this.currentUser = null;
             localStorage.removeItem('habit_user');
             this.updateAuthUI();
@@ -775,24 +762,7 @@ class HabitTracker {
         }
     }
 
-    // ゲストモード開始
-    startGuestMode() {
-        this.isGuestMode = true;
-        this.guestUserId = 'guest_' + Date.now();
-        localStorage.setItem('habit_guest_mode', 'true');
-        this.updateAuthUI();
-        this.showAuthMessage('ゲストモードで開始しました。', false);
-        console.log('🔐 ゲストモード開始');
-    }
-
-    // ゲストモード終了
-    endGuestMode() {
-        this.isGuestMode = false;
-        localStorage.removeItem('habit_guest_mode');
-        this.updateAuthUI();
-        this.showAuthMessage('ゲストモードを終了しました。', false);
-        console.log('🔐 ゲストモード終了');
-    }
+    // ゲストモードは削除済み
 
     // クラウド同期モーダルを表示
     showCloudSyncModal() {
@@ -915,28 +885,22 @@ class HabitTracker {
         const cloudSyncBtn = document.getElementById('cloudSyncBtn');
         const guestModeBtn = document.getElementById('guestModeBtn');
         
-        if (this.currentUser || this.isGuestMode) {
-            // ログイン済みまたはゲストモード：ログアウトボタンを表示
+        if (this.currentUser) {
+            // ログイン済み：ログアウトボタンを表示
             if (authBtn) authBtn.style.display = 'none';
             if (logoutBtn) {
                 logoutBtn.style.display = 'inline-block';
-                if (this.isGuestMode) {
-                    logoutBtn.textContent = 'ゲスト終了';
-                } else {
-                    logoutBtn.textContent = `ログアウト (${this.currentUser.email})`;
-                }
+                logoutBtn.textContent = `ログアウト (${this.currentUser.email})`;
             }
-            // ログイン済みの場合はクラウド同期ボタンを表示
-            if (cloudSyncBtn) {
-                cloudSyncBtn.style.display = this.currentUser ? 'inline-block' : 'none';
-            }
+            // クラウド同期ボタンを表示
+            if (cloudSyncBtn) cloudSyncBtn.style.display = 'inline-block';
             if (guestModeBtn) guestModeBtn.style.display = 'none';
         } else {
-            // 未ログイン状態：ログインボタンとゲストボタンを表示、ログアウトボタンを非表示
+            // 未ログイン状態：ログインボタンのみ表示
             if (authBtn) authBtn.style.display = 'inline-block';
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (cloudSyncBtn) cloudSyncBtn.style.display = 'none';
-            if (guestModeBtn) guestModeBtn.style.display = 'inline-block';
+            if (guestModeBtn) guestModeBtn.style.display = 'none';
         }
     }
 
@@ -1085,13 +1049,7 @@ class HabitTracker {
                 lastUpdated: new Date().toISOString()
             };
 
-            if (this.isGuestMode) {
-                // ゲストモードの場合はローカルストレージに保存
-                console.log('🔐 ゲストモード：ローカルストレージに保存');
-                localStorage.setItem('guest_user_data', JSON.stringify(userData));
-                console.log('🔐 ゲストモード：データ保存完了');
-                return;
-            }
+            // ゲストモードは削除済み
 
             // GitHub連携の場合はGitHubに保存
             await this.saveToGitHub();
@@ -1125,26 +1083,10 @@ class HabitTracker {
 
     // ユーザーデータの読み込み
     async loadUserData() {
-        if (!this.currentUser && !this.isGuestMode) return;
+        if (!this.currentUser) return;
 
         try {
-            if (this.isGuestMode) {
-                // ゲストモードの場合はローカルストレージから読み込み
-                console.log('🔐 ゲストモード：ローカルストレージから読み込み');
-                const guestData = localStorage.getItem('guest_user_data');
-                if (guestData) {
-                    const userData = JSON.parse(guestData);
-                    this.completedHabits = userData.completedHabits || {};
-                    this.healthData = userData.healthData || {};
-                    this.achievements = userData.achievements || {};
-                    
-                    // UIを更新
-                    this.renderCalendar();
-                    this.updateStatsView();
-                    console.log('🔐 ゲストモード：データ読み込み完了');
-                }
-                return;
-            }
+            // ゲストモードは削除済み
 
             // ローカルストレージのみ使用
         } catch (error) {
@@ -2484,8 +2426,8 @@ class HabitTracker {
         console.log('変更後のデータ:', this.completedHabits);
         this.saveCompletedHabits();
         
-        // クラウドに自動保存（認証済みまたはゲストモード）
-        if (this.currentUser || this.isGuestMode) {
+        // クラウドに自動保存（認証済みのみ）
+        if (this.currentUser) {
             this.saveUserData();
         }
         
@@ -3740,23 +3682,7 @@ class HabitTracker {
                 });
             }
 
-            // ゲストモードボタン
-            const guestModeBtn = document.getElementById('guestModeBtn');
-            if (guestModeBtn) {
-                console.log('🔐 ゲストモードボタンのイベントリスナーを追加中...');
-                console.log('🔐 ゲストモードボタン要素詳細:', {
-                    id: guestModeBtn.id,
-                    className: guestModeBtn.className,
-                    textContent: guestModeBtn.textContent
-                });
-                guestModeBtn.addEventListener('click', (event) => {
-                    console.log('🔐 ゲストモードボタンがクリックされました！');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.startGuestMode();
-                });
-                console.log('🔐 ゲストモードボタンのイベントリスナー追加完了');
-            }
+            // ゲストモードボタンは削除済み
 
         }, 100);
         
