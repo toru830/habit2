@@ -557,23 +557,37 @@ class HabitTracker {
                 console.log('🔐 ローカルデータを読み込みました');
             }
             
-            // 真のマルチデバイス同期：メールアドレスベースでデータを探す
-            const emailData = localStorage.getItem(`habit_data_email_${this.currentUser.email}`);
-            if (emailData) {
-                const emailUserData = JSON.parse(emailData);
-                if (emailUserData.email === this.currentUser.email) {
-                    // 同じメールアドレスのデータが見つかった場合、マージ
-                    this.completedHabits = { ...this.completedHabits, ...emailUserData.completedHabits };
-                    this.healthData = { ...this.healthData, ...emailUserData.healthData };
-                    this.achievements = { ...this.achievements, ...emailUserData.achievements };
+            // 真のクラウド同期：GitHub Gistからデータを取得
+            try {
+                const gistId = localStorage.getItem(`gist_id_${this.currentUser.email}`);
+                if (gistId) {
+                    const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                        headers: {
+                            'Authorization': `token ${localStorage.getItem('github_token')}`
+                        }
+                    });
                     
-                    // ローカルストレージに保存
-                    this.saveCompletedHabits();
-                    this.saveHealthData();
-                    this.saveAchievements();
-                    
-                    console.log('🔐 メールアドレスベースでデータを同期しました');
+                    if (response.ok) {
+                        const gist = await response.json();
+                        const cloudData = JSON.parse(gist.files['habit_data.json'].content);
+                        
+                        if (cloudData.email === this.currentUser.email) {
+                            // クラウドデータをローカルに適用
+                            this.completedHabits = cloudData.completedHabits || {};
+                            this.healthData = cloudData.healthData || {};
+                            this.achievements = cloudData.achievements || {};
+                            
+                            // ローカルストレージに保存
+                            this.saveCompletedHabits();
+                            this.saveHealthData();
+                            this.saveAchievements();
+                            
+                            console.log('🔐 クラウドからデータを同期しました');
+                        }
+                    }
                 }
+            } catch (cloudError) {
+                console.warn('クラウド同期失敗、ローカルデータを使用:', cloudError);
             }
             
             // UIを更新
@@ -1159,20 +1173,47 @@ class HabitTracker {
             localStorage.setItem(`habit_data_${this.currentUser.id}`, JSON.stringify(userData));
             localStorage.setItem(`habit_data_email_${this.currentUser.email}`, JSON.stringify(userData));
             
-            // 真のクラウド同期：JSONBin.ioを使用
+            // 真のクラウド同期：GitHub Gistを使用
             try {
-                const response = await fetch('https://api.jsonbin.io/v3/b', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': '$2a$10$YOUR_API_KEY_HERE' // 実際のAPIキーに置き換え
-                    },
-                    body: JSON.stringify(userData)
-                });
+                const gistData = {
+                    description: `Habit Tracker Data - ${this.currentUser.email}`,
+                    public: false,
+                    files: {
+                        'habit_data.json': {
+                            content: JSON.stringify(userData, null, 2)
+                        }
+                    }
+                };
+                
+                // 既存のGist IDを取得
+                const existingGistId = localStorage.getItem(`gist_id_${this.currentUser.email}`);
+                
+                let response;
+                if (existingGistId) {
+                    // 既存のGistを更新
+                    response = await fetch(`https://api.github.com/gists/${existingGistId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `token ${localStorage.getItem('github_token')}`
+                        },
+                        body: JSON.stringify(gistData)
+                    });
+                } else {
+                    // 新しいGistを作成
+                    response = await fetch('https://api.github.com/gists', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `token ${localStorage.getItem('github_token')}`
+                        },
+                        body: JSON.stringify(gistData)
+                    });
+                }
                 
                 if (response.ok) {
                     const result = await response.json();
-                    localStorage.setItem('cloud_bin_id', result.metadata.id);
+                    localStorage.setItem(`gist_id_${this.currentUser.email}`, result.id);
                     this.showCloudSyncMessage('クラウドに同期しました！', 'success');
                     console.log('🔐 クラウド同期完了:', this.currentUser.email);
                 } else {
