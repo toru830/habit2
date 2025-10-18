@@ -3408,6 +3408,21 @@ class HabitTracker {
                 emailLoginBtn: !!emailLoginBtn
             });
             
+            // loginBtnの詳細情報を出力
+            if (loginBtn) {
+                console.log('🔐 loginBtn詳細情報:', {
+                    id: loginBtn.id,
+                    className: loginBtn.className,
+                    textContent: loginBtn.textContent,
+                    style: loginBtn.style.cssText,
+                    display: getComputedStyle(loginBtn).display,
+                    visibility: getComputedStyle(loginBtn).visibility
+                });
+            } else {
+                console.error('🔐 loginBtnが見つかりません！');
+                console.error('🔐 利用可能な要素:', document.querySelectorAll('button[id*="login"]'));
+            }
+            
             console.log('🔐 ログインボタン要素:', loginBtn);
             console.log('🔐 ログアウトボタン要素:', logoutBtn);
             console.log('🔐 メールサインアップボタン要素:', emailSignUpBtn);
@@ -3525,28 +3540,6 @@ class HabitTracker {
                 console.log('🔐 ゲストモードボタンのイベントリスナー追加完了');
             }
 
-            // Googleログインボタン
-            if (loginBtn) {
-                console.log('🔐 Googleログインボタンのイベントリスナーを追加中...');
-                console.log('🔐 Googleログインボタン要素詳細:', {
-                    id: loginBtn.id,
-                    className: loginBtn.className,
-                    textContent: loginBtn.textContent,
-                    display: loginBtn.style.display
-                });
-                loginBtn.addEventListener('click', async (event) => {
-                    console.log('🔐 Googleログインボタンがクリックされました！');
-                    alert('テスト: Googleログインボタンがクリックされました！');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    try {
-                        await this.signInWithGoogle();
-                    } catch (e) {
-                        console.error('Googleログインエラー:', e);
-                    }
-                });
-                console.log('🔐 Googleログインボタンのイベントリスナー追加完了');
-            }
         }, 100);
         
         // Firebaseテストボタン
