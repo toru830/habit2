@@ -575,8 +575,15 @@ class HabitTracker {
                                 displayName: result.user.displayName,
                                 photoURL: result.user.photoURL
                             });
+                            
+                            // ユーザー状態を更新
+                            this.currentUser = result.user;
+                            this.isGuestMode = false; // ゲストモードを終了
+                            this.updateAuthUI();
+                            
                             // リダイレクト後のデータ読み込み
-                            this.loadUserData();
+                            await this.loadUserData();
+                            alert('Googleログインが完了しました！');
                         } else {
                             console.log('🔐 リダイレクト結果なし（初回アクセスまたはログインしていない状態）');
                         }
@@ -621,73 +628,53 @@ class HabitTracker {
                 }
             }
         } else {
-            // ログアウト状態：メール認証UIを表示、ログアウトボタンを非表示
+            // ログアウト状態：メール認証UIとGoogleログインボタンを表示、ログアウトボタンを非表示
             if (emailAuthContainer) emailAuthContainer.style.display = 'flex';
-            if (loginBtn) loginBtn.style.display = 'none'; // Googleログインは一時的に非表示
+            if (loginBtn) loginBtn.style.display = 'inline-block'; // Googleログインを表示
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
     }
 
-    // Googleログイン（ポップアップ方式に一時的に切り替え）
+    // Googleログイン（リダイレクト方式）
     async signInWithGoogle() {
         try {
-            console.log('🔐 signInWithGoogle関数が呼び出されました');
+            console.log('🔐 Googleログイン開始');
             console.log('🔐 Firebase認証オブジェクトの状態:', {
-                auth: window.firebaseAuth,
-                provider: window.firebaseProvider,
-                signInPopup: typeof window.firebaseSignIn,
+                auth: !!window.firebaseAuth,
+                provider: !!window.firebaseProvider,
                 signInRedirect: typeof window.firebaseSignInRedirect
             });
             
-            // まずポップアップ方式を試行
-            if (typeof window.firebaseSignIn === 'function' && window.firebaseAuth && window.firebaseProvider) {
-                console.log('🔐 ポップアップ方式でログイン開始...');
-                console.log('🔐 認証オブジェクト:', window.firebaseAuth);
-                console.log('🔐 プロバイダーオブジェクト:', window.firebaseProvider);
-                
-                const result = await window.firebaseSignIn(window.firebaseAuth, window.firebaseProvider);
-                console.log('🔐 ポップアップログイン成功:', result.user);
-                return result.user;
-            } 
-            // ポップアップが失敗した場合はリダイレクト方式を試行
-            else if (typeof window.firebaseSignInRedirect === 'function' && window.firebaseAuth && window.firebaseProvider) {
-                console.log('🔐 リダイレクト方式でログイン開始...');
-                console.log('🔐 認証オブジェクト:', window.firebaseAuth);
-                console.log('🔐 プロバイダーオブジェクト:', window.firebaseProvider);
-                
-                // リダイレクト先のURLを設定
-                const redirectUrl = window.location.origin + window.location.pathname;
-                console.log('🔐 リダイレクト先URL:', redirectUrl);
-                
-                await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
-                console.log('🔐 リダイレクト実行完了（ページがリダイレクトされます）');
-                return null;
-            } else {
-                console.error('🔐 Firebase認証が利用できません');
-                console.error('🔐 利用可能な関数:', Object.keys(window).filter(key => key.includes('firebase')));
-                alert('Firebase認証が利用できません。ページを再読み込みしてください。');
+            if (!window.firebaseAuth || !window.firebaseProvider || !window.firebaseSignInRedirect) {
+                throw new Error('Firebase認証が利用できません');
             }
+            
+            console.log('🔐 リダイレクト方式でログイン開始...');
+            console.log('🔐 現在のURL:', window.location.href);
+            
+            // リダイレクト方式でログイン
+            await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
+            console.log('🔐 リダイレクト実行完了（ページがリダイレクトされます）');
+            
         } catch (error) {
-            console.error('🔐 ログインエラー詳細:', {
+            console.error('🔐 Googleログインエラー詳細:', {
                 code: error.code,
                 message: error.message,
                 stack: error.stack,
                 name: error.name
             });
             
-            // ポップアップがブロックされた場合はリダイレクトを試行
-            if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-                console.log('🔐 ポップアップがブロックされました。リダイレクト方式を試行します。');
-                try {
-                    await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
-                    return null;
-                } catch (redirectError) {
-                    console.error('🔐 リダイレクトも失敗:', redirectError);
-                    alert(`ログインに失敗しました: ${redirectError.message}`);
-                }
+            let errorMessage = 'Googleログインに失敗しました: ';
+            if (error.code === 'auth/unauthorized-domain') {
+                errorMessage += 'このドメインは認証されていません。Firebase Consoleでドメインを追加してください。';
+            } else if (error.code === 'auth/popup-blocked') {
+                errorMessage += 'ポップアップがブロックされました。ブラウザの設定を確認してください。';
             } else {
-                alert(`ログインに失敗しました: ${error.code} - ${error.message}`);
+                errorMessage += error.message;
             }
+            
+            alert(errorMessage);
+            throw error;
         }
     }
 
@@ -3521,6 +3508,29 @@ class HabitTracker {
                     this.startGuestMode();
                 });
                 console.log('🔐 ゲストモードボタンのイベントリスナー追加完了');
+            }
+
+            // Googleログインボタン
+            if (loginBtn) {
+                console.log('🔐 Googleログインボタンのイベントリスナーを追加中...');
+                console.log('🔐 Googleログインボタン要素詳細:', {
+                    id: loginBtn.id,
+                    className: loginBtn.className,
+                    textContent: loginBtn.textContent,
+                    display: loginBtn.style.display
+                });
+                loginBtn.addEventListener('click', async (event) => {
+                    console.log('🔐 Googleログインボタンがクリックされました！');
+                    alert('テスト: Googleログインボタンがクリックされました！');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    try {
+                        await this.signInWithGoogle();
+                    } catch (e) {
+                        console.error('Googleログインエラー:', e);
+                    }
+                });
+                console.log('🔐 Googleログインボタンのイベントリスナー追加完了');
             }
         }, 100);
         
