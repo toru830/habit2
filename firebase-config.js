@@ -2,12 +2,13 @@
 // 実際のプロジェクト設定に置き換えてください
 
 export const firebaseConfig = {
-    apiKey: "your-api-key-here",
-    authDomain: "your-project-id.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "your-app-id-here"
+    apiKey: "AIzaSyDzu_ky2Sz0x0wG0UfVzUF68HiTUnu6euY",
+    authDomain: "habit-tracker0830.firebaseapp.com",
+    projectId: "habit-tracker0830",
+    storageBucket: "habit-tracker0830.firebasestorage.app",
+    messagingSenderId: "1012307413614",
+    appId: "1:1012307413614:web:3c772a588c4d0825c3f47f",
+    measurementId: "G-NCQSMFEPQL"
 };
 
 // Firebase設定の取得方法：
