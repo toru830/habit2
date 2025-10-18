@@ -408,6 +408,18 @@ class HabitTracker {
         
         // 初期化時に認証UIを更新
         this.updateAuthUI();
+        
+        // Googleログインボタンを確実に表示
+        setTimeout(() => {
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.style.display = 'inline-block';
+                console.log('🔐 Googleログインボタンを強制表示しました');
+            } else {
+                console.error('🔐 Googleログインボタンが見つかりません');
+            }
+        }, 500);
+        
         console.log('🔐 アプリ初期化完了');
     }
     
@@ -630,7 +642,10 @@ class HabitTracker {
         } else {
             // ログアウト状態：メール認証UIとGoogleログインボタンを表示、ログアウトボタンを非表示
             if (emailAuthContainer) emailAuthContainer.style.display = 'flex';
-            if (loginBtn) loginBtn.style.display = 'inline-block'; // Googleログインを表示
+            if (loginBtn) {
+                loginBtn.style.display = 'inline-block'; // Googleログインを表示
+                console.log('🔐 Googleログインボタンを表示しました');
+            }
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
     }
