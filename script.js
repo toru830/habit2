@@ -388,6 +388,10 @@ class HabitTracker {
         this.totalScore = this.calculateTotalScore();
         this.totalChart = null;
 
+        // Firebase認証
+        this.currentUser = null;
+        this.setupFirebaseAuth();
+
         this.init();
     }
 
@@ -500,6 +504,117 @@ class HabitTracker {
     }
 
     // デバッグ用の機能を追加
+    // Firebase認証の設定
+    setupFirebaseAuth() {
+        if (typeof window.firebaseOnAuthStateChanged === 'function') {
+            window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                this.currentUser = user;
+                this.updateAuthUI();
+                
+                if (user) {
+                    console.log('ユーザーがログインしました:', user.email);
+                    this.loadUserData();
+                } else {
+                    console.log('ユーザーがログアウトしました');
+                }
+            });
+        }
+    }
+
+    // 認証UIの更新
+    updateAuthUI() {
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        if (this.currentUser) {
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        } else {
+            if (loginBtn) loginBtn.style.display = 'inline-block';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+        }
+    }
+
+    // Googleログイン
+    async signInWithGoogle() {
+        try {
+            if (typeof window.firebaseSignIn === 'function') {
+                const result = await window.firebaseSignIn(window.firebaseAuth, window.firebaseProvider);
+                console.log('ログイン成功:', result.user);
+                return result.user;
+            } else {
+                console.error('Firebase認証が利用できません');
+            }
+        } catch (error) {
+            console.error('ログインエラー:', error);
+            alert('ログインに失敗しました: ' + error.message);
+        }
+    }
+
+    // ログアウト
+    async signOut() {
+        try {
+            if (typeof window.firebaseSignOut === 'function') {
+                await window.firebaseSignOut(window.firebaseAuth);
+                console.log('ログアウト成功');
+            } else {
+                console.error('Firebase認証が利用できません');
+            }
+        } catch (error) {
+            console.error('ログアウトエラー:', error);
+        }
+    }
+
+    // ユーザーデータの保存
+    async saveUserData() {
+        if (!this.currentUser) return;
+
+        try {
+            const userData = {
+                completedHabits: this.completedHabits,
+                healthData: this.healthData,
+                achievements: this.achievements,
+                lastUpdated: new Date().toISOString()
+            };
+
+            const userDocRef = window.firebaseDoc(window.firebaseDb, 'users', this.currentUser.uid);
+            await window.firebaseSetDoc(userDocRef, userData, { merge: true });
+            console.log('データをクラウドに保存しました');
+        } catch (error) {
+            console.error('データ保存エラー:', error);
+        }
+    }
+
+    // ユーザーデータの読み込み
+    async loadUserData() {
+        if (!this.currentUser) return;
+
+        try {
+            const userDocRef = window.firebaseDoc(window.firebaseDb, 'users', this.currentUser.uid);
+            const userDoc = await window.firebaseGetDoc(userDocRef);
+            
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                this.completedHabits = userData.completedHabits || {};
+                this.healthData = userData.healthData || {};
+                this.achievements = userData.achievements || {};
+                
+                // ローカルストレージも更新
+                this.saveCompletedHabits();
+                this.saveHealthData();
+                this.saveAchievements();
+                
+                // UIを更新
+                this.renderCalendar();
+                this.updateStatsView();
+                
+                console.log('クラウドからデータを読み込みました');
+            }
+        } catch (error) {
+            console.error('データ読み込みエラー:', error);
+        }
+    }
+
     addDebugFunctions() {
         // グローバルにデバッグ関数を追加
         window.debugHabitTracker = {
@@ -510,6 +625,7 @@ class HabitTracker {
                 console.log('ヘルスデータ:', this.healthData);
                 console.log('現在の週:', this.currentWeek);
                 console.log('今日の日付:', new Date().toISOString().split('T')[0]);
+                console.log('現在のユーザー:', this.currentUser);
                 
                 // 未来の日付のデータをチェック
                 const today = new Date().toISOString().split('T')[0];
@@ -609,6 +725,16 @@ class HabitTracker {
                     localStorage.clear();
                     location.reload();
                 }
+            },
+            
+            // クラウドにデータを保存
+            saveToCloud: () => {
+                this.saveUserData();
+            },
+            
+            // クラウドからデータを読み込み
+            loadFromCloud: () => {
+                this.loadUserData();
             }
         };
         
@@ -1821,6 +1947,11 @@ class HabitTracker {
         console.log('変更後のデータ:', this.completedHabits);
         this.saveCompletedHabits();
         
+        // クラウドに自動保存
+        if (this.currentUser) {
+            this.saveUserData();
+        }
+        
         // 達成チェックを実行
         this.checkAchievements();
         
@@ -2946,6 +3077,16 @@ class HabitTracker {
         document.getElementById('monsterBtn').addEventListener('click', () => this.showMonsterView());
         document.getElementById('badgeBtn').addEventListener('click', () => this.showBadgeView());
         document.getElementById('settingsBtn').addEventListener('click', () => this.showSettingsView());
+        
+        // 認証ボタン
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => this.signInWithGoogle());
+        }
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.signOut());
+        }
         
         // Firebaseテストボタン
         const firebaseTestBtn = document.getElementById('firebaseTestBtn');

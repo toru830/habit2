@@ -176,6 +176,40 @@ body {
     background: #357ABD;
 }
 
+.login-btn {
+    background: #4285f4;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.login-btn:hover {
+    background: #3367d6;
+}
+
+.logout-btn {
+    background: #ea4335;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.logout-btn:hover {
+    background: #d33b2c;
+}
+
 /* カレンダーコンテナ */
 .calendar-container {
     background: #000;

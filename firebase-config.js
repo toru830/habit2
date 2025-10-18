@@ -1,32 +1,17 @@
 // Firebase設定ファイル
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { getAuth, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+// 実際のプロジェクト設定に置き換えてください
 
-// Firebase設定
-const firebaseConfig = {
-  apiKey: "AIzaSyDzu_ky2Sz0x0wG0UfVzUF68HiTUnu6euY",
-  authDomain: "habit-tracker0830.firebaseapp.com",
-  projectId: "habit-tracker0830",
-  storageBucket: "habit-tracker0830.firebasestorage.app",
-  messagingSenderId: "1012307413614",
-  appId: "1:1012307413614:web:3c772a588c4d0825c3f47f",
-  measurementId: "G-NCQSMFEPQL"
+export const firebaseConfig = {
+    apiKey: "your-api-key-here",
+    authDomain: "your-project-id.firebaseapp.com",
+    projectId: "your-project-id",
+    storageBucket: "your-project-id.appspot.com",
+    messagingSenderId: "123456789012",
+    appId: "your-app-id-here"
 };
 
-// Firebase初期化
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// エミュレーター接続を無効化（本番環境用）
-// if (location.hostname === 'localhost') {
-//   try {
-//     connectFirestoreEmulator(db, 'localhost', 8080);
-//     connectAuthEmulator(auth, 'http://localhost:9099');
-//   } catch (error) {
-//     console.log('エミュレーターは既に接続されています');
-//   }
-// }
-
-export { db, auth };
+// Firebase設定の取得方法：
+// 1. Firebase Console (https://console.firebase.google.com/) にアクセス
+// 2. プロジェクトを作成または選択
+// 3. プロジェクト設定 > 全般 > マイアプリ > Webアプリを追加
+// 4. 設定オブジェクトをコピーして上記の値に置き換える
