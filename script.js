@@ -988,16 +988,20 @@ class HabitTracker {
     async login(email, password) {
         try {
             console.log('🔐 ログイン試行:', email);
+            alert('🔐 ログイン試行: ' + email);
             
             // ローカルストレージからユーザー情報を取得
             const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
             console.log('🔐 登録済みユーザー:', Object.keys(users));
+            alert('🔐 登録済みユーザー: ' + Object.keys(users).join(', '));
             
             const userRecord = users[email];
             console.log('🔐 ユーザーレコード:', userRecord);
+            alert('🔐 ユーザーレコード: ' + (userRecord ? '存在' : '存在しない'));
             
             if (userRecord && userRecord.passwordHash === btoa(password)) {
                 console.log('🔐 パスワード認証成功');
+                alert('🔐 パスワード認証成功');
                 this.currentUser = { id: userRecord.id, email: userRecord.email };
                 localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
                 
@@ -1010,11 +1014,13 @@ class HabitTracker {
                 return true;
             } else {
                 console.log('🔐 認証失敗 - ユーザー:', !!userRecord, 'パスワード:', userRecord ? userRecord.passwordHash === btoa(password) : 'N/A');
+                alert('🔐 認証失敗 - ユーザー: ' + (userRecord ? '存在' : '存在しない') + ', パスワード: ' + (userRecord ? (userRecord.passwordHash === btoa(password) ? '一致' : '不一致') : 'N/A'));
                 this.showAuthMessage('メールアドレスまたはパスワードが間違っています。');
                 return false;
             }
         } catch (error) {
             console.error('ログインエラー:', error);
+            alert('ログインエラー: ' + error.message);
             this.showAuthMessage('ログインに失敗しました: ' + error.message);
             return false;
         }
