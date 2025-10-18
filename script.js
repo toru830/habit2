@@ -608,14 +608,13 @@ class HabitTracker {
 
     // 認証UIの更新
     updateAuthUI() {
-        const githubConfigContainer = document.querySelector('.github-config-container');
+        const authContainer = document.querySelector('.auth-container');
         const githubConnectBtn = document.getElementById('githubConnectBtn');
         const githubDisconnectBtn = document.getElementById('githubDisconnectBtn');
         const guestModeBtn = document.getElementById('guestModeBtn');
         
         if (this.githubUser || this.isGuestMode) {
-            // GitHub連携済みまたはゲストモード：設定UIを非表示、連携解除ボタンを表示
-            if (githubConfigContainer) githubConfigContainer.style.display = 'none';
+            // GitHub連携済みまたはゲストモード：連携解除ボタンを表示
             if (githubConnectBtn) githubConnectBtn.style.display = 'none';
             if (githubDisconnectBtn) {
                 githubDisconnectBtn.style.display = 'inline-block';
@@ -626,14 +625,32 @@ class HabitTracker {
                 }
             }
         } else {
-            // 未連携状態：GitHub設定UIを表示、連携解除ボタンを非表示
-            if (githubConfigContainer) githubConfigContainer.style.display = 'flex';
+            // 未連携状態：GitHub連携ボタンを表示、連携解除ボタンを非表示
             if (githubConnectBtn) githubConnectBtn.style.display = 'inline-block';
             if (githubDisconnectBtn) githubDisconnectBtn.style.display = 'none';
         }
     }
 
-    // GitHub連携
+    // GitHub連携モーダルを表示
+    showGitHubModal() {
+        const modal = document.getElementById('githubModal');
+        if (modal) {
+            modal.style.display = 'block';
+            // 入力フィールドをクリア
+            document.getElementById('githubUsername').value = '';
+            document.getElementById('githubToken').value = '';
+        }
+    }
+
+    // GitHub連携モーダルを非表示
+    hideGitHubModal() {
+        const modal = document.getElementById('githubModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // GitHub連携実行
     async connectGitHub() {
         try {
             const username = document.getElementById('githubUsername').value;
@@ -646,6 +663,9 @@ class HabitTracker {
             
             console.log('🔐 GitHub連携開始:', username);
             
+            // 一時的に設定を保存してテスト
+            window.githubSync.saveConfig(username, token);
+            
             // GitHub接続テスト
             const success = await window.githubSync.testConnection();
             if (!success) {
@@ -653,13 +673,15 @@ class HabitTracker {
                 return;
             }
             
-            // 設定を保存
-            window.githubSync.saveConfig(username, token);
+            // 設定を正式に保存
             this.githubUser = username;
             this.isGuestMode = false;
             
             // UIを更新
             this.updateAuthUI();
+            
+            // モーダルを閉じる
+            this.hideGitHubModal();
             
             // 既存データをGitHubに保存
             await this.saveToGitHub();
@@ -3495,11 +3517,11 @@ class HabitTracker {
             
             if (githubConnectBtn) {
                 console.log('🔐 GitHub連携ボタンのイベントリスナーを追加中...');
-                githubConnectBtn.addEventListener('click', async (event) => {
+                githubConnectBtn.addEventListener('click', (event) => {
                     console.log('🔐 GitHub連携ボタンがクリックされました！');
                     event.preventDefault();
                     event.stopPropagation();
-                    await this.connectGitHub();
+                    this.showGitHubModal();
                 });
                 console.log('🔐 GitHub連携ボタンのイベントリスナー追加完了');
             }
@@ -3513,6 +3535,26 @@ class HabitTracker {
                     await this.disconnectGitHub();
                 });
                 console.log('🔐 GitHub連携解除ボタンのイベントリスナー追加完了');
+            }
+
+            // GitHubモーダルボタン
+            const githubModalConnect = document.getElementById('githubModalConnect');
+            const githubModalCancel = document.getElementById('githubModalCancel');
+            
+            if (githubModalConnect) {
+                githubModalConnect.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    await this.connectGitHub();
+                });
+            }
+
+            if (githubModalCancel) {
+                githubModalCancel.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.hideGitHubModal();
+                });
             }
 
             // ゲストモードボタン

@@ -48,10 +48,8 @@
                     <div class="month-actions">
                         <button class="nav-arrow" id="nextWeek">›</button>
                         <button class="action-btn today-btn" id="goToToday">今日</button>
-                        <!-- GitHub設定 -->
-                        <div class="github-config-container" style="margin-top: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
-                            <input type="text" id="githubUsername" placeholder="GitHubユーザー名" style="padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; width: 200px; font-size: 14px;">
-                            <input type="password" id="githubToken" placeholder="GitHub Personal Access Token" style="padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; width: 200px; font-size: 14px;">
+                        <!-- シンプルな認証UI -->
+                        <div class="auth-container" style="margin-top: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
                             <div style="display: flex; gap: 8px;">
                                 <button id="githubConnectBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px;">GitHub連携</button>
                                 <button id="githubDisconnectBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px; display: none;">連携解除</button>
@@ -63,7 +61,30 @@
                     </div>
                 </div>
 
-                <!-- 同期機能は無効化されています -->
+                <!-- GitHub連携モーダル -->
+                <div id="githubModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <h3>GitHub連携設定</h3>
+                        <div style="margin: 20px 0;">
+                            <label style="display: block; margin-bottom: 5px; color: white;">GitHubユーザー名:</label>
+                            <input type="text" id="githubUsername" placeholder="GitHubユーザー名" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; margin-bottom: 15px;">
+                            
+                            <label style="display: block; margin-bottom: 5px; color: white;">Personal Access Token:</label>
+                            <input type="password" id="githubToken" placeholder="GitHub Personal Access Token" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; margin-bottom: 15px;">
+                            
+                            <div style="font-size: 12px; color: #ccc; margin-bottom: 15px;">
+                                <p>Personal Access Tokenの取得方法:</p>
+                                <p>1. GitHub.com → Settings → Developer settings</p>
+                                <p>2. Personal access tokens → Tokens (classic)</p>
+                                <p>3. Generate new token → gist にチェック</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button id="githubModalCancel" class="action-btn" style="background-color: #666;">キャンセル</button>
+                            <button id="githubModalConnect" class="action-btn">連携開始</button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- カレンダーグリッド -->
                 <div class="calendar-container">
