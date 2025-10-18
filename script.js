@@ -3517,13 +3517,22 @@ class HabitTracker {
             
             if (githubConnectBtn) {
                 console.log('🔐 GitHub連携ボタンのイベントリスナーを追加中...');
+                console.log('🔐 GitHub連携ボタン要素詳細:', {
+                    id: githubConnectBtn.id,
+                    className: githubConnectBtn.className,
+                    textContent: githubConnectBtn.textContent,
+                    display: getComputedStyle(githubConnectBtn).display
+                });
                 githubConnectBtn.addEventListener('click', (event) => {
                     console.log('🔐 GitHub連携ボタンがクリックされました！');
+                    alert('テスト: GitHub連携ボタンがクリックされました！');
                     event.preventDefault();
                     event.stopPropagation();
                     this.showGitHubModal();
                 });
                 console.log('🔐 GitHub連携ボタンのイベントリスナー追加完了');
+            } else {
+                console.error('🔐 GitHub連携ボタンが見つかりません！');
             }
 
             if (githubDisconnectBtn) {
