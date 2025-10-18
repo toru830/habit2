@@ -18,61 +18,18 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijk2IiBmaWxsPSIjMDAwMDAwIi8+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijg0IiBmaWxsPSIjNEE5MEUyIi8+CjxzdmcgeD0iNDgiIHk9IjQ4IiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik03MiA0OEw0OCA3Mkw2MCA4NCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPGNpcmNsZSBjeD0iNzIiIGN5PSI3MiIgcj0iMTIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+Cjwvc3ZnPgo=">
     <link rel="stylesheet" href="styles.css?v=20250923180000">
     
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-        
-        // Firebase設定（ハードコーディング）
-        const firebaseConfig = {
-            apiKey: "AIzaSyDzu_ky2Sz0x0wG0UfVzUF68HiTUnu6euY",
-            authDomain: "habit-tracker0830.firebaseapp.com",
-            projectId: "habit-tracker0830",
-            storageBucket: "habit-tracker0830.firebasestorage.app",
-            messagingSenderId: "1012307413614",
-            appId: "1:1012307413614:web:3c772a588c4d0825c3f47f",
-            measurementId: "G-NCQSMFEPQL"
+    <!-- GitHub API連携 -->
+    <script src="github-sync.js"></script>
+    <script>
+        // GitHub API設定
+        window.githubConfig = {
+            apiBaseUrl: 'https://api.github.com',
+            gistId: null, // 設定画面で設定
+            token: null,  // 設定画面で設定
+            username: null
         };
         
-        console.log('🔐 Firebase設定を読み込み中...', firebaseConfig);
-        
-        // Firebase初期化
-        console.log('🔐 Firebase初期化開始...');
-        const app = initializeApp(firebaseConfig);
-        console.log('🔐 Firebase App初期化完了:', app);
-        
-        const auth = getAuth(app);
-        console.log('🔐 Firebase Auth初期化完了:', auth);
-        
-        const db = getFirestore(app);
-        console.log('🔐 Firebase Firestore初期化完了:', db);
-        
-        const provider = new GoogleAuthProvider();
-        console.log('🔐 Google Auth Provider初期化完了:', provider);
-        
-        // グローバルにFirebaseオブジェクトを設定
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.firebaseProvider = provider;
-        window.firebaseSignIn = signInWithPopup;
-        window.firebaseSignInRedirect = signInWithRedirect;
-        window.firebaseGetRedirectResult = getRedirectResult;
-        window.firebaseSignOut = signOut;
-        window.firebaseOnAuthStateChanged = onAuthStateChanged;
-        window.firebaseCreateUserWithEmailAndPassword = createUserWithEmailAndPassword;
-        window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
-        window.firebaseDoc = doc;
-        window.firebaseSetDoc = setDoc;
-        window.firebaseGetDoc = getDoc;
-        window.firebaseCollection = collection;
-        window.firebaseAddDoc = addDoc;
-        window.firebaseUpdateDoc = updateDoc;
-        window.firebaseDeleteDoc = deleteDoc;
-        window.firebaseQuery = query;
-        window.firebaseWhere = where;
-        window.firebaseOrderBy = orderBy;
-        window.firebaseGetDocs = getDocs;
+        console.log('🔐 GitHub API設定完了');
     </script>
 </head>
 <body>
@@ -91,22 +48,18 @@
                     <div class="month-actions">
                         <button class="nav-arrow" id="nextWeek">›</button>
                         <button class="action-btn today-btn" id="goToToday">今日</button>
-                        <!-- メール/パスワード認証（メイン認証） -->
-                        <div class="email-auth-container" style="margin-top: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
-                            <input type="email" id="emailInput" placeholder="メールアドレス" style="padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; width: 200px; font-size: 14px;">
-                            <input type="password" id="passwordInput" placeholder="パスワード" style="padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; width: 200px; font-size: 14px;">
+                        <!-- GitHub設定 -->
+                        <div class="github-config-container" style="margin-top: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                            <input type="text" id="githubUsername" placeholder="GitHubユーザー名" style="padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; width: 200px; font-size: 14px;">
+                            <input type="password" id="githubToken" placeholder="GitHub Personal Access Token" style="padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; width: 200px; font-size: 14px;">
                             <div style="display: flex; gap: 8px;">
-                                <button id="emailSignUpBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px;">サインアップ</button>
-                                <button id="emailLoginBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px;">ログイン</button>
+                                <button id="githubConnectBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px;">GitHub連携</button>
+                                <button id="githubDisconnectBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px; display: none;">連携解除</button>
                             </div>
                             <div style="margin-top: 5px; text-align: center;">
                                 <button id="guestModeBtn" class="action-btn" style="font-size: 12px; padding: 6px 10px; background-color: #444; color: #ccc;">ゲストとして続行</button>
                             </div>
                         </div>
-                        
-                        <!-- Googleログイン -->
-                        <button class="action-btn login-btn" id="loginBtn">Googleでログイン</button>
-                        <button class="action-btn logout-btn" id="logoutBtn" style="display: none;">ログアウト</button>
                     </div>
                 </div>
 

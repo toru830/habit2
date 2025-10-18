@@ -388,11 +388,11 @@ class HabitTracker {
         this.totalScore = this.calculateTotalScore();
         this.totalChart = null;
 
-        // Firebase認証
-        this.currentUser = null;
+        // GitHub連携
+        this.githubUser = null;
         this.isGuestMode = false;
         this.guestUserId = 'guest_' + Date.now();
-        this.setupFirebaseAuth();
+        this.setupGitHubSync();
 
         this.init();
     }
@@ -523,22 +523,9 @@ class HabitTracker {
     }
 
     // デバッグ用の機能を追加
-    // Firebase認証の設定
-    /*
-    Firebase Console設定手順：
-    1. https://console.firebase.google.com/ にアクセス
-    2. habit-tracker0830 プロジェクトを選択
-    3. Authentication → Sign-in method をクリック
-    4. "Email/Password" を見つけてクリック
-    5. "Enable" をオンにして保存
-    6. Authentication → Settings → Authorized domains に以下を追加：
-       - toru830.github.io
-       - habit-tracker0830.firebaseapp.com
-       - localhost (開発用)
-    7. Firestore Database → Rules で認証されたユーザーの読み書きが許可されているか確認
-    */
-    setupFirebaseAuth() {
-        console.log('🔐 Firebase認証設定開始...');
+    // GitHub API連携の設定
+    setupGitHubSync() {
+        console.log('🔐 GitHub API連携設定開始...');
         console.log('🔐 利用可能なFirebase関数:', {
             onAuthStateChanged: typeof window.firebaseOnAuthStateChanged,
             getRedirectResult: typeof window.firebaseGetRedirectResult,
@@ -621,75 +608,88 @@ class HabitTracker {
 
     // 認証UIの更新
     updateAuthUI() {
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const emailAuthContainer = document.querySelector('.email-auth-container');
+        const githubConfigContainer = document.querySelector('.github-config-container');
+        const githubConnectBtn = document.getElementById('githubConnectBtn');
+        const githubDisconnectBtn = document.getElementById('githubDisconnectBtn');
         const guestModeBtn = document.getElementById('guestModeBtn');
         
-        if (this.currentUser || this.isGuestMode) {
-            // ログイン状態またはゲストモード：メール認証UIを非表示、ログアウトボタンを表示
-            if (emailAuthContainer) emailAuthContainer.style.display = 'none';
-            if (loginBtn) loginBtn.style.display = 'none';
-            if (logoutBtn) {
-                logoutBtn.style.display = 'inline-block';
-                // ユーザー名を表示
+        if (this.githubUser || this.isGuestMode) {
+            // GitHub連携済みまたはゲストモード：設定UIを非表示、連携解除ボタンを表示
+            if (githubConfigContainer) githubConfigContainer.style.display = 'none';
+            if (githubConnectBtn) githubConnectBtn.style.display = 'none';
+            if (githubDisconnectBtn) {
+                githubDisconnectBtn.style.display = 'inline-block';
                 if (this.isGuestMode) {
-                    logoutBtn.textContent = `ゲストモード終了`;
+                    githubDisconnectBtn.textContent = 'ゲストモード終了';
                 } else {
-                    logoutBtn.textContent = `ログアウト (${this.currentUser.displayName || this.currentUser.email})`;
+                    githubDisconnectBtn.textContent = `連携解除 (${this.githubUser})`;
                 }
             }
         } else {
-            // ログアウト状態：メール認証UIとGoogleログインボタンを表示、ログアウトボタンを非表示
-            if (emailAuthContainer) emailAuthContainer.style.display = 'flex';
-            if (loginBtn) {
-                loginBtn.style.display = 'inline-block'; // Googleログインを表示
-                console.log('🔐 Googleログインボタンを表示しました');
-            }
-            if (logoutBtn) logoutBtn.style.display = 'none';
+            // 未連携状態：GitHub設定UIを表示、連携解除ボタンを非表示
+            if (githubConfigContainer) githubConfigContainer.style.display = 'flex';
+            if (githubConnectBtn) githubConnectBtn.style.display = 'inline-block';
+            if (githubDisconnectBtn) githubDisconnectBtn.style.display = 'none';
         }
     }
 
-    // Googleログイン（リダイレクト方式）
-    async signInWithGoogle() {
+    // GitHub連携
+    async connectGitHub() {
         try {
-            console.log('🔐 Googleログイン開始');
-            console.log('🔐 Firebase認証オブジェクトの状態:', {
-                auth: !!window.firebaseAuth,
-                provider: !!window.firebaseProvider,
-                signInRedirect: typeof window.firebaseSignInRedirect
-            });
+            const username = document.getElementById('githubUsername').value;
+            const token = document.getElementById('githubToken').value;
             
-            if (!window.firebaseAuth || !window.firebaseProvider || !window.firebaseSignInRedirect) {
-                throw new Error('Firebase認証が利用できません');
+            if (!username || !token) {
+                alert('GitHubユーザー名とトークンを入力してください。');
+                return;
             }
             
-            console.log('🔐 リダイレクト方式でログイン開始...');
-            console.log('🔐 現在のURL:', window.location.href);
+            console.log('🔐 GitHub連携開始:', username);
             
-            // リダイレクト方式でログイン
-            await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
-            console.log('🔐 リダイレクト実行完了（ページがリダイレクトされます）');
+            // GitHub接続テスト
+            const success = await window.githubSync.testConnection();
+            if (!success) {
+                alert('GitHub接続に失敗しました。トークンを確認してください。');
+                return;
+            }
+            
+            // 設定を保存
+            window.githubSync.saveConfig(username, token);
+            this.githubUser = username;
+            this.isGuestMode = false;
+            
+            // UIを更新
+            this.updateAuthUI();
+            
+            // 既存データをGitHubに保存
+            await this.saveToGitHub();
+            
+            alert('GitHub連携が完了しました！');
             
         } catch (error) {
-            console.error('🔐 Googleログインエラー詳細:', {
-                code: error.code,
-                message: error.message,
-                stack: error.stack,
-                name: error.name
-            });
-            
-            let errorMessage = 'Googleログインに失敗しました: ';
-            if (error.code === 'auth/unauthorized-domain') {
-                errorMessage += 'このドメインは認証されていません。Firebase Consoleでドメインを追加してください。';
-            } else if (error.code === 'auth/popup-blocked') {
-                errorMessage += 'ポップアップがブロックされました。ブラウザの設定を確認してください。';
-            } else {
-                errorMessage += error.message;
+            console.error('🔐 GitHub連携エラー:', error);
+            alert('GitHub連携に失敗しました: ' + error.message);
+        }
+    }
+
+    // GitHub連携解除
+    async disconnectGitHub() {
+        try {
+            if (this.isGuestMode) {
+                this.endGuestMode();
+                return;
             }
             
-            alert(errorMessage);
-            throw error;
+            window.githubSync.clearConfig();
+            this.githubUser = null;
+            this.isGuestMode = false;
+            
+            this.updateAuthUI();
+            alert('GitHub連携を解除しました。');
+            
+        } catch (error) {
+            console.error('🔐 GitHub連携解除エラー:', error);
+            alert('GitHub連携解除に失敗しました: ' + error.message);
         }
     }
 
@@ -825,9 +825,9 @@ class HabitTracker {
         }
     }
 
-    // ユーザーデータの保存
+    // データの保存（GitHub連携対応）
     async saveUserData() {
-        if (!this.currentUser && !this.isGuestMode) return;
+        if (!this.githubUser && !this.isGuestMode) return;
 
         try {
             const userData = {
@@ -845,11 +845,33 @@ class HabitTracker {
                 return;
             }
 
-            const userDocRef = window.firebaseDoc(window.firebaseDb, 'users', this.currentUser.uid);
-            await window.firebaseSetDoc(userDocRef, userData, { merge: true });
-            console.log('データをクラウドに保存しました');
+            // GitHub連携の場合はGitHubに保存
+            await this.saveToGitHub();
+            
         } catch (error) {
             console.error('データ保存エラー:', error);
+        }
+    }
+
+    // GitHubにデータを保存
+    async saveToGitHub() {
+        if (!this.githubUser) return;
+
+        try {
+            const userData = {
+                completedHabits: this.completedHabits,
+                healthData: this.healthData,
+                achievements: this.achievements,
+                lastUpdated: new Date().toISOString()
+            };
+
+            await window.githubSync.saveData(userData);
+            console.log('🔐 GitHubにデータを保存しました');
+        } catch (error) {
+            console.error('🔐 GitHubデータ保存エラー:', error);
+            // エラー時はローカルにフォールバック
+            localStorage.setItem('github_backup_data', JSON.stringify(userData));
+            console.log('🔐 ローカルにバックアップを保存しました');
         }
     }
 
@@ -3467,59 +3489,30 @@ class HabitTracker {
                 console.warn('🔐 ログアウトボタンが見つかりません');
             }
 
-            // メール/パスワード認証ボタン
-            if (emailSignUpBtn && emailInput && passwordInput) {
-                console.log('🔐 メールサインアップボタンのイベントリスナーを追加中...');
-                console.log('🔐 メールサインアップボタン要素詳細:', {
-                    id: emailSignUpBtn.id,
-                    className: emailSignUpBtn.className,
-                    textContent: emailSignUpBtn.textContent
-                });
-                emailSignUpBtn.addEventListener('click', async (event) => {
-                    console.log('🔐 メールサインアップボタンがクリックされました！');
-                    alert('テスト: メールサインアップボタンがクリックされました！');
+            // GitHub連携ボタン
+            const githubConnectBtn = document.getElementById('githubConnectBtn');
+            const githubDisconnectBtn = document.getElementById('githubDisconnectBtn');
+            
+            if (githubConnectBtn) {
+                console.log('🔐 GitHub連携ボタンのイベントリスナーを追加中...');
+                githubConnectBtn.addEventListener('click', async (event) => {
+                    console.log('🔐 GitHub連携ボタンがクリックされました！');
                     event.preventDefault();
                     event.stopPropagation();
-                    const email = emailInput.value;
-                    const password = passwordInput.value;
-                    if (email && password) {
-                        try {
-                            await this.signUpWithEmail(email, password);
-                        } catch (e) {
-                            // エラーは関数内で処理済み
-                        }
-                    } else {
-                        alert('メールアドレスとパスワードを入力してください。');
-                    }
+                    await this.connectGitHub();
                 });
-                console.log('🔐 メールサインアップボタンのイベントリスナー追加完了');
+                console.log('🔐 GitHub連携ボタンのイベントリスナー追加完了');
             }
 
-            if (emailLoginBtn && emailInput && passwordInput) {
-                console.log('🔐 メールログインボタンのイベントリスナーを追加中...');
-                console.log('🔐 メールログインボタン要素詳細:', {
-                    id: emailLoginBtn.id,
-                    className: emailLoginBtn.className,
-                    textContent: emailLoginBtn.textContent
-                });
-                emailLoginBtn.addEventListener('click', async (event) => {
-                    console.log('🔐 メールログインボタンがクリックされました！');
-                    alert('テスト: メールログインボタンがクリックされました！');
+            if (githubDisconnectBtn) {
+                console.log('🔐 GitHub連携解除ボタンのイベントリスナーを追加中...');
+                githubDisconnectBtn.addEventListener('click', async (event) => {
+                    console.log('🔐 GitHub連携解除ボタンがクリックされました！');
                     event.preventDefault();
                     event.stopPropagation();
-                    const email = emailInput.value;
-                    const password = passwordInput.value;
-                    if (email && password) {
-                        try {
-                            await this.loginWithEmail(email, password);
-                        } catch (e) {
-                            // エラーは関数内で処理済み
-                        }
-                    } else {
-                        alert('メールアドレスとパスワードを入力してください。');
-                    }
+                    await this.disconnectGitHub();
                 });
-                console.log('🔐 メールログインボタンのイベントリスナー追加完了');
+                console.log('🔐 GitHub連携解除ボタンのイベントリスナー追加完了');
             }
 
             // ゲストモードボタン
