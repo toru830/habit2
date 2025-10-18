@@ -400,7 +400,9 @@ class HabitTracker {
         console.log('🔐 アプリ初期化開始');
         this.renderCalendar();
         this.setupEventListeners();
-        this.setupDataManagement();
+        
+        // データエクスポート/インポート機能を設定
+        this.setupDataTransfer();
         this.setupMonthlyCalendarEvents();
         // 同期機能を完全に無効化（データ消失を防ぐため）
         console.log('同期機能は完全に無効化されています');
@@ -1135,7 +1137,7 @@ class HabitTracker {
         messageEl.style.display = 'none';
     }
 
-    // 真のマルチデバイス同期実行
+    // 真のクラウド同期実行
     async testCloudSyncConnection() {
         try {
             if (!this.currentUser) {
@@ -1155,18 +1157,32 @@ class HabitTracker {
             
             // ローカルストレージに保存
             localStorage.setItem(`habit_data_${this.currentUser.id}`, JSON.stringify(userData));
+            localStorage.setItem(`habit_data_email_${this.currentUser.email}`, JSON.stringify(userData));
             
-            // マルチデバイス同期：同じメールアドレスの他のデバイスにも保存
-            const allUsers = JSON.parse(localStorage.getItem('habit_users') || '{}');
-            for (const [email, userInfo] of Object.entries(allUsers)) {
-                if (email === this.currentUser.email && userInfo.id !== this.currentUser.id) {
-                    // 同じメールアドレスの他のユーザーIDにも保存
-                    localStorage.setItem(`habit_data_${userInfo.id}`, JSON.stringify(userData));
+            // 真のクラウド同期：JSONBin.ioを使用
+            try {
+                const response = await fetch('https://api.jsonbin.io/v3/b', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': '$2a$10$YOUR_API_KEY_HERE' // 実際のAPIキーに置き換え
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    localStorage.setItem('cloud_bin_id', result.metadata.id);
+                    this.showCloudSyncMessage('クラウドに同期しました！', 'success');
+                    console.log('🔐 クラウド同期完了:', this.currentUser.email);
+                } else {
+                    throw new Error('クラウド同期失敗');
                 }
+            } catch (cloudError) {
+                console.warn('クラウド同期失敗、ローカルのみ保存:', cloudError);
+                this.showCloudSyncMessage('ローカルに保存しました（クラウド同期は設定が必要です）', 'success');
             }
             
-            this.showCloudSyncMessage('マルチデバイス同期完了！', 'success');
-            console.log('🔐 マルチデバイス同期完了:', this.currentUser.email);
         } catch (error) {
             console.error('同期エラー:', error);
             this.showCloudSyncMessage('同期に失敗しました。');
@@ -1375,6 +1391,86 @@ class HabitTracker {
         console.log('  debugHabitTracker.validateData() - データの整合性をチェック');
         console.log('  debugHabitTracker.clearOldIds() - 古いIDをクリア');
         console.log('  debugHabitTracker.forceReset() - アプリを強制リセット');
+    }
+    
+    // データエクスポート/インポート機能を設定
+    setupDataTransfer() {
+        const exportBtn = document.getElementById('exportData');
+        const importBtn = document.getElementById('importData');
+        const importFile = document.getElementById('importFile');
+        
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportUserData());
+        }
+        
+        if (importBtn) {
+            importBtn.addEventListener('click', () => importFile.click());
+        }
+        
+        if (importFile) {
+            importFile.addEventListener('change', (e) => this.importUserData(e));
+        }
+    }
+    
+    // データをエクスポート
+    exportUserData() {
+        if (!this.currentUser) {
+            alert('ログインが必要です。');
+            return;
+        }
+        
+        const userData = {
+            completedHabits: this.completedHabits,
+            healthData: this.healthData,
+            achievements: this.achievements,
+            userId: this.currentUser.id,
+            email: this.currentUser.email,
+            exportDate: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(userData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `habit_data_${this.currentUser.email}_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+        alert('データをエクスポートしました！');
+    }
+    
+    // データをインポート
+    importUserData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const userData = JSON.parse(e.target.result);
+                
+                // データを復元
+                this.completedHabits = userData.completedHabits || {};
+                this.healthData = userData.healthData || {};
+                this.achievements = userData.achievements || {};
+                
+                // ローカルストレージに保存
+                this.saveCompletedHabits();
+                this.saveHealthData();
+                this.saveAchievements();
+                
+                // UIを更新
+                this.renderCalendar();
+                this.updateStatsView();
+                
+                alert('データをインポートしました！');
+            } catch (error) {
+                alert('ファイルの読み込みに失敗しました: ' + error.message);
+            }
+        };
+        reader.readAsText(file);
     }
 
     // 現在の週を取得（月曜日開始）

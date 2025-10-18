@@ -127,10 +127,17 @@
                             </div>
                         </div>
                         
-                        <div style="display: flex; gap: 10px;">
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                             <button id="cloudSyncTest" class="action-btn" style="flex: 1; padding: 12px;">今すぐ同期</button>
                             <button id="cloudSyncCancel" class="action-btn" style="background-color: #666; padding: 12px;">閉じる</button>
                         </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button id="exportData" class="action-btn" style="flex: 1; padding: 12px; background-color: #28a745;">データをエクスポート</button>
+                            <button id="importData" class="action-btn" style="flex: 1; padding: 12px; background-color: #17a2b8;">データをインポート</button>
+                        </div>
+                        
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
                         
                         <div id="cloudSyncMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
                     </div>
