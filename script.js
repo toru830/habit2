@@ -691,12 +691,7 @@ class HabitTracker {
                 return;
             }
             
-            if (typeof window.firebaseSignOut === 'function') {
-                await window.firebaseSignOut(window.firebaseAuth);
-                console.log('ログアウト成功');
-            } else {
-                console.error('Firebase認証が利用できません');
-            }
+            // Firebase認証は削除済み
             this.currentUser = null;
             this.isGuestMode = false;
             this.updateAuthUI();
@@ -778,26 +773,9 @@ class HabitTracker {
                 return;
             }
 
-            const userDocRef = window.firebaseDoc(window.firebaseDb, 'users', this.currentUser.uid);
-            const userDoc = await window.firebaseGetDoc(userDocRef);
+            // Firebase Firestoreは削除済み
             
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                this.completedHabits = userData.completedHabits || {};
-                this.healthData = userData.healthData || {};
-                this.achievements = userData.achievements || {};
-                
-                // ローカルストレージも更新
-                this.saveCompletedHabits();
-                this.saveHealthData();
-                this.saveAchievements();
-                
-                // UIを更新
-                this.renderCalendar();
-                this.updateStatsView();
-                
-                console.log('クラウドからデータを読み込みました');
-            }
+            // Firebase Firestoreは削除済み - ローカルストレージのみ使用
         } catch (error) {
             console.error('データ読み込みエラー:', error);
         }
@@ -3371,17 +3349,7 @@ class HabitTracker {
 
         }, 100);
         
-        // Firebaseテストボタン
-        const firebaseTestBtn = document.getElementById('firebaseTestBtn');
-        if (firebaseTestBtn) {
-            firebaseTestBtn.addEventListener('click', () => {
-                if (window.runFirebaseTest) {
-                    window.runFirebaseTest();
-                } else {
-                    alert('Firebaseテスト機能が利用できません');
-                }
-            });
-        }
+        // Firebaseテストボタンは削除済み
     }
 
     // 手動同期のみの安全なセットアップ
