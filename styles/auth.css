@@ -1,0 +1,222 @@
+/* 認証モーダルスタイル */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #333;
+  border-radius: 8px;
+  padding: 30px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  color: white;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: white;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #555;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.tab:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: white;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #222;
+  color: white;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover:not(:disabled) {
+  background-color: #357ABD;
+}
+
+.form-actions button[type="submit"]:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+.form-actions button[type="button"] {
+  background-color: #666;
+  color: #ccc;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: #777;
+  color: white;
+}
+
+.message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.message.error {
+  background-color: #ff4444;
+  color: white;
+}
+
+.message.success {
+  background-color: #44ff44;
+  color: #333;
+}
+
+/* ヘッダーボタンスタイル */
+.auth-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+  margin-left: 10px;
+}
+
+.login-btn {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.login-btn:hover {
+  background-color: #357ABD;
+}
+
+.logout-btn {
+  background-color: #666;
+  color: #ccc;
+}
+
+.logout-btn:hover {
+  background-color: #777;
+  color: white;
+}
+
+.sync-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.sync-btn:hover {
+  background-color: #218838;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
+}

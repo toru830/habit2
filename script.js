@@ -408,14 +408,14 @@ class HabitTracker {
         // 初期化時に認証UIを更新
         this.updateAuthUI();
         
-        // Googleログインボタンを確実に表示
+        // 認証ボタンを確実に表示
         setTimeout(() => {
-            const loginBtn = document.getElementById('loginBtn');
-            if (loginBtn) {
-                loginBtn.style.display = 'inline-block';
-                console.log('🔐 Googleログインボタンを強制表示しました');
+            const authBtn = document.getElementById('authBtn');
+            if (authBtn) {
+                authBtn.style.display = 'inline-block';
+                console.log('🔐 認証ボタンを強制表示しました');
             } else {
-                console.error('🔐 Googleログインボタンが見つかりません');
+                console.error('🔐 認証ボタンが見つかりません');
             }
         }, 500);
         
@@ -528,7 +528,7 @@ class HabitTracker {
         console.log('🔐 認証システム初期化...');
         
         // 保存されたユーザー情報を読み込み
-        const savedUser = localStorage.getItem('habit_user');
+        const savedUser = localStorage.getItem('habit_current_user');
         if (savedUser) {
             this.currentUser = JSON.parse(savedUser);
             this.updateAuthUI();
@@ -883,163 +883,239 @@ class HabitTracker {
         const authBtn = document.getElementById('authBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const cloudSyncBtn = document.getElementById('cloudSyncBtn');
-        const guestModeBtn = document.getElementById('guestModeBtn');
         
         if (this.currentUser) {
-            // ログイン済み：ログアウトボタンを表示
+            // ログイン済み：ログアウトボタンと同期ボタンを表示
             if (authBtn) authBtn.style.display = 'none';
             if (logoutBtn) {
                 logoutBtn.style.display = 'inline-block';
                 logoutBtn.textContent = `ログアウト (${this.currentUser.email})`;
             }
-            // クラウド同期ボタンを表示
             if (cloudSyncBtn) cloudSyncBtn.style.display = 'inline-block';
-            if (guestModeBtn) guestModeBtn.style.display = 'none';
         } else {
             // 未ログイン状態：ログインボタンのみ表示
             if (authBtn) authBtn.style.display = 'inline-block';
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (cloudSyncBtn) cloudSyncBtn.style.display = 'none';
-            if (guestModeBtn) guestModeBtn.style.display = 'none';
         }
     }
 
-    // GitHub連携モーダルを表示
-    showGitHubModal() {
-        const modal = document.getElementById('githubModal');
+    // 認証モーダルを表示
+    showAuthModal() {
+        const modal = document.getElementById('authModal');
         if (modal) {
             modal.style.display = 'block';
-            // 入力フィールドをクリア
-            document.getElementById('githubUsername').value = '';
-            document.getElementById('githubToken').value = '';
         }
     }
 
-    // GitHub連携モーダルを非表示
-    hideGitHubModal() {
-        const modal = document.getElementById('githubModal');
+    // 認証モーダルを非表示
+    hideAuthModal() {
+        const modal = document.getElementById('authModal');
         if (modal) {
             modal.style.display = 'none';
         }
     }
 
-    // GitHub連携実行
-    async connectGitHub() {
+    // ログインフォームを表示
+    showLoginForm() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('signupForm').style.display = 'none';
+        document.getElementById('loginTab').style.backgroundColor = '#4A90E2';
+        document.getElementById('signupTab').style.backgroundColor = '#555';
+    }
+
+    // 新規登録フォームを表示
+    showSignupForm() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('signupForm').style.display = 'block';
+        document.getElementById('loginTab').style.backgroundColor = '#555';
+        document.getElementById('signupTab').style.backgroundColor = '#4A90E2';
+    }
+
+    // フォームをクリア
+    clearAuthForms() {
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupPassword').value = '';
+        document.getElementById('signupPasswordConfirm').value = '';
+        this.hideAuthMessage();
+    }
+
+    // メッセージを表示
+    showAuthMessage(message, type = 'error') {
+        const messageEl = document.getElementById('authMessage');
+        messageEl.textContent = message;
+        messageEl.style.display = 'block';
+        messageEl.style.backgroundColor = type === 'error' ? '#ff4444' : '#44ff44';
+        messageEl.style.color = type === 'error' ? 'white' : 'black';
+    }
+
+    // メッセージを非表示
+    hideAuthMessage() {
+        const messageEl = document.getElementById('authMessage');
+        messageEl.style.display = 'none';
+    }
+
+    // ログイン処理
+    async login(email, password) {
         try {
-            const username = document.getElementById('githubUsername').value;
-            const token = document.getElementById('githubToken').value;
+            // ローカルストレージからユーザー情報を取得
+            const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            const userRecord = users[email];
             
-            if (!username || !token) {
-                alert('GitHubユーザー名とトークンを入力してください。');
-                return;
+            if (userRecord && userRecord.passwordHash === btoa(password)) {
+                this.currentUser = { id: userRecord.id, email: userRecord.email };
+                localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
+                this.updateAuthUI();
+                this.hideAuthModal();
+                this.showAuthMessage('ログイン成功！', 'success');
+                return true;
+            } else {
+                this.showAuthMessage('メールアドレスまたはパスワードが間違っています。');
+                return false;
             }
-            
-            console.log('🔐 GitHub連携開始:', username);
-            
-            // 一時的に設定を保存してテスト
-            window.githubSync.saveConfig(username, token);
-            
-            // GitHub接続テスト
-            const success = await window.githubSync.testConnection();
-            if (!success) {
-                alert('GitHub接続に失敗しました。トークンを確認してください。');
-                return;
-            }
-            
-            // 設定を正式に保存
-            this.githubUser = username;
-            this.isGuestMode = false;
-            
-            // UIを更新
-            this.updateAuthUI();
-            
-            // モーダルを閉じる
-            this.hideGitHubModal();
-            
-            // 既存データをGitHubに保存
-            await this.saveToGitHub();
-            
-            alert('GitHub連携が完了しました！');
-            
         } catch (error) {
-            console.error('🔐 GitHub連携エラー:', error);
-            alert('GitHub連携に失敗しました: ' + error.message);
+            console.error('ログインエラー:', error);
+            this.showAuthMessage('ログインに失敗しました。');
+            return false;
         }
     }
 
-    // GitHub連携解除
-    async disconnectGitHub() {
+    // 新規登録処理
+    async signup(email, password) {
         try {
-            if (this.isGuestMode) {
-                this.endGuestMode();
-                return;
+            const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            
+            if (users[email]) {
+                this.showAuthMessage('このメールアドレスは既に登録されています。');
+                return false;
             }
             
-            window.githubSync.clearConfig();
-            this.githubUser = null;
-            this.isGuestMode = false;
+            if (password.length < 6) {
+                this.showAuthMessage('パスワードは6文字以上で入力してください。');
+                return false;
+            }
+            
+            const userId = `user_${Date.now()}`;
+            const newUser = { id: userId, email: email };
+            users[email] = { ...newUser, passwordHash: btoa(password) };
+            
+            localStorage.setItem('habit_users', JSON.stringify(users));
+            this.currentUser = newUser;
+            localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
             
             this.updateAuthUI();
-            alert('GitHub連携を解除しました。');
-            
+            this.hideAuthModal();
+            this.showAuthMessage('新規登録成功！', 'success');
+            return true;
         } catch (error) {
-            console.error('🔐 GitHub連携解除エラー:', error);
-            alert('GitHub連携解除に失敗しました: ' + error.message);
+            console.error('新規登録エラー:', error);
+            this.showAuthMessage('新規登録に失敗しました。');
+            return false;
         }
+    }
+
+    // ログアウト処理
+    logout() {
+        this.currentUser = null;
+        localStorage.removeItem('habit_current_user');
+        this.updateAuthUI();
     }
 
     // 同期状態をチェック
     checkSyncStatus() {
         console.log('🔐 同期状態をチェック中...');
-        if (this.githubUser) {
-            console.log('🔐 GitHub連携済み:', this.githubUser);
-        } else if (this.isGuestMode) {
-            console.log('🔐 ゲストモード中');
+        if (this.currentUser) {
+            console.log('🔐 ログイン済み:', this.currentUser.email);
         } else {
-            console.log('🔐 未連携状態');
+            console.log('🔐 未ログイン状態');
         }
     }
 
-    // ゲストモード開始
-    startGuestMode() {
-        console.log('🔐 ゲストモード開始');
-        this.isGuestMode = true;
-        this.currentUser = null;
-        this.guestUserId = 'guest_' + Date.now();
-        this.updateAuthUI();
-        alert('ゲストモードで開始しました。データはローカルに保存されます。');
+    // クラウド同期設定モーダルを表示
+    showCloudSyncModal() {
+        const modal = document.getElementById('cloudSyncModal');
+        if (modal) {
+            modal.style.display = 'block';
+        }
     }
 
-    // ゲストモード終了
-    endGuestMode() {
-        console.log('🔐 ゲストモード終了');
-        this.isGuestMode = false;
-        this.currentUser = null;
-        this.updateAuthUI();
-        alert('ゲストモードを終了しました。');
+    // クラウド同期設定モーダルを非表示
+    hideCloudSyncModal() {
+        const modal = document.getElementById('cloudSyncModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
 
-    // ログアウト
-    async signOut() {
+    // クラウド同期メッセージを表示
+    showCloudSyncMessage(message, type = 'error') {
+        const messageEl = document.getElementById('cloudSyncMessage');
+        messageEl.textContent = message;
+        messageEl.style.display = 'block';
+        messageEl.style.backgroundColor = type === 'error' ? '#ff4444' : '#44ff44';
+        messageEl.style.color = type === 'error' ? 'white' : 'black';
+    }
+
+    // クラウド同期メッセージを非表示
+    hideCloudSyncMessage() {
+        const messageEl = document.getElementById('cloudSyncMessage');
+        messageEl.style.display = 'none';
+    }
+
+    // クラウド同期テスト
+    async testCloudSyncConnection() {
         try {
-            if (this.isGuestMode) {
-                // ゲストモードの場合は単純に終了
-                this.endGuestMode();
+            const apiKey = document.getElementById('jsonbinApiKey').value;
+            if (!apiKey) {
+                this.showCloudSyncMessage('API Keyを入力してください。');
                 return;
             }
             
-            // 認証なしでログアウト
-            this.currentUser = null;
-            this.isGuestMode = false;
-            this.updateAuthUI();
+            // JSONBin.io接続テスト
+            const response = await fetch('https://api.jsonbin.io/v3/b', {
+                method: 'POST',
+                headers: {
+                    'X-Master-Key': apiKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ test: true })
+            });
+            
+            if (response.ok) {
+                this.showCloudSyncMessage('接続テスト成功！', 'success');
+            } else {
+                this.showCloudSyncMessage('接続テスト失敗。API Keyを確認してください。');
+            }
         } catch (error) {
-            console.error('ログアウトエラー:', error);
+            console.error('クラウド同期テストエラー:', error);
+            this.showCloudSyncMessage('接続テストに失敗しました。');
         }
     }
 
-    // データの保存（GitHub連携対応）
+    // クラウド同期設定保存
+    async saveCloudSyncConfig() {
+        try {
+            const apiKey = document.getElementById('jsonbinApiKey').value;
+            if (!apiKey) {
+                this.showCloudSyncMessage('API Keyを入力してください。');
+                return;
+            }
+            
+            // 設定を保存
+            localStorage.setItem('jsonbin_api_key', apiKey);
+            this.hideCloudSyncModal();
+            this.showCloudSyncMessage('設定を保存しました！', 'success');
+        } catch (error) {
+            console.error('クラウド同期設定保存エラー:', error);
+            this.showCloudSyncMessage('設定の保存に失敗しました。');
+        }
+    }
+
+    // データの保存（認証対応）
     async saveUserData() {
-        if (!this.githubUser && !this.isGuestMode) return;
+        if (!this.currentUser) return;
 
         try {
             const userData = {
@@ -3584,66 +3660,37 @@ class HabitTracker {
         
         // 少し遅延してボタンが確実に存在することを確認
         setTimeout(() => {
-            console.log('🔐 GitHub連携ボタン要素を検索中...');
+            console.log('🔐 認証ボタン要素を検索中...');
             
-
-            // GitHub連携ボタン
-            const githubConnectBtn = document.getElementById('githubConnectBtn');
-            const githubDisconnectBtn = document.getElementById('githubDisconnectBtn');
-            
-            if (githubConnectBtn) {
-                console.log('🔐 GitHub連携ボタンのイベントリスナーを追加中...');
-                console.log('🔐 GitHub連携ボタン要素詳細:', {
-                    id: githubConnectBtn.id,
-                    className: githubConnectBtn.className,
-                    textContent: githubConnectBtn.textContent,
-                    display: getComputedStyle(githubConnectBtn).display
-                });
-                githubConnectBtn.addEventListener('click', (event) => {
-                    console.log('🔐 GitHub連携ボタンがクリックされました！');
-                    alert('テスト: GitHub連携ボタンがクリックされました！');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.showGitHubModal();
-                });
-                console.log('🔐 GitHub連携ボタンのイベントリスナー追加完了');
-            } else {
-                console.error('🔐 GitHub連携ボタンが見つかりません！');
-            }
-
-            if (githubDisconnectBtn) {
-                console.log('🔐 GitHub連携解除ボタンのイベントリスナーを追加中...');
-                githubDisconnectBtn.addEventListener('click', async (event) => {
-                    console.log('🔐 GitHub連携解除ボタンがクリックされました！');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    await this.disconnectGitHub();
-                });
-                console.log('🔐 GitHub連携解除ボタンのイベントリスナー追加完了');
-            }
-
-            // GitHubモーダルボタン
-            const githubModalConnect = document.getElementById('githubModalConnect');
-            const githubModalCancel = document.getElementById('githubModalCancel');
-            
-            if (githubModalConnect) {
-                githubModalConnect.addEventListener('click', async (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    await this.connectGitHub();
-                });
-            }
-
-            if (githubModalCancel) {
-                githubModalCancel.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.hideGitHubModal();
-                });
-            }
-
-            // クラウド同期ボタン
+            // 認証ボタン
+            const authBtn = document.getElementById('authBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
             const cloudSyncBtn = document.getElementById('cloudSyncBtn');
+            
+            if (authBtn) {
+                console.log('🔐 認証ボタンのイベントリスナーを追加中...');
+                authBtn.addEventListener('click', (event) => {
+                    console.log('🔐 認証ボタンがクリックされました！');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.showAuthModal();
+                });
+                console.log('🔐 認証ボタンのイベントリスナー追加完了');
+            } else {
+                console.error('🔐 認証ボタンが見つかりません！');
+            }
+
+            if (logoutBtn) {
+                console.log('🔐 ログアウトボタンのイベントリスナーを追加中...');
+                logoutBtn.addEventListener('click', (event) => {
+                    console.log('🔐 ログアウトボタンがクリックされました！');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.logout();
+                });
+                console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
+            }
+
             if (cloudSyncBtn) {
                 console.log('🔐 クラウド同期ボタンのイベントリスナーを追加中...');
                 cloudSyncBtn.addEventListener('click', (event) => {
@@ -3655,11 +3702,80 @@ class HabitTracker {
                 console.log('🔐 クラウド同期ボタンのイベントリスナー追加完了');
             }
 
+            // 認証モーダルボタン
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+            const loginSubmit = document.getElementById('loginSubmit');
+            const signupSubmit = document.getElementById('signupSubmit');
+            const authModalCancel = document.getElementById('authModalCancel');
+            const authModalCancel2 = document.getElementById('authModalCancel2');
+            
             // クラウド同期モーダルボタン
             const cloudSyncTest = document.getElementById('cloudSyncTest');
             const cloudSyncSave = document.getElementById('cloudSyncSave');
             const cloudSyncCancel = document.getElementById('cloudSyncCancel');
             
+            // 認証モーダルイベントリスナー
+            if (loginTab) {
+                loginTab.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.showLoginForm();
+                });
+            }
+
+            if (signupTab) {
+                signupTab.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.showSignupForm();
+                });
+            }
+
+            if (loginSubmit) {
+                loginSubmit.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const email = document.getElementById('loginEmail').value;
+                    const password = document.getElementById('loginPassword').value;
+                    await this.login(email, password);
+                });
+            }
+
+            if (signupSubmit) {
+                signupSubmit.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const email = document.getElementById('signupEmail').value;
+                    const password = document.getElementById('signupPassword').value;
+                    const confirmPassword = document.getElementById('signupPasswordConfirm').value;
+                    
+                    if (password !== confirmPassword) {
+                        this.showAuthMessage('パスワードが一致しません。');
+                        return;
+                    }
+                    
+                    await this.signup(email, password);
+                });
+            }
+
+            if (authModalCancel) {
+                authModalCancel.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.hideAuthModal();
+                });
+            }
+
+            if (authModalCancel2) {
+                authModalCancel2.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.hideAuthModal();
+                });
+            }
+
+            // クラウド同期モーダルイベントリスナー
             if (cloudSyncTest) {
                 cloudSyncTest.addEventListener('click', async (event) => {
                     event.preventDefault();
@@ -3667,6 +3783,7 @@ class HabitTracker {
                     await this.testCloudSyncConnection();
                 });
             }
+
             if (cloudSyncSave) {
                 cloudSyncSave.addEventListener('click', async (event) => {
                     event.preventDefault();
@@ -3674,6 +3791,7 @@ class HabitTracker {
                     await this.saveCloudSyncConfig();
                 });
             }
+
             if (cloudSyncCancel) {
                 cloudSyncCancel.addEventListener('click', (event) => {
                     event.preventDefault();
@@ -3682,11 +3800,11 @@ class HabitTracker {
                 });
             }
 
-            // ゲストモードボタンは削除済み
+            console.log('🔐 イベントリスナー設定完了');
+
 
         }, 100);
         
-        // テストボタンは削除済み
     }
 
     // 手動同期のみの安全なセットアップ

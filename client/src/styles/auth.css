@@ -1,0 +1,143 @@
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.auth-modal-content {
+  background-color: #282c34;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+  color: #e0e0e0;
+  text-align: center;
+}
+
+.auth-title {
+  color: #61dafb;
+  margin-bottom: 25px;
+  font-size: 1.8em;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #444;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 12px 0;
+  background-color: #3a3f47;
+  color: #bbb;
+  border: none;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: all 0.3s ease;
+}
+
+.auth-tab:hover {
+  background-color: #4a4f57;
+}
+
+.auth-tab.active {
+  background-color: #61dafb;
+  color: #282c34;
+  font-weight: bold;
+  border-bottom: 3px solid #61dafb;
+}
+
+.auth-form {
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.95em;
+  color: #e0e0e0;
+}
+
+.auth-input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background-color: #333;
+  color: #e0e0e0;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.auth-input:focus {
+  border-color: #61dafb;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(97, 218, 251, 0.3);
+}
+
+.auth-message {
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 15px;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.auth-message.error {
+  background-color: #ff4444;
+  color: white;
+}
+
+.auth-message.success {
+  background-color: #44ff44;
+  color: #282c34;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.auth-submit-btn, .auth-cancel-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.auth-submit-btn {
+  background-color: #61dafb;
+  color: #282c34;
+}
+
+.auth-submit-btn:hover {
+  background-color: #4a90e2;
+}
+
+.auth-cancel-btn {
+  background-color: #555;
+  color: #e0e0e0;
+}
+
+.auth-cancel-btn:hover {
+  background-color: #777;
+}
