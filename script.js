@@ -628,6 +628,44 @@ class HabitTracker {
         }
     }
 
+    // メール/パスワードでサインアップ
+    async signUpWithEmail(email, password) {
+        try {
+            console.log('🔐 メールでサインアップ開始:', email);
+            const userCredential = await window.firebaseCreateUserWithEmailAndPassword(window.firebaseAuth, email, password);
+            console.log('🔐 サインアップ成功:', userCredential.user);
+            alert('サインアップが完了しました！');
+            return userCredential.user;
+        } catch (error) {
+            console.error('🔐 サインアップエラー:', {
+                code: error.code,
+                message: error.message,
+                stack: error.stack
+            });
+            alert('サインアップに失敗しました: ' + error.message);
+            throw error;
+        }
+    }
+
+    // メール/パスワードでログイン
+    async loginWithEmail(email, password) {
+        try {
+            console.log('🔐 メールでログイン開始:', email);
+            const userCredential = await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, email, password);
+            console.log('🔐 ログイン成功:', userCredential.user);
+            alert('ログインが完了しました！');
+            return userCredential.user;
+        } catch (error) {
+            console.error('🔐 ログインエラー:', {
+                code: error.code,
+                message: error.message,
+                stack: error.stack
+            });
+            alert('ログインに失敗しました: ' + error.message);
+            throw error;
+        }
+    }
+
     // ログアウト
     async signOut() {
         try {
@@ -3168,9 +3206,15 @@ class HabitTracker {
         setTimeout(() => {
             const loginBtn = document.getElementById('loginBtn');
             const logoutBtn = document.getElementById('logoutBtn');
+            const emailInput = document.getElementById('emailInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const emailSignUpBtn = document.getElementById('emailSignUpBtn');
+            const emailLoginBtn = document.getElementById('emailLoginBtn');
             
             console.log('🔐 ログインボタン要素:', loginBtn);
             console.log('🔐 ログアウトボタン要素:', logoutBtn);
+            console.log('🔐 メールサインアップボタン要素:', emailSignUpBtn);
+            console.log('🔐 メールログインボタン要素:', emailLoginBtn);
             
             if (loginBtn) {
                 console.log('🔐 ログインボタンのイベントリスナーを追加中...');
@@ -3202,6 +3246,43 @@ class HabitTracker {
                 console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
             } else {
                 console.warn('🔐 ログアウトボタンが見つかりません');
+            }
+
+            // メール/パスワード認証ボタン
+            if (emailSignUpBtn && emailInput && passwordInput) {
+                console.log('🔐 メールサインアップボタンのイベントリスナーを追加中...');
+                emailSignUpBtn.addEventListener('click', async () => {
+                    const email = emailInput.value;
+                    const password = passwordInput.value;
+                    if (email && password) {
+                        try {
+                            await this.signUpWithEmail(email, password);
+                        } catch (e) {
+                            // エラーは関数内で処理済み
+                        }
+                    } else {
+                        alert('メールアドレスとパスワードを入力してください。');
+                    }
+                });
+                console.log('🔐 メールサインアップボタンのイベントリスナー追加完了');
+            }
+
+            if (emailLoginBtn && emailInput && passwordInput) {
+                console.log('🔐 メールログインボタンのイベントリスナーを追加中...');
+                emailLoginBtn.addEventListener('click', async () => {
+                    const email = emailInput.value;
+                    const password = passwordInput.value;
+                    if (email && password) {
+                        try {
+                            await this.loginWithEmail(email, password);
+                        } catch (e) {
+                            // エラーは関数内で処理済み
+                        }
+                    } else {
+                        alert('メールアドレスとパスワードを入力してください。');
+                    }
+                });
+                console.log('🔐 メールログインボタンのイベントリスナー追加完了');
             }
         }, 100);
         

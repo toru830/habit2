@@ -21,7 +21,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         // Firebase設定（実際のプロジェクト設定に置き換えてください）
@@ -50,6 +50,8 @@
         window.firebaseGetRedirectResult = getRedirectResult;
         window.firebaseSignOut = signOut;
         window.firebaseOnAuthStateChanged = onAuthStateChanged;
+        window.firebaseCreateUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
         window.firebaseDoc = doc;
         window.firebaseSetDoc = setDoc;
         window.firebaseGetDoc = getDoc;
@@ -81,6 +83,16 @@
                         <button class="action-btn today-btn" id="goToToday">今日</button>
                         <button class="action-btn login-btn" id="loginBtn">Googleでログイン（リダイレクト）</button>
                         <button class="action-btn logout-btn" id="logoutBtn" style="display: none;">ログアウト</button>
+                        
+                        <!-- メール/パスワード認証（テスト用） -->
+                        <div class="email-auth-container" style="margin-top: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                            <input type="email" id="emailInput" placeholder="メールアドレス" style="padding: 5px; border-radius: 3px; border: 1px solid #333; background-color: #222; color: white; width: 180px; font-size: 12px;">
+                            <input type="password" id="passwordInput" placeholder="パスワード" style="padding: 5px; border-radius: 3px; border: 1px solid #333; background-color: #222; color: white; width: 180px; font-size: 12px;">
+                            <div style="display: flex; gap: 5px;">
+                                <button id="emailSignUpBtn" class="action-btn" style="font-size: 11px; padding: 5px 8px;">サインアップ</button>
+                                <button id="emailLoginBtn" class="action-btn" style="font-size: 11px; padding: 5px 8px;">ログイン</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
