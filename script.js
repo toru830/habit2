@@ -984,7 +984,7 @@ class HabitTracker {
         messageEl.style.display = 'none';
     }
 
-    // ログイン処理（マルチデバイス対応）
+    // ログイン処理（真のマルチデバイス対応）
     async login(email, password) {
         try {
             console.log('🔐 ログイン試行:', email);
@@ -1013,10 +1013,31 @@ class HabitTracker {
                 this.showAuthMessage('ログイン成功！データを同期しました。', 'success');
                 return true;
             } else {
-                console.log('🔐 認証失敗 - ユーザー:', !!userRecord, 'パスワード:', userRecord ? userRecord.passwordHash === btoa(password) : 'N/A');
-                alert('🔐 認証失敗 - ユーザー: ' + (userRecord ? '存在' : '存在しない') + ', パスワード: ' + (userRecord ? (userRecord.passwordHash === btoa(password) ? '一致' : '不一致') : 'N/A'));
-                this.showAuthMessage('メールアドレスまたはパスワードが間違っています。');
-                return false;
+                // ユーザーが見つからない場合、新規登録を試行
+                console.log('🔐 ユーザーが見つからない、新規登録を試行');
+                alert('🔐 ユーザーが見つからない、新規登録を試行');
+                
+                // 新規登録処理
+                const userId = `user_${Date.now()}`;
+                const newUser = { id: userId, email: email };
+                users[email] = { ...newUser, passwordHash: btoa(password) };
+                
+                localStorage.setItem('habit_users', JSON.stringify(users));
+                this.currentUser = newUser;
+                localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
+                
+                // 新規ユーザーのデータを初期化
+                this.completedHabits = {};
+                this.healthData = {};
+                this.achievements = {};
+                
+                // クラウドに初期データを保存
+                await this.syncToCloud();
+                
+                this.updateAuthUI();
+                this.hideAuthModal();
+                this.showAuthMessage('新規登録成功！データを同期しました。', 'success');
+                return true;
             }
         } catch (error) {
             console.error('ログインエラー:', error);
