@@ -91,18 +91,19 @@
                     <div class="month-actions">
                         <button class="nav-arrow" id="nextWeek">›</button>
                         <button class="action-btn today-btn" id="goToToday">今日</button>
-                        <button class="action-btn login-btn" id="loginBtn">Googleでログイン（リダイレクト）</button>
-                        <button class="action-btn logout-btn" id="logoutBtn" style="display: none;">ログアウト</button>
-                        
-                        <!-- メール/パスワード認証（テスト用） -->
+                        <!-- メール/パスワード認証（メイン認証） -->
                         <div class="email-auth-container" style="margin-top: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
-                            <input type="email" id="emailInput" placeholder="メールアドレス" style="padding: 5px; border-radius: 3px; border: 1px solid #333; background-color: #222; color: white; width: 180px; font-size: 12px;">
-                            <input type="password" id="passwordInput" placeholder="パスワード" style="padding: 5px; border-radius: 3px; border: 1px solid #333; background-color: #222; color: white; width: 180px; font-size: 12px;">
-                            <div style="display: flex; gap: 5px;">
-                                <button id="emailSignUpBtn" class="action-btn" style="font-size: 11px; padding: 5px 8px;">サインアップ</button>
-                                <button id="emailLoginBtn" class="action-btn" style="font-size: 11px; padding: 5px 8px;">ログイン</button>
+                            <input type="email" id="emailInput" placeholder="メールアドレス" style="padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; width: 200px; font-size: 14px;">
+                            <input type="password" id="passwordInput" placeholder="パスワード" style="padding: 8px; border-radius: 4px; border: 1px solid #333; background-color: #222; color: white; width: 200px; font-size: 14px;">
+                            <div style="display: flex; gap: 8px;">
+                                <button id="emailSignUpBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px;">サインアップ</button>
+                                <button id="emailLoginBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px;">ログイン</button>
                             </div>
                         </div>
+                        
+                        <!-- Googleログイン（一時的に非表示） -->
+                        <button class="action-btn login-btn" id="loginBtn" style="display: none;">Googleでログイン</button>
+                        <button class="action-btn logout-btn" id="logoutBtn" style="display: none;">ログアウト</button>
                     </div>
                 </div>
 

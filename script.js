@@ -593,9 +593,11 @@ class HabitTracker {
     updateAuthUI() {
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
+        const emailAuthContainer = document.querySelector('.email-auth-container');
         
         if (this.currentUser) {
-            // ログイン状態：ログインボタンを非表示、ログアウトボタンを表示
+            // ログイン状態：メール認証UIを非表示、ログアウトボタンを表示
+            if (emailAuthContainer) emailAuthContainer.style.display = 'none';
             if (loginBtn) loginBtn.style.display = 'none';
             if (logoutBtn) {
                 logoutBtn.style.display = 'inline-block';
@@ -603,11 +605,9 @@ class HabitTracker {
                 logoutBtn.textContent = `ログアウト (${this.currentUser.displayName || this.currentUser.email})`;
             }
         } else {
-            // ログアウト状態：ログインボタンを表示、ログアウトボタンを非表示
-            if (loginBtn) {
-                loginBtn.style.display = 'inline-block';
-                loginBtn.textContent = 'Googleでログイン（ポップアップ）';
-            }
+            // ログアウト状態：メール認証UIを表示、ログアウトボタンを非表示
+            if (emailAuthContainer) emailAuthContainer.style.display = 'flex';
+            if (loginBtn) loginBtn.style.display = 'none'; // Googleログインは一時的に非表示
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
     }
@@ -679,17 +679,42 @@ class HabitTracker {
     async signUpWithEmail(email, password) {
         try {
             console.log('🔐 メールでサインアップ開始:', email);
+            console.log('🔐 Firebase認証オブジェクト確認:', {
+                auth: !!window.firebaseAuth,
+                createUser: typeof window.firebaseCreateUserWithEmailAndPassword
+            });
+            
+            if (!window.firebaseAuth || !window.firebaseCreateUserWithEmailAndPassword) {
+                throw new Error('Firebase認証が利用できません');
+            }
+            
             const userCredential = await window.firebaseCreateUserWithEmailAndPassword(window.firebaseAuth, email, password);
             console.log('🔐 サインアップ成功:', userCredential.user);
-            alert('サインアップが完了しました！');
+            console.log('🔐 ユーザー情報:', {
+                uid: userCredential.user.uid,
+                email: userCredential.user.email,
+                emailVerified: userCredential.user.emailVerified
+            });
             return userCredential.user;
         } catch (error) {
-            console.error('🔐 サインアップエラー:', {
+            console.error('🔐 サインアップエラー詳細:', {
                 code: error.code,
                 message: error.message,
                 stack: error.stack
             });
-            alert('サインアップに失敗しました: ' + error.message);
+            
+            let errorMessage = 'サインアップに失敗しました: ';
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage += 'このメールアドレスは既に使用されています。';
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage += 'パスワードが弱すぎます。6文字以上で入力してください。';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage += 'メールアドレスの形式が正しくありません。';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            alert(errorMessage);
             throw error;
         }
     }
@@ -698,17 +723,44 @@ class HabitTracker {
     async loginWithEmail(email, password) {
         try {
             console.log('🔐 メールでログイン開始:', email);
+            console.log('🔐 Firebase認証オブジェクト確認:', {
+                auth: !!window.firebaseAuth,
+                signIn: typeof window.firebaseSignInWithEmailAndPassword
+            });
+            
+            if (!window.firebaseAuth || !window.firebaseSignInWithEmailAndPassword) {
+                throw new Error('Firebase認証が利用できません');
+            }
+            
             const userCredential = await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, email, password);
             console.log('🔐 ログイン成功:', userCredential.user);
-            alert('ログインが完了しました！');
+            console.log('🔐 ユーザー情報:', {
+                uid: userCredential.user.uid,
+                email: userCredential.user.email,
+                emailVerified: userCredential.user.emailVerified
+            });
             return userCredential.user;
         } catch (error) {
-            console.error('🔐 ログインエラー:', {
+            console.error('🔐 ログインエラー詳細:', {
                 code: error.code,
                 message: error.message,
                 stack: error.stack
             });
-            alert('ログインに失敗しました: ' + error.message);
+            
+            let errorMessage = 'ログインに失敗しました: ';
+            if (error.code === 'auth/user-not-found') {
+                errorMessage += 'このメールアドレスは登録されていません。';
+            } else if (error.code === 'auth/wrong-password') {
+                errorMessage += 'パスワードが間違っています。';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage += 'メールアドレスの形式が正しくありません。';
+            } else if (error.code === 'auth/too-many-requests') {
+                errorMessage += 'ログイン試行回数が多すぎます。しばらく待ってから再試行してください。';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            alert(errorMessage);
             throw error;
         }
     }
