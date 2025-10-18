@@ -24,7 +24,7 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
-        // Firebase設定（実際のプロジェクト設定に置き換えてください）
+        // Firebase設定（ハードコーディング）
         const firebaseConfig = {
             apiKey: "AIzaSyDzu_ky2Sz0x0wG0UfVzUF68HiTUnu6euY",
             authDomain: "habit-tracker0830.firebaseapp.com",
@@ -35,11 +35,21 @@
             measurementId: "G-NCQSMFEPQL"
         };
         
+        console.log('🔐 Firebase設定を読み込み中...', firebaseConfig);
+        
         // Firebase初期化
+        console.log('🔐 Firebase初期化開始...');
         const app = initializeApp(firebaseConfig);
+        console.log('🔐 Firebase App初期化完了:', app);
+        
         const auth = getAuth(app);
+        console.log('🔐 Firebase Auth初期化完了:', auth);
+        
         const db = getFirestore(app);
+        console.log('🔐 Firebase Firestore初期化完了:', db);
+        
         const provider = new GoogleAuthProvider();
+        console.log('🔐 Google Auth Provider初期化完了:', provider);
         
         // グローバルにFirebaseオブジェクトを設定
         window.firebaseAuth = auth;

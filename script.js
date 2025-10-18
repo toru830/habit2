@@ -515,16 +515,30 @@ class HabitTracker {
     // 2. Authentication → Sign-in method で Google が有効になっているか
     // 3. Firestore Database → Rules で認証されたユーザーの読み書きが許可されているか
     setupFirebaseAuth() {
-        if (typeof window.firebaseOnAuthStateChanged === 'function') {
+        console.log('🔐 Firebase認証設定開始...');
+        console.log('🔐 利用可能なFirebase関数:', {
+            onAuthStateChanged: typeof window.firebaseOnAuthStateChanged,
+            getRedirectResult: typeof window.firebaseGetRedirectResult,
+            auth: window.firebaseAuth
+        });
+        
+        if (typeof window.firebaseOnAuthStateChanged === 'function' && window.firebaseAuth) {
+            console.log('🔐 認証状態監視を開始...');
             window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                console.log('🔐 認証状態変更:', user ? 'ログイン' : 'ログアウト');
                 this.currentUser = user;
                 this.updateAuthUI();
                 
                 if (user) {
-                    console.log('ユーザーがログインしました:', user.email);
+                    console.log('🔐 ユーザーがログインしました:', {
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName,
+                        photoURL: user.photoURL
+                    });
                     this.loadUserData();
                 } else {
-                    console.log('ユーザーがログアウトしました');
+                    console.log('🔐 ユーザーがログアウトしました');
                 }
             });
             
@@ -567,6 +581,11 @@ class HabitTracker {
             } else {
                 console.warn('🔐 getRedirectResult関数が利用できません');
             }
+        } else {
+            console.error('🔐 Firebase認証が利用できません:', {
+                onAuthStateChanged: typeof window.firebaseOnAuthStateChanged,
+                auth: window.firebaseAuth
+            });
         }
     }
 
@@ -603,10 +622,14 @@ class HabitTracker {
                 signInRedirect: typeof window.firebaseSignInRedirect
             });
             
-            if (typeof window.firebaseSignInRedirect === 'function') {
+            if (typeof window.firebaseSignInRedirect === 'function' && window.firebaseAuth && window.firebaseProvider) {
                 console.log('🔐 リダイレクト開始...');
                 console.log('🔐 認証オブジェクト:', window.firebaseAuth);
                 console.log('🔐 プロバイダーオブジェクト:', window.firebaseProvider);
+                
+                // リダイレクト先のURLを設定
+                const redirectUrl = window.location.origin + window.location.pathname;
+                console.log('🔐 リダイレクト先URL:', redirectUrl);
                 
                 await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
                 console.log('🔐 リダイレクト実行完了（ページがリダイレクトされます）');
@@ -5106,9 +5129,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Firebase認証の初期化を待つ
     const initApp = () => {
-        if (window.firebaseAuth && window.firebaseProvider) {
+        console.log('🔐 Firebase認証オブジェクトの確認:', {
+            firebaseAuth: !!window.firebaseAuth,
+            firebaseProvider: !!window.firebaseProvider,
+            firebaseDb: !!window.firebaseDb
+        });
+        
+        if (window.firebaseAuth && window.firebaseProvider && window.firebaseDb) {
             console.log('🔐 Firebase認証オブジェクトが利用可能です');
             const app = new HabitTracker();
+            window.habitTracker = app; // グローバルに保存
             
             // データ更新イベントは無効化（データ上書きを防ぐため）
             console.log('データ更新イベントは無効化されています');
