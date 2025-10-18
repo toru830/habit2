@@ -545,28 +545,48 @@ class HabitTracker {
         if (!this.currentUser) return;
         
         try {
+            // まずローカルデータを確認
+            const localData = localStorage.getItem(`habit_data_${this.currentUser.id}`);
+            if (localData) {
+                const userData = JSON.parse(localData);
+                this.completedHabits = userData.completedHabits || {};
+                this.healthData = userData.healthData || {};
+                this.achievements = userData.achievements || {};
+                console.log('🔐 ローカルデータを読み込みました');
+            }
+            
+            // クラウド同期を試行
             if (window.cloudSync && window.cloudSync.loadConfig()) {
-                const cloudData = await window.cloudSync.loadData();
-                if (cloudData) {
-                    // クラウドデータをローカルに適用
-                    this.completedHabits = cloudData.completedHabits || {};
-                    this.healthData = cloudData.healthData || {};
-                    this.achievements = cloudData.achievements || {};
-                    
-                    // ローカルストレージを更新
-                    this.saveCompletedHabits();
-                    this.saveHealthData();
-                    this.saveAchievements();
-                    
-                    // UIを更新
-                    this.renderCalendar();
-                    this.updateStatsView();
-                    
-                    console.log('🔐 クラウドからデータを同期しました');
+                try {
+                    const cloudData = await window.cloudSync.loadData();
+                    if (cloudData && cloudData.userId === this.currentUser.id) {
+                        // クラウドデータが新しい場合は適用
+                        const localLastSync = localData ? JSON.parse(localData).lastSync : null;
+                        const cloudLastSync = cloudData.lastSync;
+                        
+                        if (!localLastSync || new Date(cloudLastSync) > new Date(localLastSync)) {
+                            this.completedHabits = cloudData.completedHabits || {};
+                            this.healthData = cloudData.healthData || {};
+                            this.achievements = cloudData.achievements || {};
+                            
+                            // ローカルストレージに保存
+                            this.saveCompletedHabits();
+                            this.saveHealthData();
+                            this.saveAchievements();
+                            
+                            console.log('🔐 クラウドからデータを同期しました');
+                        }
+                    }
+                } catch (cloudError) {
+                    console.warn('クラウド同期失敗、ローカルデータを使用:', cloudError);
                 }
             }
+            
+            // UIを更新
+            this.renderCalendar();
+            this.updateStatsView();
         } catch (error) {
-            console.error('クラウド同期エラー:', error);
+            console.error('同期エラー:', error);
         }
     }
 
@@ -1071,7 +1091,7 @@ class HabitTracker {
         messageEl.style.display = 'none';
     }
 
-    // 簡単同期実行
+    // 真のマルチデバイス同期実行
     async testCloudSyncConnection() {
         try {
             if (!this.currentUser) {
@@ -1085,13 +1105,27 @@ class HabitTracker {
                 healthData: this.healthData,
                 achievements: this.achievements,
                 userId: this.currentUser.id,
+                email: this.currentUser.email,
                 lastSync: new Date().toISOString()
             };
             
-            // ローカルストレージに保存（簡単な同期）
+            // ローカルストレージに保存
             localStorage.setItem(`habit_data_${this.currentUser.id}`, JSON.stringify(userData));
             
-            this.showCloudSyncMessage('データを同期しました！', 'success');
+            // クラウド同期（JSONBin.io使用）
+            if (window.cloudSync && window.cloudSync.loadConfig()) {
+                try {
+                    await window.cloudSync.saveData(userData);
+                    this.showCloudSyncMessage('クラウドに同期しました！', 'success');
+                    console.log('🔐 クラウド同期完了:', this.currentUser.email);
+                } catch (cloudError) {
+                    console.warn('クラウド同期失敗、ローカルのみ保存:', cloudError);
+                    this.showCloudSyncMessage('ローカルに保存しました（クラウド同期は設定が必要です）', 'success');
+                }
+            } else {
+                this.showCloudSyncMessage('ローカルに保存しました（クラウド同期は設定が必要です）', 'success');
+            }
+            
             console.log('🔐 データ同期完了:', this.currentUser.email);
         } catch (error) {
             console.error('同期エラー:', error);
