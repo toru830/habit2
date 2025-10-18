@@ -581,8 +581,9 @@ class HabitTracker {
                             this.updateAuthUI();
                             
                             // リダイレクト後のデータ読み込み
-                            await this.loadUserData();
-                            alert('Googleログインが完了しました！');
+                            this.loadUserData().then(() => {
+                                alert('Googleログインが完了しました！');
+                            });
                         } else {
                             console.log('🔐 リダイレクト結果なし（初回アクセスまたはログインしていない状態）');
                         }
