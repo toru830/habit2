@@ -3134,10 +3134,16 @@ class HabitTracker {
 
     // イベントリスナーの設定
     setupEventListeners() {
+        console.log('🔐 setupEventListeners開始');
+        
         // 週移動ボタン
-        document.getElementById('prevWeek').addEventListener('click', () => this.moveToPrevWeek());
-        document.getElementById('nextWeek').addEventListener('click', () => this.moveToNextWeek());
-        document.getElementById('goToToday').addEventListener('click', () => this.goToToday());
+        const prevWeekBtn = document.getElementById('prevWeek');
+        const nextWeekBtn = document.getElementById('nextWeek');
+        const goToTodayBtn = document.getElementById('goToToday');
+        
+        if (prevWeekBtn) prevWeekBtn.addEventListener('click', () => this.moveToPrevWeek());
+        if (nextWeekBtn) nextWeekBtn.addEventListener('click', () => this.moveToNextWeek());
+        if (goToTodayBtn) goToTodayBtn.addEventListener('click', () => this.goToToday());
         
         // スワイプイベントは無効化
         // this.setupSwipeEvents();
@@ -3156,35 +3162,48 @@ class HabitTracker {
         document.getElementById('settingsBtn').addEventListener('click', () => this.showSettingsView());
         
         // 認証ボタン
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
+        console.log('🔐 認証ボタンの設定開始');
         
-        console.log('🔐 ログインボタン要素:', loginBtn);
-        console.log('🔐 ログアウトボタン要素:', logoutBtn);
-        
-        if (loginBtn) {
-            console.log('🔐 ログインボタンのイベントリスナーを追加中...');
-            loginBtn.addEventListener('click', (event) => {
-                event.preventDefault();
-                console.log('🔐 ログインボタンがクリックされました');
-                console.log('🔐 現在の認証状態:', this.currentUser ? 'ログイン済み' : '未ログイン');
-                console.log('🔐 Firebase認証オブジェクト:', window.firebaseAuth);
-                console.log('🔐 Firebaseプロバイダー:', window.firebaseProvider);
-                console.log('🔐 signInWithRedirect関数:', typeof window.firebaseSignInRedirect);
-                this.signInWithGoogle();
-            });
-            console.log('🔐 ログインボタンのイベントリスナー追加完了');
-        } else {
-            console.error('🔐 ログインボタンが見つかりません！');
-        }
-        
-        if (logoutBtn) {
-            console.log('🔐 ログアウトボタンのイベントリスナーを追加中...');
-            logoutBtn.addEventListener('click', () => this.signOut());
-            console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
-        } else {
-            console.warn('🔐 ログアウトボタンが見つかりません');
-        }
+        // 少し遅延してボタンが確実に存在することを確認
+        setTimeout(() => {
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            console.log('🔐 ログインボタン要素:', loginBtn);
+            console.log('🔐 ログアウトボタン要素:', logoutBtn);
+            
+            if (loginBtn) {
+                console.log('🔐 ログインボタンのイベントリスナーを追加中...');
+                
+                // 既存のイベントリスナーを削除（重複防止）
+                loginBtn.removeEventListener('click', this.handleLoginClick);
+                
+                // 新しいイベントリスナーを追加
+                this.handleLoginClick = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('🔐 ログインボタンがクリックされました');
+                    console.log('🔐 現在の認証状態:', this.currentUser ? 'ログイン済み' : '未ログイン');
+                    console.log('🔐 Firebase認証オブジェクト:', window.firebaseAuth);
+                    console.log('🔐 Firebaseプロバイダー:', window.firebaseProvider);
+                    console.log('🔐 signInWithRedirect関数:', typeof window.firebaseSignInRedirect);
+                    this.signInWithGoogle();
+                };
+                
+                loginBtn.addEventListener('click', this.handleLoginClick);
+                console.log('🔐 ログインボタンのイベントリスナー追加完了');
+            } else {
+                console.error('🔐 ログインボタンが見つかりません！');
+            }
+            
+            if (logoutBtn) {
+                console.log('🔐 ログアウトボタンのイベントリスナーを追加中...');
+                logoutBtn.addEventListener('click', () => this.signOut());
+                console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
+            } else {
+                console.warn('🔐 ログアウトボタンが見つかりません');
+            }
+        }, 100);
         
         // Firebaseテストボタン
         const firebaseTestBtn = document.getElementById('firebaseTestBtn');
@@ -5002,10 +5021,23 @@ class HabitTracker {
 
 // アプリの初期化
 document.addEventListener('DOMContentLoaded', () => {
-    const app = new HabitTracker();
+    console.log('🔐 DOMContentLoaded: アプリ初期化開始');
     
-    // データ更新イベントは無効化（データ上書きを防ぐため）
-    console.log('データ更新イベントは無効化されています');
+    // Firebase認証の初期化を待つ
+    const initApp = () => {
+        if (window.firebaseAuth && window.firebaseProvider) {
+            console.log('🔐 Firebase認証オブジェクトが利用可能です');
+            const app = new HabitTracker();
+            
+            // データ更新イベントは無効化（データ上書きを防ぐため）
+            console.log('データ更新イベントは無効化されています');
+        } else {
+            console.log('🔐 Firebase認証オブジェクトを待機中...');
+            setTimeout(initApp, 100);
+        }
+    };
+    
+    initApp();
 });
 
 // サービスワーカーの登録（PWA対応）
