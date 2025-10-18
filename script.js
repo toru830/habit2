@@ -3196,11 +3196,22 @@ class HabitTracker {
     // イベントリスナーの設定
     setupEventListeners() {
         console.log('🔐 setupEventListeners開始');
+        console.log('🔐 DOM状態確認:', {
+            readyState: document.readyState,
+            body: !!document.body,
+            head: !!document.head
+        });
         
         // 週移動ボタン
         const prevWeekBtn = document.getElementById('prevWeek');
         const nextWeekBtn = document.getElementById('nextWeek');
         const goToTodayBtn = document.getElementById('goToToday');
+        
+        console.log('🔐 週移動ボタン要素確認:', {
+            prevWeek: !!prevWeekBtn,
+            nextWeek: !!nextWeekBtn,
+            goToToday: !!goToTodayBtn
+        });
         
         if (prevWeekBtn) prevWeekBtn.addEventListener('click', () => this.moveToPrevWeek());
         if (nextWeekBtn) nextWeekBtn.addEventListener('click', () => this.moveToNextWeek());
@@ -3224,15 +3235,30 @@ class HabitTracker {
         
         // 認証ボタン
         console.log('🔐 認証ボタンの設定開始');
+        console.log('🔐 現在のDOM状態:', {
+            readyState: document.readyState,
+            allElements: document.querySelectorAll('*').length,
+            buttons: document.querySelectorAll('button').length
+        });
         
         // 少し遅延してボタンが確実に存在することを確認
         setTimeout(() => {
+            console.log('🔐 認証ボタン要素を検索中...');
             const loginBtn = document.getElementById('loginBtn');
             const logoutBtn = document.getElementById('logoutBtn');
             const emailInput = document.getElementById('emailInput');
             const passwordInput = document.getElementById('passwordInput');
             const emailSignUpBtn = document.getElementById('emailSignUpBtn');
             const emailLoginBtn = document.getElementById('emailLoginBtn');
+            
+            console.log('🔐 認証ボタン要素検索結果:', {
+                loginBtn: !!loginBtn,
+                logoutBtn: !!logoutBtn,
+                emailInput: !!emailInput,
+                passwordInput: !!passwordInput,
+                emailSignUpBtn: !!emailSignUpBtn,
+                emailLoginBtn: !!emailLoginBtn
+            });
             
             console.log('🔐 ログインボタン要素:', loginBtn);
             console.log('🔐 ログアウトボタン要素:', logoutBtn);
@@ -3241,15 +3267,22 @@ class HabitTracker {
             
             if (loginBtn) {
                 console.log('🔐 ログインボタンのイベントリスナーを追加中...');
+                console.log('🔐 ログインボタン要素詳細:', {
+                    id: loginBtn.id,
+                    className: loginBtn.className,
+                    textContent: loginBtn.textContent,
+                    style: loginBtn.style.cssText
+                });
                 
                 // 既存のイベントリスナーを削除（重複防止）
                 loginBtn.removeEventListener('click', this.handleLoginClick);
                 
                 // 新しいイベントリスナーを追加
                 this.handleLoginClick = (event) => {
+                    console.log('🔐 ログインボタンがクリックされました！');
+                    alert('テスト: Googleログインボタンがクリックされました！');
                     event.preventDefault();
                     event.stopPropagation();
-                    console.log('🔐 ログインボタンがクリックされました');
                     console.log('🔐 現在の認証状態:', this.currentUser ? 'ログイン済み' : '未ログイン');
                     console.log('🔐 Firebase認証オブジェクト:', window.firebaseAuth);
                     console.log('🔐 Firebaseプロバイダー:', window.firebaseProvider);
@@ -3274,7 +3307,16 @@ class HabitTracker {
             // メール/パスワード認証ボタン
             if (emailSignUpBtn && emailInput && passwordInput) {
                 console.log('🔐 メールサインアップボタンのイベントリスナーを追加中...');
-                emailSignUpBtn.addEventListener('click', async () => {
+                console.log('🔐 メールサインアップボタン要素詳細:', {
+                    id: emailSignUpBtn.id,
+                    className: emailSignUpBtn.className,
+                    textContent: emailSignUpBtn.textContent
+                });
+                emailSignUpBtn.addEventListener('click', async (event) => {
+                    console.log('🔐 メールサインアップボタンがクリックされました！');
+                    alert('テスト: メールサインアップボタンがクリックされました！');
+                    event.preventDefault();
+                    event.stopPropagation();
                     const email = emailInput.value;
                     const password = passwordInput.value;
                     if (email && password) {
@@ -3292,7 +3334,16 @@ class HabitTracker {
 
             if (emailLoginBtn && emailInput && passwordInput) {
                 console.log('🔐 メールログインボタンのイベントリスナーを追加中...');
-                emailLoginBtn.addEventListener('click', async () => {
+                console.log('🔐 メールログインボタン要素詳細:', {
+                    id: emailLoginBtn.id,
+                    className: emailLoginBtn.className,
+                    textContent: emailLoginBtn.textContent
+                });
+                emailLoginBtn.addEventListener('click', async (event) => {
+                    console.log('🔐 メールログインボタンがクリックされました！');
+                    alert('テスト: メールログインボタンがクリックされました！');
+                    event.preventDefault();
+                    event.stopPropagation();
                     const email = emailInput.value;
                     const password = passwordInput.value;
                     if (email && password) {
