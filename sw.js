@@ -7,7 +7,7 @@ const urlsToCache = [
   './manifest.json',
   './firebase-config.js',
   './sync-optional.js',
-  './sync-manager.js',
+  // './sync-manager.js', // 一時的に無効化
   './firebase-test.js'
 ];
 
