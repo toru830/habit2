@@ -390,6 +390,8 @@ class HabitTracker {
 
         // Firebase認証
         this.currentUser = null;
+        this.isGuestMode = false;
+        this.guestUserId = 'guest_' + Date.now();
         this.setupFirebaseAuth();
 
         this.init();
@@ -510,10 +512,19 @@ class HabitTracker {
 
     // デバッグ用の機能を追加
     // Firebase認証の設定
-    // Firebase Console設定確認事項：
-    // 1. Authentication → Settings → Authorized domains に 'toru830.github.io' が追加されているか
-    // 2. Authentication → Sign-in method で Google が有効になっているか
-    // 3. Firestore Database → Rules で認証されたユーザーの読み書きが許可されているか
+    /*
+    Firebase Console設定手順：
+    1. https://console.firebase.google.com/ にアクセス
+    2. habit-tracker0830 プロジェクトを選択
+    3. Authentication → Sign-in method をクリック
+    4. "Email/Password" を見つけてクリック
+    5. "Enable" をオンにして保存
+    6. Authentication → Settings → Authorized domains に以下を追加：
+       - toru830.github.io
+       - habit-tracker0830.firebaseapp.com
+       - localhost (開発用)
+    7. Firestore Database → Rules で認証されたユーザーの読み書きが許可されているか確認
+    */
     setupFirebaseAuth() {
         console.log('🔐 Firebase認証設定開始...');
         console.log('🔐 利用可能なFirebase関数:', {
@@ -594,15 +605,20 @@ class HabitTracker {
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const emailAuthContainer = document.querySelector('.email-auth-container');
+        const guestModeBtn = document.getElementById('guestModeBtn');
         
-        if (this.currentUser) {
-            // ログイン状態：メール認証UIを非表示、ログアウトボタンを表示
+        if (this.currentUser || this.isGuestMode) {
+            // ログイン状態またはゲストモード：メール認証UIを非表示、ログアウトボタンを表示
             if (emailAuthContainer) emailAuthContainer.style.display = 'none';
             if (loginBtn) loginBtn.style.display = 'none';
             if (logoutBtn) {
                 logoutBtn.style.display = 'inline-block';
                 // ユーザー名を表示
-                logoutBtn.textContent = `ログアウト (${this.currentUser.displayName || this.currentUser.email})`;
+                if (this.isGuestMode) {
+                    logoutBtn.textContent = `ゲストモード終了`;
+                } else {
+                    logoutBtn.textContent = `ログアウト (${this.currentUser.displayName || this.currentUser.email})`;
+                }
             }
         } else {
             // ログアウト状態：メール認証UIを表示、ログアウトボタンを非表示
@@ -765,15 +781,43 @@ class HabitTracker {
         }
     }
 
+    // ゲストモード開始
+    startGuestMode() {
+        console.log('🔐 ゲストモード開始');
+        this.isGuestMode = true;
+        this.currentUser = null;
+        this.guestUserId = 'guest_' + Date.now();
+        this.updateAuthUI();
+        alert('ゲストモードで開始しました。データはローカルに保存されます。');
+    }
+
+    // ゲストモード終了
+    endGuestMode() {
+        console.log('🔐 ゲストモード終了');
+        this.isGuestMode = false;
+        this.currentUser = null;
+        this.updateAuthUI();
+        alert('ゲストモードを終了しました。');
+    }
+
     // ログアウト
     async signOut() {
         try {
+            if (this.isGuestMode) {
+                // ゲストモードの場合は単純に終了
+                this.endGuestMode();
+                return;
+            }
+            
             if (typeof window.firebaseSignOut === 'function') {
                 await window.firebaseSignOut(window.firebaseAuth);
                 console.log('ログアウト成功');
             } else {
                 console.error('Firebase認証が利用できません');
             }
+            this.currentUser = null;
+            this.isGuestMode = false;
+            this.updateAuthUI();
         } catch (error) {
             console.error('ログアウトエラー:', error);
         }
@@ -781,7 +825,7 @@ class HabitTracker {
 
     // ユーザーデータの保存
     async saveUserData() {
-        if (!this.currentUser) return;
+        if (!this.currentUser && !this.isGuestMode) return;
 
         try {
             const userData = {
@@ -790,6 +834,14 @@ class HabitTracker {
                 achievements: this.achievements,
                 lastUpdated: new Date().toISOString()
             };
+
+            if (this.isGuestMode) {
+                // ゲストモードの場合はローカルストレージに保存
+                console.log('🔐 ゲストモード：ローカルストレージに保存');
+                localStorage.setItem('guest_user_data', JSON.stringify(userData));
+                console.log('🔐 ゲストモード：データ保存完了');
+                return;
+            }
 
             const userDocRef = window.firebaseDoc(window.firebaseDb, 'users', this.currentUser.uid);
             await window.firebaseSetDoc(userDocRef, userData, { merge: true });
@@ -801,9 +853,27 @@ class HabitTracker {
 
     // ユーザーデータの読み込み
     async loadUserData() {
-        if (!this.currentUser) return;
+        if (!this.currentUser && !this.isGuestMode) return;
 
         try {
+            if (this.isGuestMode) {
+                // ゲストモードの場合はローカルストレージから読み込み
+                console.log('🔐 ゲストモード：ローカルストレージから読み込み');
+                const guestData = localStorage.getItem('guest_user_data');
+                if (guestData) {
+                    const userData = JSON.parse(guestData);
+                    this.completedHabits = userData.completedHabits || {};
+                    this.healthData = userData.healthData || {};
+                    this.achievements = userData.achievements || {};
+                    
+                    // UIを更新
+                    this.renderCalendar();
+                    this.updateStatsView();
+                    console.log('🔐 ゲストモード：データ読み込み完了');
+                }
+                return;
+            }
+
             const userDocRef = window.firebaseDoc(window.firebaseDb, 'users', this.currentUser.uid);
             const userDoc = await window.firebaseGetDoc(userDocRef);
             
@@ -2161,8 +2231,8 @@ class HabitTracker {
         console.log('変更後のデータ:', this.completedHabits);
         this.saveCompletedHabits();
         
-        // クラウドに自動保存
-        if (this.currentUser) {
+        // クラウドに自動保存（認証済みまたはゲストモード）
+        if (this.currentUser || this.isGuestMode) {
             this.saveUserData();
         }
         
@@ -3433,6 +3503,24 @@ class HabitTracker {
                     }
                 });
                 console.log('🔐 メールログインボタンのイベントリスナー追加完了');
+            }
+
+            // ゲストモードボタン
+            const guestModeBtn = document.getElementById('guestModeBtn');
+            if (guestModeBtn) {
+                console.log('🔐 ゲストモードボタンのイベントリスナーを追加中...');
+                console.log('🔐 ゲストモードボタン要素詳細:', {
+                    id: guestModeBtn.id,
+                    className: guestModeBtn.className,
+                    textContent: guestModeBtn.textContent
+                });
+                guestModeBtn.addEventListener('click', (event) => {
+                    console.log('🔐 ゲストモードボタンがクリックされました！');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.startGuestMode();
+                });
+                console.log('🔐 ゲストモードボタンのイベントリスナー追加完了');
             }
         }, 100);
         
