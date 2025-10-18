@@ -5,10 +5,7 @@ const urlsToCache = [
   './styles.css',
   './script.js',
   './manifest.json',
-  './firebase-config.js',
-  './sync-optional.js',
-  // './sync-manager.js', // 一時的に無効化
-  './firebase-test.js'
+  './github-sync.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -44,12 +41,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Firebase関連のリクエストはキャッシュをスキップ
-  if (event.request.url.includes('firestore.googleapis.com') || 
-      event.request.url.includes('firebase.googleapis.com') ||
-      event.request.url.includes('googleapis.com')) {
-    return;
-  }
+  // Firebase関連のリクエストは削除済み
   
   event.respondWith(
     caches.match(event.request)

@@ -388,11 +388,11 @@ class HabitTracker {
         this.totalScore = this.calculateTotalScore();
         this.totalChart = null;
 
-        // GitHub連携
-        this.githubUser = null;
+        // 認証システム
+        this.currentUser = null;
         this.isGuestMode = false;
         this.guestUserId = 'guest_' + Date.now();
-        this.setupGitHubSync();
+        this.apiBaseUrl = 'https://api.github.com';
 
         this.init();
     }
@@ -524,45 +524,242 @@ class HabitTracker {
 
     // デバッグ用の機能を追加
     // GitHub API連携の設定
-    setupGitHubSync() {
-        console.log('🔐 GitHub API連携設定開始...');
+    // 認証システムのセットアップ
+    setupAuth() {
+        console.log('🔐 認証システム初期化...');
         
-        // 保存されたGitHub設定を読み込み
-        if (window.githubSync) {
-            const hasConfig = window.githubSync.loadConfig();
-            if (hasConfig) {
-                this.githubUser = window.githubSync.username;
-                this.updateAuthUI();
-                console.log('🔐 保存されたGitHub設定を読み込みました:', this.githubUser);
-            }
+        // 保存されたユーザー情報を読み込み
+        const savedUser = localStorage.getItem('habit_user');
+        if (savedUser) {
+            this.currentUser = JSON.parse(savedUser);
+            this.updateAuthUI();
+            console.log('🔐 保存されたユーザー情報を読み込みました:', this.currentUser.email);
         }
         
-        // オフライン時の同期チェック
-        this.checkSyncStatus();
+        // ゲストモードの確認
+        const isGuest = localStorage.getItem('habit_guest_mode');
+        if (isGuest === 'true') {
+            this.isGuestMode = true;
+            this.updateAuthUI();
+            console.log('🔐 ゲストモードで起動');
+        }
+    }
+
+    // 認証モーダルを表示
+    showAuthModal() {
+        const modal = document.getElementById('authModal');
+        if (modal) {
+            modal.style.display = 'block';
+            this.showLoginForm();
+        }
+    }
+
+    // 認証モーダルを非表示
+    hideAuthModal() {
+        const modal = document.getElementById('authModal');
+        if (modal) {
+            modal.style.display = 'none';
+            this.clearAuthForms();
+        }
+    }
+
+    // ログインフォームを表示
+    showLoginForm() {
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        
+        if (loginForm) loginForm.style.display = 'block';
+        if (signupForm) signupForm.style.display = 'none';
+        if (loginTab) {
+            loginTab.style.backgroundColor = '#4A90E2';
+            loginTab.style.color = 'white';
+        }
+        if (signupTab) {
+            signupTab.style.backgroundColor = '#555';
+            signupTab.style.color = '#ccc';
+        }
+    }
+
+    // 新規登録フォームを表示
+    showSignupForm() {
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        
+        if (loginForm) loginForm.style.display = 'none';
+        if (signupForm) signupForm.style.display = 'block';
+        if (loginTab) {
+            loginTab.style.backgroundColor = '#555';
+            loginTab.style.color = '#ccc';
+        }
+        if (signupTab) {
+            signupTab.style.backgroundColor = '#4A90E2';
+            signupTab.style.color = 'white';
+        }
+    }
+
+    // フォームをクリア
+    clearAuthForms() {
+        const inputs = ['loginEmail', 'loginPassword', 'signupEmail', 'signupPassword', 'signupPasswordConfirm'];
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) input.value = '';
+        });
+        this.hideAuthMessage();
+    }
+
+    // メッセージを表示
+    showAuthMessage(message, isError = false) {
+        const messageDiv = document.getElementById('authMessage');
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.backgroundColor = isError ? '#ff4444' : '#44ff44';
+            messageDiv.style.color = 'white';
+        }
+    }
+
+    // メッセージを非表示
+    hideAuthMessage() {
+        const messageDiv = document.getElementById('authMessage');
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
+        }
+    }
+
+    // ログイン処理
+    async login(email, password) {
+        try {
+            // 簡単な認証（実際のプロダクションでは適切な認証システムを使用）
+            const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            const user = users[email];
+            
+            if (user && user.password === password) {
+                this.currentUser = { email: email, id: user.id };
+                localStorage.setItem('habit_user', JSON.stringify(this.currentUser));
+                this.updateAuthUI();
+                this.hideAuthModal();
+                this.showAuthMessage('ログインしました！', false);
+                console.log('🔐 ログイン成功:', email);
+                return true;
+            } else {
+                this.showAuthMessage('メールアドレスまたはパスワードが間違っています。', true);
+                return false;
+            }
+        } catch (error) {
+            console.error('ログインエラー:', error);
+            this.showAuthMessage('ログインに失敗しました。', true);
+            return false;
+        }
+    }
+
+    // 新規登録処理
+    async signup(email, password) {
+        try {
+            // パスワード確認
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+            if (password !== passwordConfirm) {
+                this.showAuthMessage('パスワードが一致しません。', true);
+                return false;
+            }
+            
+            if (password.length < 6) {
+                this.showAuthMessage('パスワードは6文字以上で入力してください。', true);
+                return false;
+            }
+            
+            // ユーザー登録
+            const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            if (users[email]) {
+                this.showAuthMessage('このメールアドレスは既に登録されています。', true);
+                return false;
+            }
+            
+            const userId = 'user_' + Date.now();
+            users[email] = {
+                id: userId,
+                password: password,
+                createdAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('habit_users', JSON.stringify(users));
+            
+            this.currentUser = { email: email, id: userId };
+            localStorage.setItem('habit_user', JSON.stringify(this.currentUser));
+            this.updateAuthUI();
+            this.hideAuthModal();
+            this.showAuthMessage('アカウントを作成しました！', false);
+            console.log('🔐 新規登録成功:', email);
+            return true;
+        } catch (error) {
+            console.error('新規登録エラー:', error);
+            this.showAuthMessage('アカウント作成に失敗しました。', true);
+            return false;
+        }
+    }
+
+    // ログアウト処理
+    async logout() {
+        try {
+            if (this.isGuestMode) {
+                this.endGuestMode();
+                return;
+            }
+            
+            this.currentUser = null;
+            localStorage.removeItem('habit_user');
+            this.updateAuthUI();
+            this.showAuthMessage('ログアウトしました。', false);
+            console.log('🔐 ログアウト成功');
+        } catch (error) {
+            console.error('ログアウトエラー:', error);
+        }
+    }
+
+    // ゲストモード開始
+    startGuestMode() {
+        this.isGuestMode = true;
+        this.guestUserId = 'guest_' + Date.now();
+        localStorage.setItem('habit_guest_mode', 'true');
+        this.updateAuthUI();
+        this.showAuthMessage('ゲストモードで開始しました。', false);
+        console.log('🔐 ゲストモード開始');
+    }
+
+    // ゲストモード終了
+    endGuestMode() {
+        this.isGuestMode = false;
+        localStorage.removeItem('habit_guest_mode');
+        this.updateAuthUI();
+        this.showAuthMessage('ゲストモードを終了しました。', false);
+        console.log('🔐 ゲストモード終了');
     }
 
     // 認証UIの更新
     updateAuthUI() {
-        const githubConnectBtn = document.getElementById('githubConnectBtn');
-        const githubDisconnectBtn = document.getElementById('githubDisconnectBtn');
+        const authBtn = document.getElementById('authBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
         const guestModeBtn = document.getElementById('guestModeBtn');
         
-        if (this.githubUser || this.isGuestMode) {
-            // GitHub連携済みまたはゲストモード：連携解除ボタンを表示
-            if (githubConnectBtn) githubConnectBtn.style.display = 'none';
-            if (githubDisconnectBtn) {
-                githubDisconnectBtn.style.display = 'inline-block';
+        if (this.currentUser || this.isGuestMode) {
+            // ログイン済みまたはゲストモード：ログアウトボタンを表示
+            if (authBtn) authBtn.style.display = 'none';
+            if (logoutBtn) {
+                logoutBtn.style.display = 'inline-block';
                 if (this.isGuestMode) {
-                    githubDisconnectBtn.textContent = 'ゲスト終了';
+                    logoutBtn.textContent = 'ゲスト終了';
                 } else {
-                    githubDisconnectBtn.textContent = `連携解除 (${this.githubUser})`;
+                    logoutBtn.textContent = `ログアウト (${this.currentUser.email})`;
                 }
             }
             if (guestModeBtn) guestModeBtn.style.display = 'none';
         } else {
-            // 未連携状態：GitHub連携ボタンとゲストボタンを表示、連携解除ボタンを非表示
-            if (githubConnectBtn) githubConnectBtn.style.display = 'inline-block';
-            if (githubDisconnectBtn) githubDisconnectBtn.style.display = 'none';
+            // 未ログイン状態：ログインボタンとゲストボタンを表示、ログアウトボタンを非表示
+            if (authBtn) authBtn.style.display = 'inline-block';
+            if (logoutBtn) logoutBtn.style.display = 'none';
             if (guestModeBtn) guestModeBtn.style.display = 'inline-block';
         }
     }
@@ -691,7 +888,7 @@ class HabitTracker {
                 return;
             }
             
-            // Firebase認証は削除済み
+            // 認証なしでログアウト
             this.currentUser = null;
             this.isGuestMode = false;
             this.updateAuthUI();
@@ -773,9 +970,7 @@ class HabitTracker {
                 return;
             }
 
-            // Firebase Firestoreは削除済み
-            
-            // Firebase Firestoreは削除済み - ローカルストレージのみ使用
+            // ローカルストレージのみ使用
         } catch (error) {
             console.error('データ読み込みエラー:', error);
         }
@@ -3349,7 +3544,7 @@ class HabitTracker {
 
         }, 100);
         
-        // Firebaseテストボタンは削除済み
+        // テストボタンは削除済み
     }
 
     // 手動同期のみの安全なセットアップ
@@ -5157,7 +5352,7 @@ class HabitTracker {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔐 DOMContentLoaded: アプリ初期化開始');
     
-    // アプリを直接初期化（Firebase待機なし）
+    // アプリを直接初期化
     const app = new HabitTracker();
     window.habitTracker = app; // グローバルに保存
     console.log('🔐 アプリ初期化完了');
