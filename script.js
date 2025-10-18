@@ -508,6 +508,10 @@ class HabitTracker {
 
     // デバッグ用の機能を追加
     // Firebase認証の設定
+    // Firebase Console設定確認事項：
+    // 1. Authentication → Settings → Authorized domains に 'toru830.github.io' が追加されているか
+    // 2. Authentication → Sign-in method で Google が有効になっているか
+    // 3. Firestore Database → Rules で認証されたユーザーの読み書きが許可されているか
     setupFirebaseAuth() {
         if (typeof window.firebaseOnAuthStateChanged === 'function') {
             window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
@@ -524,17 +528,42 @@ class HabitTracker {
             
             // リダイレクト結果の処理
             if (typeof window.firebaseGetRedirectResult === 'function') {
+                console.log('🔐 リダイレクト結果を確認中...');
                 window.firebaseGetRedirectResult(window.firebaseAuth)
                     .then((result) => {
+                        console.log('🔐 リダイレクト結果詳細:', {
+                            result: result,
+                            hasResult: !!result,
+                            hasUser: !!(result && result.user),
+                            user: result ? result.user : null,
+                            credential: result ? result.credential : null,
+                            operationType: result ? result.operationType : null
+                        });
+                        
                         if (result && result.user) {
-                            console.log('リダイレクトログイン成功:', result.user);
+                            console.log('🔐 リダイレクトログイン成功:', result.user);
+                            console.log('🔐 ユーザー情報:', {
+                                uid: result.user.uid,
+                                email: result.user.email,
+                                displayName: result.user.displayName,
+                                photoURL: result.user.photoURL
+                            });
                             // リダイレクト後のデータ読み込み
                             this.loadUserData();
+                        } else {
+                            console.log('🔐 リダイレクト結果なし（初回アクセスまたはログインしていない状態）');
                         }
                     })
                     .catch((error) => {
-                        console.error('リダイレクトログインエラー:', error);
+                        console.error('🔐 リダイレクトログインエラー詳細:', {
+                            code: error.code,
+                            message: error.message,
+                            stack: error.stack,
+                            name: error.name
+                        });
                     });
+            } else {
+                console.warn('🔐 getRedirectResult関数が利用できません');
             }
         }
     }
@@ -565,17 +594,35 @@ class HabitTracker {
     // Googleログイン（リダイレクト方式）
     async signInWithGoogle() {
         try {
+            console.log('🔐 signInWithGoogle関数が呼び出されました');
+            console.log('🔐 Firebase認証オブジェクトの状態:', {
+                auth: window.firebaseAuth,
+                provider: window.firebaseProvider,
+                signInRedirect: typeof window.firebaseSignInRedirect
+            });
+            
             if (typeof window.firebaseSignInRedirect === 'function') {
-                console.log('リダイレクト方式でログインを開始します...');
+                console.log('🔐 リダイレクト開始...');
+                console.log('🔐 認証オブジェクト:', window.firebaseAuth);
+                console.log('🔐 プロバイダーオブジェクト:', window.firebaseProvider);
+                
                 await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
+                console.log('🔐 リダイレクト実行完了（ページがリダイレクトされます）');
                 // リダイレクトの場合は結果は別途処理される
                 return null;
             } else {
-                console.error('Firebase認証が利用できません');
+                console.error('🔐 Firebase認証が利用できません');
+                console.error('🔐 利用可能な関数:', Object.keys(window).filter(key => key.includes('firebase')));
+                alert('Firebase認証が利用できません。ページを再読み込みしてください。');
             }
         } catch (error) {
-            console.error('ログインエラー:', error);
-            alert('ログインに失敗しました: ' + error.message);
+            console.error('🔐 ログインエラー詳細:', {
+                code: error.code,
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+            alert(`ログインに失敗しました: ${error.code} - ${error.message}`);
         }
     }
 
@@ -3110,7 +3157,14 @@ class HabitTracker {
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         if (loginBtn) {
-            loginBtn.addEventListener('click', () => this.signInWithGoogle());
+            loginBtn.addEventListener('click', () => {
+                console.log('🔐 ログインボタンがクリックされました');
+                console.log('🔐 現在の認証状態:', this.currentUser ? 'ログイン済み' : '未ログイン');
+                console.log('🔐 Firebase認証オブジェクト:', window.firebaseAuth);
+                console.log('🔐 Firebaseプロバイダー:', window.firebaseProvider);
+                console.log('🔐 signInWithRedirect関数:', typeof window.firebaseSignInRedirect);
+                this.signInWithGoogle();
+            });
         }
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => this.signOut());
