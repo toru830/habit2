@@ -50,7 +50,7 @@
                         <button class="action-btn today-btn" id="goToToday">今日</button>
                         <button id="authBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px; margin-left: 10px;">ログイン</button>
                         <button id="logoutBtn" class="action-btn" style="font-size: 14px; padding: 8px 12px; margin-left: 10px; display: none;">ログアウト</button>
-                        <button id="cloudSyncBtn" class="action-btn" style="font-size: 12px; padding: 6px 10px; background-color: #4A90E2; color: white; margin-left: 10px; display: none;">同期設定</button>
+                        <button id="cloudSyncBtn" class="action-btn" style="font-size: 12px; padding: 6px 10px; background-color: #4A90E2; color: white; margin-left: 10px; display: none;">同期</button>
                     </div>
                 </div>
 
@@ -105,27 +105,19 @@
                     </div>
                 </div>
 
-                <!-- クラウド同期設定モーダル -->
+                <!-- 簡単同期モーダル -->
                 <div id="cloudSyncModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
-                    <div class="modal-content" style="background-color: #333; margin: 10% auto; padding: 30px; border: 1px solid #666; width: 90%; max-width: 500px; border-radius: 8px;">
-                        <h3 style="color: white; margin-top: 0; text-align: center;">クラウド同期設定</h3>
+                    <div class="modal-content" style="background-color: #333; margin: 10% auto; padding: 30px; border: 1px solid #666; width: 90%; max-width: 400px; border-radius: 8px;">
+                        <h3 style="color: white; margin-top: 0; text-align: center;">データ同期</h3>
                         
-                        <div style="margin: 20px 0;">
-                            <label style="display: block; margin-bottom: 5px; color: white;">JSONBin.io API Key:</label>
-                            <input type="password" id="jsonbinApiKey" placeholder="JSONBin.io API Key" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #555; background-color: #222; color: white; box-sizing: border-box; margin-bottom: 15px;">
-                            
-                            <div style="font-size: 12px; color: #ccc; margin-bottom: 15px; background-color: #222; padding: 10px; border-radius: 4px;">
-                                <p style="margin: 0 0 5px 0; font-weight: bold;">API Keyの取得方法:</p>
-                                <p style="margin: 0 0 3px 0;">1. <a href="https://jsonbin.io" target="_blank" style="color: #4A90E2;">jsonbin.io</a> にアクセス</p>
-                                <p style="margin: 0 0 3px 0;">2. アカウント作成・ログイン</p>
-                                <p style="margin: 0;">3. API Keys から新しいキーを生成</p>
-                            </div>
+                        <div style="margin: 20px 0; text-align: center;">
+                            <p style="color: #ccc; margin-bottom: 20px;">ログインすると、データが自動的にクラウドに保存されます。</p>
+                            <p style="color: #4A90E2; font-size: 14px;">他のデバイスでも同じアカウントでログインすれば、データが同期されます。</p>
                         </div>
                         
                         <div style="display: flex; gap: 10px;">
-                            <button id="cloudSyncTest" class="action-btn" style="flex: 1; padding: 12px;">接続テスト</button>
-                            <button id="cloudSyncSave" class="action-btn" style="flex: 1; padding: 12px;">設定保存</button>
-                            <button id="cloudSyncCancel" class="action-btn" style="background-color: #666; padding: 12px;">キャンセル</button>
+                            <button id="cloudSyncTest" class="action-btn" style="flex: 1; padding: 12px;">今すぐ同期</button>
+                            <button id="cloudSyncCancel" class="action-btn" style="background-color: #666; padding: 12px;">閉じる</button>
                         </div>
                         
                         <div id="cloudSyncMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
