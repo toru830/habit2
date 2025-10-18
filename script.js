@@ -526,85 +526,19 @@ class HabitTracker {
     // GitHub API連携の設定
     setupGitHubSync() {
         console.log('🔐 GitHub API連携設定開始...');
-        console.log('🔐 利用可能なFirebase関数:', {
-            onAuthStateChanged: typeof window.firebaseOnAuthStateChanged,
-            getRedirectResult: typeof window.firebaseGetRedirectResult,
-            auth: window.firebaseAuth
-        });
         
-        if (typeof window.firebaseOnAuthStateChanged === 'function' && window.firebaseAuth) {
-            console.log('🔐 認証状態監視を開始...');
-            window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
-                console.log('🔐 認証状態変更:', user ? 'ログイン' : 'ログアウト');
-                this.currentUser = user;
+        // 保存されたGitHub設定を読み込み
+        if (window.githubSync) {
+            const hasConfig = window.githubSync.loadConfig();
+            if (hasConfig) {
+                this.githubUser = window.githubSync.username;
                 this.updateAuthUI();
-                
-                if (user) {
-                    console.log('🔐 ユーザーがログインしました:', {
-                        uid: user.uid,
-                        email: user.email,
-                        displayName: user.displayName,
-                        photoURL: user.photoURL
-                    });
-                    this.loadUserData();
-                } else {
-                    console.log('🔐 ユーザーがログアウトしました');
-                }
-            });
-            
-            // リダイレクト結果の処理
-            if (typeof window.firebaseGetRedirectResult === 'function') {
-                console.log('🔐 リダイレクト結果を確認中...');
-                window.firebaseGetRedirectResult(window.firebaseAuth)
-                    .then((result) => {
-                        console.log('🔐 リダイレクト結果詳細:', {
-                            result: result,
-                            hasResult: !!result,
-                            hasUser: !!(result && result.user),
-                            user: result ? result.user : null,
-                            credential: result ? result.credential : null,
-                            operationType: result ? result.operationType : null
-                        });
-                        
-                        if (result && result.user) {
-                            console.log('🔐 リダイレクトログイン成功:', result.user);
-                            console.log('🔐 ユーザー情報:', {
-                                uid: result.user.uid,
-                                email: result.user.email,
-                                displayName: result.user.displayName,
-                                photoURL: result.user.photoURL
-                            });
-                            
-                            // ユーザー状態を更新
-                            this.currentUser = result.user;
-                            this.isGuestMode = false; // ゲストモードを終了
-                            this.updateAuthUI();
-                            
-                            // リダイレクト後のデータ読み込み
-                            this.loadUserData().then(() => {
-                                alert('Googleログインが完了しました！');
-                            });
-                        } else {
-                            console.log('🔐 リダイレクト結果なし（初回アクセスまたはログインしていない状態）');
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('🔐 リダイレクトログインエラー詳細:', {
-                            code: error.code,
-                            message: error.message,
-                            stack: error.stack,
-                            name: error.name
-                        });
-                    });
-            } else {
-                console.warn('🔐 getRedirectResult関数が利用できません');
+                console.log('🔐 保存されたGitHub設定を読み込みました:', this.githubUser);
             }
-        } else {
-            console.error('🔐 Firebase認証が利用できません:', {
-                onAuthStateChanged: typeof window.firebaseOnAuthStateChanged,
-                auth: window.firebaseAuth
-            });
         }
+        
+        // オフライン時の同期チェック
+        this.checkSyncStatus();
     }
 
     // 認証UIの更新
@@ -716,93 +650,15 @@ class HabitTracker {
         }
     }
 
-    // メール/パスワードでサインアップ
-    async signUpWithEmail(email, password) {
-        try {
-            console.log('🔐 メールでサインアップ開始:', email);
-            console.log('🔐 Firebase認証オブジェクト確認:', {
-                auth: !!window.firebaseAuth,
-                createUser: typeof window.firebaseCreateUserWithEmailAndPassword
-            });
-            
-            if (!window.firebaseAuth || !window.firebaseCreateUserWithEmailAndPassword) {
-                throw new Error('Firebase認証が利用できません');
-            }
-            
-            const userCredential = await window.firebaseCreateUserWithEmailAndPassword(window.firebaseAuth, email, password);
-            console.log('🔐 サインアップ成功:', userCredential.user);
-            console.log('🔐 ユーザー情報:', {
-                uid: userCredential.user.uid,
-                email: userCredential.user.email,
-                emailVerified: userCredential.user.emailVerified
-            });
-            return userCredential.user;
-        } catch (error) {
-            console.error('🔐 サインアップエラー詳細:', {
-                code: error.code,
-                message: error.message,
-                stack: error.stack
-            });
-            
-            let errorMessage = 'サインアップに失敗しました: ';
-            if (error.code === 'auth/email-already-in-use') {
-                errorMessage += 'このメールアドレスは既に使用されています。';
-            } else if (error.code === 'auth/weak-password') {
-                errorMessage += 'パスワードが弱すぎます。6文字以上で入力してください。';
-            } else if (error.code === 'auth/invalid-email') {
-                errorMessage += 'メールアドレスの形式が正しくありません。';
-            } else {
-                errorMessage += error.message;
-            }
-            
-            alert(errorMessage);
-            throw error;
-        }
-    }
-
-    // メール/パスワードでログイン
-    async loginWithEmail(email, password) {
-        try {
-            console.log('🔐 メールでログイン開始:', email);
-            console.log('🔐 Firebase認証オブジェクト確認:', {
-                auth: !!window.firebaseAuth,
-                signIn: typeof window.firebaseSignInWithEmailAndPassword
-            });
-            
-            if (!window.firebaseAuth || !window.firebaseSignInWithEmailAndPassword) {
-                throw new Error('Firebase認証が利用できません');
-            }
-            
-            const userCredential = await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, email, password);
-            console.log('🔐 ログイン成功:', userCredential.user);
-            console.log('🔐 ユーザー情報:', {
-                uid: userCredential.user.uid,
-                email: userCredential.user.email,
-                emailVerified: userCredential.user.emailVerified
-            });
-            return userCredential.user;
-        } catch (error) {
-            console.error('🔐 ログインエラー詳細:', {
-                code: error.code,
-                message: error.message,
-                stack: error.stack
-            });
-            
-            let errorMessage = 'ログインに失敗しました: ';
-            if (error.code === 'auth/user-not-found') {
-                errorMessage += 'このメールアドレスは登録されていません。';
-            } else if (error.code === 'auth/wrong-password') {
-                errorMessage += 'パスワードが間違っています。';
-            } else if (error.code === 'auth/invalid-email') {
-                errorMessage += 'メールアドレスの形式が正しくありません。';
-            } else if (error.code === 'auth/too-many-requests') {
-                errorMessage += 'ログイン試行回数が多すぎます。しばらく待ってから再試行してください。';
-            } else {
-                errorMessage += error.message;
-            }
-            
-            alert(errorMessage);
-            throw error;
+    // 同期状態をチェック
+    checkSyncStatus() {
+        console.log('🔐 同期状態をチェック中...');
+        if (this.githubUser) {
+            console.log('🔐 GitHub連携済み:', this.githubUser);
+        } else if (this.isGuestMode) {
+            console.log('🔐 ゲストモード中');
+        } else {
+            console.log('🔐 未連携状態');
         }
     }
 
@@ -3436,81 +3292,8 @@ class HabitTracker {
         
         // 少し遅延してボタンが確実に存在することを確認
         setTimeout(() => {
-            console.log('🔐 認証ボタン要素を検索中...');
-            const loginBtn = document.getElementById('loginBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const emailInput = document.getElementById('emailInput');
-            const passwordInput = document.getElementById('passwordInput');
-            const emailSignUpBtn = document.getElementById('emailSignUpBtn');
-            const emailLoginBtn = document.getElementById('emailLoginBtn');
+            console.log('🔐 GitHub連携ボタン要素を検索中...');
             
-            console.log('🔐 認証ボタン要素検索結果:', {
-                loginBtn: !!loginBtn,
-                logoutBtn: !!logoutBtn,
-                emailInput: !!emailInput,
-                passwordInput: !!passwordInput,
-                emailSignUpBtn: !!emailSignUpBtn,
-                emailLoginBtn: !!emailLoginBtn
-            });
-            
-            // loginBtnの詳細情報を出力
-            if (loginBtn) {
-                console.log('🔐 loginBtn詳細情報:', {
-                    id: loginBtn.id,
-                    className: loginBtn.className,
-                    textContent: loginBtn.textContent,
-                    style: loginBtn.style.cssText,
-                    display: getComputedStyle(loginBtn).display,
-                    visibility: getComputedStyle(loginBtn).visibility
-                });
-            } else {
-                console.error('🔐 loginBtnが見つかりません！');
-                console.error('🔐 利用可能な要素:', document.querySelectorAll('button[id*="login"]'));
-            }
-            
-            console.log('🔐 ログインボタン要素:', loginBtn);
-            console.log('🔐 ログアウトボタン要素:', logoutBtn);
-            console.log('🔐 メールサインアップボタン要素:', emailSignUpBtn);
-            console.log('🔐 メールログインボタン要素:', emailLoginBtn);
-            
-            if (loginBtn) {
-                console.log('🔐 ログインボタンのイベントリスナーを追加中...');
-                console.log('🔐 ログインボタン要素詳細:', {
-                    id: loginBtn.id,
-                    className: loginBtn.className,
-                    textContent: loginBtn.textContent,
-                    style: loginBtn.style.cssText
-                });
-                
-                // 既存のイベントリスナーを削除（重複防止）
-                loginBtn.removeEventListener('click', this.handleLoginClick);
-                
-                // 新しいイベントリスナーを追加
-                this.handleLoginClick = (event) => {
-                    console.log('🔐 ログインボタンがクリックされました！');
-                    alert('テスト: Googleログインボタンがクリックされました！');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('🔐 現在の認証状態:', this.currentUser ? 'ログイン済み' : '未ログイン');
-                    console.log('🔐 Firebase認証オブジェクト:', window.firebaseAuth);
-                    console.log('🔐 Firebaseプロバイダー:', window.firebaseProvider);
-                    console.log('🔐 signInWithRedirect関数:', typeof window.firebaseSignInRedirect);
-                    this.signInWithGoogle();
-                };
-                
-                loginBtn.addEventListener('click', this.handleLoginClick);
-                console.log('🔐 ログインボタンのイベントリスナー追加完了');
-            } else {
-                console.error('🔐 ログインボタンが見つかりません！');
-            }
-            
-            if (logoutBtn) {
-                console.log('🔐 ログアウトボタンのイベントリスナーを追加中...');
-                logoutBtn.addEventListener('click', () => this.signOut());
-                console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
-            } else {
-                console.warn('🔐 ログアウトボタンが見つかりません');
-            }
 
             // GitHub連携ボタン
             const githubConnectBtn = document.getElementById('githubConnectBtn');
