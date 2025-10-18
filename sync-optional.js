@@ -51,11 +51,11 @@ class OptionalSyncManager {
     async enableSync() {
         try {
             console.log('手動同期機能を有効化中...');
-            // 同期マネージャーを動的インポート
-            const syncModule = await import('./sync-manager.js');
-            this.syncManager = syncModule.syncManager;
-            this.isEnabled = true;
-            console.log('手動同期機能が有効になりました');
+            // 同期マネージャーを動的インポート（一時的に無効化）
+            // const syncModule = await import('./sync-manager.js');
+            // this.syncManager = syncModule.syncManager;
+            this.isEnabled = false; // 完全に無効化
+            console.log('同期機能は完全に無効化されています');
             
             // リアルタイム同期は無効化（手動同期のみ）
             console.log('リアルタイム同期は無効化されています');
