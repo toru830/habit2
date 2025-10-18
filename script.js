@@ -528,6 +528,8 @@ class HabitTracker {
                     .then((result) => {
                         if (result && result.user) {
                             console.log('リダイレクトログイン成功:', result.user);
+                            // リダイレクト後のデータ読み込み
+                            this.loadUserData();
                         }
                     })
                     .catch((error) => {
@@ -554,31 +556,20 @@ class HabitTracker {
             // ログアウト状態：ログインボタンを表示、ログアウトボタンを非表示
             if (loginBtn) {
                 loginBtn.style.display = 'inline-block';
-                loginBtn.textContent = 'Googleでログイン';
+                loginBtn.textContent = 'Googleでログイン（リダイレクト）';
             }
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
     }
 
-    // Googleログイン
+    // Googleログイン（リダイレクト方式）
     async signInWithGoogle() {
         try {
-            if (typeof window.firebaseSignIn === 'function') {
-                // まずポップアップで試行
-                try {
-                    const result = await window.firebaseSignIn(window.firebaseAuth, window.firebaseProvider);
-                    console.log('ログイン成功:', result.user);
-                    return result.user;
-                } catch (popupError) {
-                    // ポップアップが失敗した場合はリダイレクトを使用
-                    if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user') {
-                        console.log('ポップアップがブロックされました。リダイレクトを使用します。');
-                        await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
-                        return null; // リダイレクトの場合は結果は別途処理
-                    } else {
-                        throw popupError;
-                    }
-                }
+            if (typeof window.firebaseSignInRedirect === 'function') {
+                console.log('リダイレクト方式でログインを開始します...');
+                await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
+                // リダイレクトの場合は結果は別途処理される
+                return null;
             } else {
                 console.error('Firebase認証が利用できません');
             }
