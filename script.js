@@ -606,24 +606,36 @@ class HabitTracker {
             // ログアウト状態：ログインボタンを表示、ログアウトボタンを非表示
             if (loginBtn) {
                 loginBtn.style.display = 'inline-block';
-                loginBtn.textContent = 'Googleでログイン（リダイレクト）';
+                loginBtn.textContent = 'Googleでログイン（ポップアップ）';
             }
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
     }
 
-    // Googleログイン（リダイレクト方式）
+    // Googleログイン（ポップアップ方式に一時的に切り替え）
     async signInWithGoogle() {
         try {
             console.log('🔐 signInWithGoogle関数が呼び出されました');
             console.log('🔐 Firebase認証オブジェクトの状態:', {
                 auth: window.firebaseAuth,
                 provider: window.firebaseProvider,
+                signInPopup: typeof window.firebaseSignIn,
                 signInRedirect: typeof window.firebaseSignInRedirect
             });
             
-            if (typeof window.firebaseSignInRedirect === 'function' && window.firebaseAuth && window.firebaseProvider) {
-                console.log('🔐 リダイレクト開始...');
+            // まずポップアップ方式を試行
+            if (typeof window.firebaseSignIn === 'function' && window.firebaseAuth && window.firebaseProvider) {
+                console.log('🔐 ポップアップ方式でログイン開始...');
+                console.log('🔐 認証オブジェクト:', window.firebaseAuth);
+                console.log('🔐 プロバイダーオブジェクト:', window.firebaseProvider);
+                
+                const result = await window.firebaseSignIn(window.firebaseAuth, window.firebaseProvider);
+                console.log('🔐 ポップアップログイン成功:', result.user);
+                return result.user;
+            } 
+            // ポップアップが失敗した場合はリダイレクト方式を試行
+            else if (typeof window.firebaseSignInRedirect === 'function' && window.firebaseAuth && window.firebaseProvider) {
+                console.log('🔐 リダイレクト方式でログイン開始...');
                 console.log('🔐 認証オブジェクト:', window.firebaseAuth);
                 console.log('🔐 プロバイダーオブジェクト:', window.firebaseProvider);
                 
@@ -633,7 +645,6 @@ class HabitTracker {
                 
                 await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
                 console.log('🔐 リダイレクト実行完了（ページがリダイレクトされます）');
-                // リダイレクトの場合は結果は別途処理される
                 return null;
             } else {
                 console.error('🔐 Firebase認証が利用できません');
@@ -647,7 +658,20 @@ class HabitTracker {
                 stack: error.stack,
                 name: error.name
             });
-            alert(`ログインに失敗しました: ${error.code} - ${error.message}`);
+            
+            // ポップアップがブロックされた場合はリダイレクトを試行
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+                console.log('🔐 ポップアップがブロックされました。リダイレクト方式を試行します。');
+                try {
+                    await window.firebaseSignInRedirect(window.firebaseAuth, window.firebaseProvider);
+                    return null;
+                } catch (redirectError) {
+                    console.error('🔐 リダイレクトも失敗:', redirectError);
+                    alert(`ログインに失敗しました: ${redirectError.message}`);
+                }
+            } else {
+                alert(`ログインに失敗しました: ${error.code} - ${error.message}`);
+            }
         }
     }
 
