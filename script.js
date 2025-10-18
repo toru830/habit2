@@ -556,29 +556,21 @@ class HabitTracker {
             }
             
             // 真のマルチデバイス同期：メールアドレスベースでデータを探す
-            const allUsers = JSON.parse(localStorage.getItem('habit_users') || '{}');
-            
-            // 同じメールアドレスの他のデバイスのデータを探す
-            for (const [email, userInfo] of Object.entries(allUsers)) {
-                if (email === this.currentUser.email && userInfo.id !== this.currentUser.id) {
-                    const otherUserData = localStorage.getItem(`habit_data_${userInfo.id}`);
-                    if (otherUserData) {
-                        const otherData = JSON.parse(otherUserData);
-                        if (otherData.email === this.currentUser.email) {
-                            // 同じメールアドレスのデータが見つかった場合、マージ
-                            this.completedHabits = { ...this.completedHabits, ...otherData.completedHabits };
-                            this.healthData = { ...this.healthData, ...otherData.healthData };
-                            this.achievements = { ...this.achievements, ...otherData.achievements };
-                            
-                            // ローカルストレージに保存
-                            this.saveCompletedHabits();
-                            this.saveHealthData();
-                            this.saveAchievements();
-                            
-                            console.log('🔐 他のデバイスからデータを同期しました');
-                            break;
-                        }
-                    }
+            const emailData = localStorage.getItem(`habit_data_email_${this.currentUser.email}`);
+            if (emailData) {
+                const emailUserData = JSON.parse(emailData);
+                if (emailUserData.email === this.currentUser.email) {
+                    // 同じメールアドレスのデータが見つかった場合、マージ
+                    this.completedHabits = { ...this.completedHabits, ...emailUserData.completedHabits };
+                    this.healthData = { ...this.healthData, ...emailUserData.healthData };
+                    this.achievements = { ...this.achievements, ...emailUserData.achievements };
+                    
+                    // ローカルストレージに保存
+                    this.saveCompletedHabits();
+                    this.saveHealthData();
+                    this.saveAchievements();
+                    
+                    console.log('🔐 メールアドレスベースでデータを同期しました');
                 }
             }
             
@@ -1181,7 +1173,7 @@ class HabitTracker {
         }
     }
 
-    // データの保存（マルチデバイス対応）
+    // データの保存（真のマルチデバイス対応）
     async saveUserData() {
         if (!this.currentUser) return;
 
@@ -1198,16 +1190,20 @@ class HabitTracker {
             // ローカルストレージに保存
             localStorage.setItem(`habit_data_${this.currentUser.id}`, JSON.stringify(userData));
             
-            // マルチデバイス同期：同じメールアドレスの他のデバイスにも保存
+            // 真のマルチデバイス同期：メールアドレスベースでデータを共有
             const allUsers = JSON.parse(localStorage.getItem('habit_users') || '{}');
+            
+            // 同じメールアドレスの他のデバイスにも保存
             for (const [email, userInfo] of Object.entries(allUsers)) {
                 if (email === this.currentUser.email && userInfo.id !== this.currentUser.id) {
-                    // 同じメールアドレスの他のユーザーIDにも保存
                     localStorage.setItem(`habit_data_${userInfo.id}`, JSON.stringify(userData));
                 }
             }
             
-            console.log('🔐 マルチデバイス対応でデータを保存しました');
+            // メールアドレスベースでデータを保存（デバイス間共有用）
+            localStorage.setItem(`habit_data_email_${this.currentUser.email}`, JSON.stringify(userData));
+            
+            console.log('🔐 真のマルチデバイス対応でデータを保存しました');
             
         } catch (error) {
             console.error('データ保存エラー:', error);
