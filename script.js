@@ -402,6 +402,9 @@ class HabitTracker {
         this.setupMonthlyCalendarEvents();
         // 同期機能を完全に無効化（データ消失を防ぐため）
         console.log('同期機能は完全に無効化されています');
+        
+        // 初期化時に認証UIを更新
+        this.updateAuthUI();
     }
     
     // データ管理機能の設定
@@ -540,10 +543,19 @@ class HabitTracker {
         const logoutBtn = document.getElementById('logoutBtn');
         
         if (this.currentUser) {
+            // ログイン状態：ログインボタンを非表示、ログアウトボタンを表示
             if (loginBtn) loginBtn.style.display = 'none';
-            if (logoutBtn) logoutBtn.style.display = 'inline-block';
+            if (logoutBtn) {
+                logoutBtn.style.display = 'inline-block';
+                // ユーザー名を表示
+                logoutBtn.textContent = `ログアウト (${this.currentUser.displayName || this.currentUser.email})`;
+            }
         } else {
-            if (loginBtn) loginBtn.style.display = 'inline-block';
+            // ログアウト状態：ログインボタンを表示、ログアウトボタンを非表示
+            if (loginBtn) {
+                loginBtn.style.display = 'inline-block';
+                loginBtn.textContent = 'Googleでログイン';
+            }
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
     }
