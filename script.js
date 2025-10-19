@@ -1,5 +1,5 @@
 // JSONBin.io API設定
-const JSONBIN_API_URL = 'https://api.jsonbin.io/v3/b';
+const JSONBIN_API_URL = 'https://api.jsonbin.io/v3/bins';
 const JSONBIN_API_KEY = '$2a$10$YOUR_ACTUAL_API_KEY_HERE'; // 実際のAPIキーに置き換え
 
 // APIキー設定関数
@@ -1123,19 +1123,70 @@ class HabitTracker {
             console.log('🔑 APIキーテスト開始:', apiKey.substring(0, 10) + '...');
             this.updateDebugInfo('APIキーテスト中...');
             
-            // まず、より簡単なテストを実行
-            const response = await fetch(`${JSONBIN_API_URL}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': apiKey
-                },
-                body: JSON.stringify({ 
-                    test: true, 
-                    timestamp: new Date().toISOString(),
-                    message: 'JSONBin.io API接続テスト'
-                })
+            // まず、APIキーの形式をチェック
+            if (!apiKey.startsWith('$2a$10$')) {
+                this.updateDebugInfo('❌ APIキー形式が正しくありません');
+                this.showApiKeyMessage('❌ APIキーは「$2a$10$」で始まる必要があります', true);
+                return false;
+            }
+            
+            // より簡単なテストを実行 - 最小限のデータで
+            const testData = { 
+                test: true,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('🔑 送信データ:', testData);
+            console.log('🔑 APIエンドポイント:', JSONBIN_API_URL);
+            console.log('🔑 使用ヘッダー:', {
+                'Content-Type': 'application/json',
+                'X-Master-Key': apiKey.substring(0, 10) + '...'
             });
+            
+            // 複数のエンドポイントを試す
+            const endpoints = [
+                'https://api.jsonbin.io/v3/bins',
+                'https://api.jsonbin.io/v3/b',
+                'https://api.jsonbin.io/v3/bins/'
+            ];
+            
+            let response = null;
+            let workingEndpoint = null;
+            
+            for (const endpoint of endpoints) {
+                try {
+                    console.log(`🔑 エンドポイントをテスト中: ${endpoint}`);
+                    response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': apiKey
+                        },
+                        body: JSON.stringify(testData)
+                    });
+                    
+                    console.log(`🔑 ${endpoint} レスポンス:`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        ok: response.ok
+                    });
+                    
+                    if (response.ok) {
+                        workingEndpoint = endpoint;
+                        break;
+                    }
+                } catch (error) {
+                    console.log(`🔑 ${endpoint} エラー:`, error.message);
+                }
+            }
+            
+            if (!workingEndpoint) {
+                this.updateDebugInfo('❌ すべてのエンドポイントでエラーが発生しました');
+                this.showApiKeyMessage('❌ APIエンドポイントに問題があります', true);
+                return false;
+            }
+            
+            console.log(`🔑 動作するエンドポイント: ${workingEndpoint}`);
 
             console.log('🔑 APIレスポンス:', {
                 status: response.status,
@@ -1148,6 +1199,7 @@ class HabitTracker {
                 let errorData = {};
                 try {
                     errorData = await response.json();
+                    console.log('🔑 エラーレスポンス詳細:', errorData);
                 } catch (e) {
                     console.log('🔑 エラーレスポンスの解析に失敗:', e);
                 }
