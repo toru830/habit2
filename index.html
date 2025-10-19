@@ -16,10 +16,55 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijk2IiBmaWxsPSIjMDAwMDAwIi8+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijg0IiBmaWxsPSIjNEE5MEUyIi8+CjxzdmcgeD0iNDgiIHk9IjQ4IiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik03MiA0OEw0OCA3Mkw2MCA4NCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPGNpcmNsZSBjeD0iNzIiIGN5PSI3MiIgcj0iMTIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+Cjwvc3ZnPgo=">
-    <link rel="stylesheet" href="styles.css?v=20250101410000">
+    <link rel="stylesheet" href="styles.css?v=20250101420000">
     
-    <!-- QRコード生成ライブラリ -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- QRコード生成ライブラリ（複数CDN対応） -->
+    <script>
+        // QRCodeライブラリの読み込み確認とフォールバック
+        function loadQRCodeLibrary() {
+            return new Promise((resolve, reject) => {
+                if (typeof QRCode !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
+                const cdnUrls = [
+                    'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+                    'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+                    'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js'
+                ];
+                
+                let currentIndex = 0;
+                
+                function tryLoadScript() {
+                    if (currentIndex >= cdnUrls.length) {
+                        reject(new Error('すべてのCDNからQRCodeライブラリの読み込みに失敗しました'));
+                        return;
+                    }
+                    
+                    const script = document.createElement('script');
+                    script.src = cdnUrls[currentIndex];
+                    script.onload = () => {
+                        console.log('✅ QRCodeライブラリを読み込みました:', cdnUrls[currentIndex]);
+                        resolve();
+                    };
+                    script.onerror = () => {
+                        console.warn('⚠️ CDN読み込み失敗:', cdnUrls[currentIndex]);
+                        currentIndex++;
+                        tryLoadScript();
+                    };
+                    document.head.appendChild(script);
+                }
+                
+                tryLoadScript();
+            });
+        }
+        
+        // ページ読み込み時にQRCodeライブラリを読み込み
+        loadQRCodeLibrary().catch(error => {
+            console.error('❌ QRCodeライブラリの読み込みに失敗:', error);
+        });
+    </script>
 </head>
 <body>
     <div class="app-container">
@@ -160,9 +205,9 @@
                                     <strong>デバッグ情報:</strong><br>
                                     <span id="debugInfo">APIキーを入力してテストボタンを押してください</span>
                                 </div>
-                            </div>
-                        </div>
-                        
+                    </div>
+                </div>
+
                         <div style="display: flex; gap: 10px; justify-content: space-between;">
                             <button id="saveApiKey" class="action-btn" style="flex: 1; padding: 12px; margin-right: 5px; background-color: #28a745;">保存</button>
                             <button id="testApiKey" class="action-btn" style="flex: 1; padding: 12px; margin: 0 5px; background-color: #17a2b8;">テスト</button>
@@ -740,6 +785,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=20250101410000"></script>
+    <script src="script.js?v=20250101420000"></script>
 </body>
 </html>

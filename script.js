@@ -40,10 +40,19 @@ class QRSyncManager {
     // QRコードを生成してCanvasに描画
     async generateQRCode(canvasId, data) {
         try {
+            console.log('🔍 QRコード生成開始:', { canvasId, dataLength: data.length });
+            
+            // QRCodeライブラリの存在確認
+            if (typeof QRCode === 'undefined') {
+                throw new Error('QRCodeライブラリが読み込まれていません');
+            }
+            
             const canvas = document.getElementById(canvasId);
             if (!canvas) {
                 throw new Error('Canvas要素が見つかりません');
             }
+
+            console.log('🔍 Canvas要素を確認:', canvas);
 
             // QRコードを生成
             await QRCode.toCanvas(canvas, data, {
@@ -58,6 +67,11 @@ class QRSyncManager {
             console.log('✅ QRコードを生成しました');
         } catch (error) {
             console.error('❌ QRコード生成エラー:', error);
+            console.error('❌ エラー詳細:', {
+                message: error.message,
+                stack: error.stack,
+                QRCodeAvailable: typeof QRCode !== 'undefined'
+            });
             throw error;
         }
     }
@@ -1795,15 +1809,64 @@ class HabitTracker {
                 // データをQRコード用にエクスポート
                 const qrData = await qrSyncManager.exportToQR();
                 
+                // QRCodeライブラリの読み込みを待つ
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                while (typeof QRCode === 'undefined' && attempts < maxAttempts) {
+                    console.log(`🔍 QRCodeライブラリの読み込み待機中... (${attempts + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    attempts++;
+                }
+                
+                if (typeof QRCode === 'undefined') {
+                    console.warn('⚠️ QRCodeライブラリが読み込まれていません。代替手段を使用します。');
+                    this.showQRExportFallback(qrData);
+                    return;
+                }
+                
                 // QRコードを生成
                 await qrSyncManager.generateQRCode('qrCodeCanvas', qrData);
                 
                 console.log('✅ QRコードエクスポートモーダルを表示しました');
             } catch (error) {
                 console.error('❌ QRコード生成エラー:', error);
-                alert('QRコードの生成に失敗しました');
+                this.showQRExportFallback(qrData);
             }
         }
+    }
+
+    // QRコード生成失敗時の代替手段
+    showQRExportFallback(qrData) {
+        const canvas = document.getElementById('qrCodeCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 200, 200);
+            ctx.fillStyle = '#000000';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('QRコード生成エラー', 100, 80);
+            ctx.fillText('下記のURLをコピーして', 100, 100);
+            ctx.fillText('他のデバイスで開いてください', 100, 120);
+        }
+        
+        // テキストエリアにURLを表示
+        const modal = document.getElementById('qrExportModal');
+        if (modal) {
+            let textArea = modal.querySelector('#qrDataTextArea');
+            if (!textArea) {
+                textArea = document.createElement('textarea');
+                textArea.id = 'qrDataTextArea';
+                textArea.style.cssText = 'width: 100%; height: 80px; margin: 10px 0; padding: 10px; border: 1px solid #666; border-radius: 4px; background-color: #222; color: #fff; font-size: 12px; resize: vertical;';
+                textArea.placeholder = 'QRコード生成に失敗しました。下記のURLをコピーして他のデバイスで開いてください。';
+                modal.querySelector('.modal-content').insertBefore(textArea, modal.querySelector('.modal-content').lastElementChild);
+            }
+            textArea.value = qrData;
+            textArea.select();
+        }
+        
+        alert('QRコード生成に失敗しました。\n\n代替手段として、表示されたURLをコピーして他のデバイスで開いてください。');
     }
 
     // QRコードエクスポートモーダルを非表示
