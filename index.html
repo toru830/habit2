@@ -16,7 +16,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijk2IiBmaWxsPSIjMDAwMDAwIi8+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijg0IiBmaWxsPSIjNEE5MEUyIi8+CjxzdmcgeD0iNDgiIHk9IjQ4IiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik03MiA0OEw0OCA3Mkw2MCA4NCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPGNpcmNsZSBjeD0iNzIiIGN5PSI3MiIgcj0iMTIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+Cjwvc3ZnPgo=">
-    <link rel="stylesheet" href="styles.css?v=20250101220000">
+    <link rel="stylesheet" href="styles.css?v=20250101230000">
     
     <!-- クラウド同期 -->
     <script src="cloud-sync.js"></script>
@@ -113,20 +113,35 @@
                         <h3 style="color: white; margin-top: 0; text-align: center;">データ同期</h3>
                         
                         <div style="margin: 20px 0;">
-                            <p style="color: #ccc; margin-bottom: 15px;">現在のデータを他のデバイスと同期するには：</p>
+                            <div style="background-color: #ff6b6b; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ff4757;">
+                                <h4 style="color: #fff; margin-top: 0;">⚠️ 重要な注意</h4>
+                                <p style="color: #fff; font-size: 14px; margin: 5px 0; font-weight: bold;">PCとスマホは別々のデータベースです！</p>
+                                <p style="color: #fff; font-size: 13px; margin: 5px 0;">PCでアカウントを作成しても、スマホでは自動的に同期されません。</p>
+                                <p style="color: #fff; font-size: 13px; margin: 5px 0;">データを共有するには、以下の手順が必要です。</p>
+                            </div>
                             
                             <div style="background-color: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                                <h4 style="color: #ffc107; margin-top: 0;">💾 データエクスポート/インポート（推奨）</h4>
-                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">1. PCで「データをエクスポート」をクリック</p>
-                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">2. JSONファイルをスマホに転送（メール、クラウドストレージ等）</p>
-                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">3. スマホで「データをインポート」をクリック</p>
-                                <p style="color: #28a745; font-size: 12px; margin: 5px 0;">✅ ブラウザキャッシュをクリアしてもデータは消えません</p>
+                                <h4 style="color: #ffc107; margin-top: 0;">💾 データ同期手順（必須）</h4>
+                                <div style="background-color: #333; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                                    <p style="color: #fff; font-size: 14px; margin: 5px 0; font-weight: bold;">📱 PC → スマホ の同期</p>
+                                    <p style="color: #ccc; font-size: 13px; margin: 3px 0;">1. PCでログイン後、「データをエクスポート」をクリック</p>
+                                    <p style="color: #ccc; font-size: 13px; margin: 3px 0;">2. ダウンロードしたJSONファイルをスマホに転送</p>
+                                    <p style="color: #ccc; font-size: 13px; margin: 3px 0;">3. スマホで同じメールアドレスでログイン</p>
+                                    <p style="color: #ccc; font-size: 13px; margin: 3px 0;">4. 「データをインポート」でファイルを選択</p>
+                                </div>
+                                <div style="background-color: #333; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                                    <p style="color: #fff; font-size: 14px; margin: 5px 0; font-weight: bold;">📱 スマホ → PC の同期</p>
+                                    <p style="color: #ccc; font-size: 13px; margin: 3px 0;">1. スマホで「データをエクスポート」をクリック</p>
+                                    <p style="color: #ccc; font-size: 13px; margin: 3px 0;">2. ファイルをPCに転送</p>
+                                    <p style="color: #ccc; font-size: 13px; margin: 3px 0;">3. PCで「データをインポート」を実行</p>
+                                </div>
+                                <p style="color: #28a745; font-size: 12px; margin: 5px 0;">✅ この方法でブラウザキャッシュをクリアしてもデータは消えません</p>
                             </div>
                             
                             <div style="background-color: #222; padding: 15px; border-radius: 8px;">
-                                <h4 style="color: #4A90E2; margin-top: 0;">📱 自動同期（開発中）</h4>
-                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">将来的に自動同期機能を実装予定</p>
-                                <p style="color: #ffc107; font-size: 12px; margin: 5px 0;">⚠️ 現在は手動でのエクスポート/インポートをお使いください</p>
+                                <h4 style="color: #4A90E2; margin-top: 0;">📱 現在の同期状況</h4>
+                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">各デバイスで独立してデータを管理</p>
+                                <p style="color: #ffc107; font-size: 12px; margin: 5px 0;">⚠️ 自動同期は開発中です。手動でのエクスポート/インポートをお使いください</p>
                             </div>
                         </div>
                         
@@ -659,6 +674,6 @@
             });
         }
     </script>
-    <script src="script.js?v=20250101220000"></script>
+    <script src="script.js?v=20250101230000"></script>
 </body>
 </html>
