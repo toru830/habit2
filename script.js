@@ -1468,18 +1468,36 @@ class HabitTracker {
         link.click();
         
         URL.revokeObjectURL(url);
-        alert('✅ データをエクスポートしました！\n\n📱 スマホでの同期手順：\n1. このファイルをスマホに転送（メール、クラウドストレージ等）\n2. スマホで同じメールアドレスでログイン\n3. ☁️ボタン → データをインポート\n4. ファイルを選択して同期完了\n\n⚠️ 重要：PCとスマホは別々のデータベースです！');
+        alert('✅ データをエクスポートしました！\n\n📱 スマホでの同期手順：\n1. このファイルをスマホに転送（メール、クラウドストレージ等）\n2. スマホで同じメールアドレスでログイン\n3. ☁️ボタン → データをインポート\n4. ファイルを選択して同期完了\n\n🔒 セキュリティ：メールアドレスが一致する場合のみインポート可能\n⚠️ 重要：PCとスマホは別々のデータベースです！\n\n🚀 自動同期機能は2025年2月に実装予定です');
     }
     
-    // データをインポート
+    // データをインポート（セキュリティ強化版）
     importUserData(event) {
         const file = event.target.files[0];
         if (!file) return;
+        
+        // ログイン確認
+        if (!this.currentUser) {
+            alert('❌ エラー：ログインが必要です。\n\n先にログインしてからデータをインポートしてください。');
+            return;
+        }
         
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const userData = JSON.parse(e.target.result);
+                
+                // セキュリティチェック：メールアドレスの一致確認
+                if (!userData.email || userData.email !== this.currentUser.email) {
+                    alert('❌ セキュリティエラー：\n\nインポートしようとしているデータのメールアドレスが、現在ログインしているアカウントと一致しません。\n\n正しいアカウントでログインしてから再度お試しください。');
+                    return;
+                }
+                
+                // データの整合性チェック
+                if (!userData.completedHabits && !userData.healthData && !userData.achievements) {
+                    alert('❌ エラー：\n\n有効なデータが見つかりません。\n\n正しいエクスポートファイルを選択してください。');
+                    return;
+                }
                 
                 // データを復元
                 this.completedHabits = userData.completedHabits || {};
@@ -1495,9 +1513,9 @@ class HabitTracker {
                 this.renderCalendar();
                 this.updateStatsView();
                 
-                alert('✅ データをインポートしました！\n\n📱 同期完了：\n- 習慣データが復元されました\n- ヘルスデータが復元されました\n- 成果データが復元されました\n\nこれで他のデバイスと同じデータが表示されます！');
+                alert('✅ データをインポートしました！\n\n📱 同期完了：\n- 習慣データが復元されました\n- ヘルスデータが復元されました\n- 成果データが復元されました\n\n🔒 セキュリティ：正しいアカウントのデータのみが復元されました');
             } catch (error) {
-                alert('ファイルの読み込みに失敗しました: ' + error.message);
+                alert('❌ ファイルの読み込みに失敗しました：\n\n' + error.message + '\n\n正しいJSONファイルを選択してください。');
             }
         };
         reader.readAsText(file);
