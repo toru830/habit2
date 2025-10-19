@@ -1105,9 +1105,13 @@ class HabitTracker {
 
     // ログアウト処理
     logout() {
-        this.currentUser = null;
-        localStorage.removeItem('habit_current_user');
-        this.updateAuthUI();
+        // 確認ダイアログを表示
+        if (confirm('ログアウトしますか？')) {
+            this.currentUser = null;
+            localStorage.removeItem('habit_current_user');
+            this.updateAuthUI();
+            this.showAuthMessage('ログアウトしました。', false);
+        }
     }
 
     // 同期状態をチェック
@@ -1423,6 +1427,18 @@ class HabitTracker {
         
         if (importFile) {
             importFile.addEventListener('change', (e) => this.importUserData(e));
+        }
+        
+        // モーダルの閉じるボタン
+        const authModalClose = document.getElementById('authModalClose');
+        const cloudSyncModalClose = document.getElementById('cloudSyncModalClose');
+        
+        if (authModalClose) {
+            authModalClose.addEventListener('click', () => this.hideAuthModal());
+        }
+        
+        if (cloudSyncModalClose) {
+            cloudSyncModalClose.addEventListener('click', () => this.hideCloudSyncModal());
         }
     }
     
@@ -3861,7 +3877,7 @@ class HabitTracker {
                     this.showAuthModal();
                 });
                 console.log('🔐 認証ボタンのイベントリスナー追加完了');
-            } else {
+                } else {
                 console.error('🔐 認証ボタンが見つかりません！');
             }
 
@@ -3987,8 +4003,8 @@ class HabitTracker {
     setupManualSyncOnly() {
         console.log('手動同期は無効化されています');
         // 同期機能を完全に無効化
-        return;
-    }
+            return;
+        }
 
     // オプション同期機能の設定（自動同期を無効化）
     setupOptionalSync() {
