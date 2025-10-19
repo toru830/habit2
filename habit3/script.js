@@ -14,9 +14,22 @@ const habitsData = [
     { id: 'vitamin_b', name: 'ビタミンD', shortName: 'ﾋﾞﾀﾐﾝD', category: '栄養', priority: 3, reason: 'エネルギー代謝と神経機能に重要。', type: 'supplement' }
 ];
 
-// JSONBin.io API設定（テスト用のダミーキー）
+// JSONBin.io API設定
 const JSONBIN_API_URL = 'https://api.jsonbin.io/v3/b';
-const JSONBIN_API_KEY = '$2a$10$dummy_key_for_testing'; // テスト用
+const JSONBIN_API_KEY = '$2a$10$YOUR_ACTUAL_API_KEY_HERE'; // 実際のAPIキーに置き換え
+
+// APIキー設定関数
+function setJsonbinApiKey(apiKey) {
+    window.jsonbinApiKey = apiKey;
+    localStorage.setItem('jsonbin_api_key', apiKey);
+    console.log('☁️ JSONBin.io APIキーを設定しました');
+}
+
+// 保存されたAPIキーを読み込み
+const savedApiKey = localStorage.getItem('jsonbin_api_key');
+if (savedApiKey) {
+    setJsonbinApiKey(savedApiKey);
+}
 
 class HabitTracker {
     constructor() {
@@ -58,16 +71,21 @@ class HabitTracker {
             authBtn: document.getElementById('authBtn'),
             logoutBtn: document.getElementById('logoutBtn'),
             syncBtn: document.getElementById('syncBtn'),
+            apiKeyBtn: document.getElementById('apiKeyBtn'),
             authModalClose: document.getElementById('authModalClose'),
             syncModalClose: document.getElementById('syncModalClose'),
+            apiKeyModalClose: document.getElementById('apiKeyModalClose'),
             authModalCancel: document.getElementById('authModalCancel'),
             authModalCancel2: document.getElementById('authModalCancel2'),
             syncModalCancel: document.getElementById('syncModalCancel'),
+            apiKeyModalCancel: document.getElementById('apiKeyModalCancel'),
             loginTab: document.getElementById('loginTab'),
             signupTab: document.getElementById('signupTab'),
             loginSubmit: document.getElementById('loginSubmit'),
             signupSubmit: document.getElementById('signupSubmit'),
-            manualSync: document.getElementById('manualSync')
+            manualSync: document.getElementById('manualSync'),
+            saveApiKey: document.getElementById('saveApiKey'),
+            testApiKey: document.getElementById('testApiKey')
         };
 
         // 週移動
@@ -95,6 +113,13 @@ class HabitTracker {
 
         // 同期
         if (elements.manualSync) elements.manualSync.addEventListener('click', () => this.manualSync());
+        
+        // APIキー設定
+        if (elements.apiKeyBtn) elements.apiKeyBtn.addEventListener('click', () => this.showApiKeyModal());
+        if (elements.apiKeyModalClose) elements.apiKeyModalClose.addEventListener('click', () => this.hideApiKeyModal());
+        if (elements.apiKeyModalCancel) elements.apiKeyModalCancel.addEventListener('click', () => this.hideApiKeyModal());
+        if (elements.saveApiKey) elements.saveApiKey.addEventListener('click', () => this.saveApiKey());
+        if (elements.testApiKey) elements.testApiKey.addEventListener('click', () => this.testApiKey());
     }
 
     // 認証モーダル表示
@@ -329,12 +354,29 @@ class HabitTracker {
         if (messageEl) messageEl.style.display = 'none';
     }
 
-    // JSONBin.io API連携（テスト用）
+    // クラウドにデータを同期（JSONBin.io API使用）
     async syncToCloud() {
-        if (!this.currentUser) return;
+        if (!this.currentUser || this.isSyncing) return;
+        
+        const apiKey = window.jsonbinApiKey || JSONBIN_API_KEY;
+        if (!apiKey || apiKey === '$2a$10$YOUR_ACTUAL_API_KEY_HERE') {
+            console.log('ℹ️ JSONBin.io APIキーが設定されていません');
+            // オフライン時はローカルストレージに保存
+            const userData = {
+                completedHabits: this.completedHabits,
+                userId: this.currentUser.id,
+                email: this.currentUser.email,
+                lastSync: new Date().toISOString()
+            };
+            localStorage.setItem(`habit3_data_${this.currentUser.email}`, JSON.stringify(userData));
+            console.log('✅ オフライン：ローカルストレージに保存しました');
+            return;
+        }
 
         try {
             this.isSyncing = true;
+            console.log('☁️ クラウドにデータを同期中...');
+            
             const userData = {
                 completedHabits: this.completedHabits,
                 userId: this.currentUser.id,
@@ -342,37 +384,131 @@ class HabitTracker {
                 lastSync: new Date().toISOString()
             };
 
-            // テスト用：ローカルストレージに保存
-            localStorage.setItem(`habit3_cloud_${this.currentUser.id}`, JSON.stringify(userData));
-            console.log('✅ ローカルにデータを保存しました（テスト用）');
+            // メールアドレスからBin IDを生成
+            const binId = this.generateBinId(this.currentUser.email);
+
+            // JSONBin.io APIにデータを保存
+            const response = await fetch(`${JSONBIN_API_URL}/${binId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': apiKey
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (response.ok) {
+                // ローカルストレージにも保存（オフライン対応）
+                localStorage.setItem(`habit3_data_${this.currentUser.email}`, JSON.stringify(userData));
+                console.log('✅ クラウドにデータを同期しました');
+            } else {
+                console.error('❌ クラウド同期に失敗:', response.status);
+                // エラー時はローカルストレージに保存
+                localStorage.setItem(`habit3_data_${this.currentUser.email}`, JSON.stringify(userData));
+                console.log('✅ エラー時：ローカルストレージに保存しました');
+            }
         } catch (error) {
             console.error('❌ 同期エラー:', error);
+            // エラー時はローカルストレージに保存
+            const userData = {
+                completedHabits: this.completedHabits,
+                userId: this.currentUser.id,
+                email: this.currentUser.email,
+                lastSync: new Date().toISOString()
+            };
+            localStorage.setItem(`habit3_data_${this.currentUser.email}`, JSON.stringify(userData));
+            console.log('✅ エラー時：ローカルストレージに保存しました');
         } finally {
             this.isSyncing = false;
         }
     }
 
-    async syncFromCloud() {
-        if (!this.currentUser) return;
+    // メールアドレスからBin IDを生成
+    generateBinId(email) {
+        // メールアドレスをハッシュ化してBin IDを生成
+        let hash = 0;
+        for (let i = 0; i < email.length; i++) {
+            const char = email.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 32bit整数に変換
+        }
+        return `habit3_${Math.abs(hash).toString(36)}`;
+    }
 
+    async syncFromCloud() {
+        if (!this.currentUser || this.isSyncing) return;
+        
+        const apiKey = window.jsonbinApiKey || JSONBIN_API_KEY;
+        if (!apiKey || apiKey === '$2a$10$YOUR_ACTUAL_API_KEY_HERE') {
+            console.log('ℹ️ JSONBin.io APIキーが設定されていません');
+            // オフライン時はローカルデータを使用
+            const localData = localStorage.getItem(`habit3_data_${this.currentUser.email}`);
+            if (localData) {
+                const userData = JSON.parse(localData);
+                this.completedHabits = userData.completedHabits || {};
+                this.renderCalendar();
+                console.log('✅ オフライン：ローカルデータを使用しました');
+            }
+            return;
+        }
+        
         try {
             this.isSyncing = true;
+            console.log('☁️ クラウドからデータを同期中...');
             
-            // テスト用：ローカルストレージから取得
-            const savedData = localStorage.getItem(`habit3_cloud_${this.currentUser.id}`);
-            if (savedData) {
-                const userData = JSON.parse(savedData);
-                if (userData && userData.completedHabits) {
-                    this.completedHabits = userData.completedHabits;
-                    this.saveCompletedHabits();
-                    this.renderCalendar();
-                    console.log('✅ ローカルからデータを取得しました（テスト用）');
+            // メールアドレスからBin IDを生成
+            const binId = this.generateBinId(this.currentUser.email);
+            
+            // JSONBin.io APIからデータを取得
+            const response = await fetch(`${JSONBIN_API_URL}/${binId}/latest`, {
+                headers: {
+                    'X-Master-Key': apiKey
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const userData = data.record;
+                
+                if (userData && userData.email === this.currentUser.email) {
+                    // クラウドデータをローカルに適用
+                    this.completedHabits = userData.completedHabits || {};
+                    
+                    // ローカルストレージにも保存（オフライン対応）
+                    localStorage.setItem(`habit3_data_${this.currentUser.email}`, JSON.stringify(userData));
+                    
+                    console.log('✅ クラウドからデータを同期しました');
+                }
+            } else if (response.status === 404) {
+                console.log('ℹ️ クラウドにデータが見つかりません（初回ログイン）');
+                // ローカルデータを確認
+                const localData = localStorage.getItem(`habit3_data_${this.currentUser.email}`);
+                if (localData) {
+                    const userData = JSON.parse(localData);
+                    this.completedHabits = userData.completedHabits || {};
+                    console.log('✅ ローカルデータを読み込みました');
                 }
             } else {
-                console.log('ℹ️ データが見つかりません（初回ログイン）');
+                console.error('❌ クラウド同期に失敗:', response.status);
+                // オフライン時はローカルデータを使用
+                const localData = localStorage.getItem(`habit3_data_${this.currentUser.email}`);
+                if (localData) {
+                    const userData = JSON.parse(localData);
+                    this.completedHabits = userData.completedHabits || {};
+                    console.log('✅ オフライン：ローカルデータを使用しました');
+                }
             }
+            
+            this.renderCalendar();
         } catch (error) {
             console.error('❌ 同期エラー:', error);
+            // エラー時はローカルデータを使用
+            const localData = localStorage.getItem(`habit3_data_${this.currentUser.email}`);
+            if (localData) {
+                const userData = JSON.parse(localData);
+                this.completedHabits = userData.completedHabits || {};
+                console.log('✅ エラー時：ローカルデータを使用しました');
+            }
         } finally {
             this.isSyncing = false;
         }
@@ -406,6 +542,128 @@ class HabitTracker {
         setTimeout(() => {
             messageEl.style.display = 'none';
         }, 3000);
+    }
+
+    // APIキー設定モーダル表示
+    showApiKeyModal() {
+        const modal = document.getElementById('apiKeyModal');
+        if (modal) {
+            modal.style.display = 'block';
+            // 保存されたAPIキーを表示
+            const savedApiKey = localStorage.getItem('jsonbin_api_key');
+            const input = document.getElementById('apiKeyInput');
+            if (input && savedApiKey) {
+                input.value = savedApiKey;
+            }
+        }
+    }
+
+    // APIキー設定モーダル非表示
+    hideApiKeyModal() {
+        const modal = document.getElementById('apiKeyModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    // APIキー保存
+    async saveApiKey() {
+        const input = document.getElementById('apiKeyInput');
+        if (!input) return;
+
+        const apiKey = input.value.trim();
+        if (!apiKey) {
+            this.showApiKeyMessage('APIキーを入力してください。', true);
+            return;
+        }
+
+        if (!apiKey.startsWith('$2a$10$')) {
+            this.showApiKeyMessage('正しいAPIキー形式ではありません。', true);
+            return;
+        }
+
+        try {
+            // APIキーをテスト
+            const testResult = await this.testApiKeyConnection(apiKey);
+            if (testResult) {
+                // 保存
+                setJsonbinApiKey(apiKey);
+                this.showApiKeyMessage('APIキーを保存しました！', false);
+                setTimeout(() => {
+                    this.hideApiKeyModal();
+                }, 1500);
+            } else {
+                this.showApiKeyMessage('APIキーが無効です。', true);
+            }
+        } catch (error) {
+            console.error('APIキー保存エラー:', error);
+            this.showApiKeyMessage('APIキーの保存に失敗しました。', true);
+        }
+    }
+
+    // APIキーテスト
+    async testApiKey() {
+        const input = document.getElementById('apiKeyInput');
+        if (!input) return;
+
+        const apiKey = input.value.trim();
+        if (!apiKey) {
+            this.showApiKeyMessage('APIキーを入力してください。', true);
+            return;
+        }
+
+        if (!apiKey.startsWith('$2a$10$')) {
+            this.showApiKeyMessage('正しいAPIキー形式ではありません。', true);
+            return;
+        }
+
+        try {
+            this.showApiKeyMessage('テスト中...', false);
+            const testResult = await this.testApiKeyConnection(apiKey);
+            if (testResult) {
+                this.showApiKeyMessage('✅ APIキーが有効です！', false);
+            } else {
+                this.showApiKeyMessage('❌ APIキーが無効です。', true);
+            }
+        } catch (error) {
+            console.error('APIキーテストエラー:', error);
+            this.showApiKeyMessage('❌ テストに失敗しました。', true);
+        }
+    }
+
+    // APIキー接続テスト
+    async testApiKeyConnection(apiKey) {
+        try {
+            // テスト用のBin ID
+            const testBinId = 'test_connection';
+            
+            const response = await fetch(`${JSONBIN_API_URL}/${testBinId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': apiKey
+                },
+                body: JSON.stringify({ test: true, timestamp: new Date().toISOString() })
+            });
+
+            return response.ok;
+        } catch (error) {
+            console.error('APIキー接続テストエラー:', error);
+            return false;
+        }
+    }
+
+    // APIキーメッセージ表示
+    showApiKeyMessage(message, isError) {
+        const messageEl = document.getElementById('apiKeyMessage');
+        if (messageEl) {
+            messageEl.textContent = message;
+            messageEl.style.display = 'block';
+            messageEl.style.backgroundColor = isError ? '#ff6b6b' : '#28a745';
+            messageEl.style.color = 'white';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 3000);
+        }
     }
 
     // 現在の週を取得
