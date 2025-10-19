@@ -614,6 +614,12 @@ class HabitTracker {
                 }
             });
 
+            console.log('☁️ クラウド同期レスポンス:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+
             if (response.ok) {
                 const data = await response.json();
                 const userData = data.record;
@@ -641,7 +647,13 @@ class HabitTracker {
                     console.log('✅ ローカルデータを読み込みました');
                 }
             } else {
-                console.error('❌ クラウド同期に失敗:', response.status);
+                const errorData = await response.json().catch(() => ({}));
+                console.error('❌ クラウド同期に失敗:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorData: errorData
+                });
+                
                 // オフライン時はローカルデータを使用
                 const localData = localStorage.getItem(`habit_data_${this.currentUser.email}`);
                 if (localData) {
@@ -719,12 +731,24 @@ class HabitTracker {
                 body: JSON.stringify(userData)
             });
 
+            console.log('☁️ クラウド保存レスポンス:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+
             if (response.ok) {
                 // ローカルストレージにも保存（オフライン対応）
                 localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
                 console.log('✅ クラウドにデータを同期しました');
             } else {
-                console.error('❌ クラウド同期に失敗:', response.status);
+                const errorData = await response.json().catch(() => ({}));
+                console.error('❌ クラウド同期に失敗:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorData: errorData
+                });
+                
                 // エラー時はローカルストレージに保存
                 localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
                 console.log('✅ エラー時：ローカルストレージに保存しました');
@@ -1064,11 +1088,22 @@ class HabitTracker {
         }
     }
 
+    // デバッグ情報を更新
+    updateDebugInfo(message) {
+        const debugEl = document.getElementById('debugInfo');
+        if (debugEl) {
+            debugEl.textContent = message;
+        }
+    }
+
     // APIキー接続テスト
     async testApiKeyConnection(apiKey) {
         try {
-            // テスト用のBin ID
-            const testBinId = 'test_connection';
+            console.log('🔑 APIキーテスト開始:', apiKey.substring(0, 10) + '...');
+            this.updateDebugInfo('APIキーテスト中...');
+            
+            // テスト用のBin ID（ランダムなIDを使用）
+            const testBinId = 'test_connection_' + Date.now();
             
             const response = await fetch(`${JSONBIN_API_URL}/${testBinId}`, {
                 method: 'PUT',
@@ -1076,12 +1111,53 @@ class HabitTracker {
                     'Content-Type': 'application/json',
                     'X-Master-Key': apiKey
                 },
-                body: JSON.stringify({ test: true, timestamp: new Date().toISOString() })
+                body: JSON.stringify({ 
+                    test: true, 
+                    timestamp: new Date().toISOString(),
+                    message: 'JSONBin.io API接続テスト'
+                })
             });
 
-            return response.ok;
+            console.log('🔑 APIレスポンス:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('🔑 APIエラー詳細:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorData: errorData
+                });
+                
+                // デバッグ情報を更新
+                this.updateDebugInfo(`❌ エラー: ${response.status} ${response.statusText}`);
+                
+                // 詳細なエラーメッセージを表示
+                if (response.status === 401) {
+                    this.showApiKeyMessage('❌ APIキーが無効です。正しいキーを入力してください。', true);
+                } else if (response.status === 403) {
+                    this.showApiKeyMessage('❌ APIキーの権限が不足しています。', true);
+                } else if (response.status === 429) {
+                    this.showApiKeyMessage('❌ APIリクエスト制限に達しました。しばらく待ってから再試行してください。', true);
+                } else {
+                    this.showApiKeyMessage(`❌ APIエラー: ${response.status} ${response.statusText}`, true);
+                }
+                
+                return false;
+            }
+
+            const data = await response.json();
+            console.log('🔑 APIテスト成功:', data);
+            this.updateDebugInfo('✅ API接続テスト成功！');
+            return true;
+            
         } catch (error) {
-            console.error('APIキー接続テストエラー:', error);
+            console.error('🔑 APIキー接続テストエラー:', error);
+            this.updateDebugInfo(`❌ ネットワークエラー: ${error.message}`);
+            this.showApiKeyMessage(`❌ ネットワークエラー: ${error.message}`, true);
             return false;
         }
     }
