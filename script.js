@@ -1226,6 +1226,8 @@ class HabitTracker {
         const authBtn = document.getElementById('authBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const syncBtn = document.getElementById('syncBtn');
+        const qrExportBtn = document.getElementById('qrExportBtn');
+        const qrImportBtn = document.getElementById('qrImportBtn');
         
         if (this.currentUser) {
             // ログイン済み：ログアウトボタンと同期ボタンを表示
@@ -1239,6 +1241,14 @@ class HabitTracker {
                 syncBtn.style.display = 'flex';
                 syncBtn.title = '自動同期';
             }
+            if (qrExportBtn) {
+                qrExportBtn.style.display = 'flex';
+                qrExportBtn.title = 'QRコードでエクスポート';
+            }
+            if (qrImportBtn) {
+                qrImportBtn.style.display = 'flex';
+                qrImportBtn.title = 'QRコードでインポート';
+            }
         } else {
             // 未ログイン状態：ログインボタンのみ表示
             if (authBtn) {
@@ -1247,6 +1257,11 @@ class HabitTracker {
             }
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (syncBtn) syncBtn.style.display = 'none';
+            if (qrExportBtn) qrExportBtn.style.display = 'none';
+            if (qrImportBtn) {
+                qrImportBtn.style.display = 'flex';
+                qrImportBtn.title = 'QRコードでインポート';
+            }
         }
     }
 
@@ -1809,29 +1824,13 @@ class HabitTracker {
                 // データをQRコード用にエクスポート
                 const qrData = await qrSyncManager.exportToQR();
                 
-                // QRCodeライブラリの読み込みを待つ
-                let attempts = 0;
-                const maxAttempts = 10;
-                
-                while (typeof QRCode === 'undefined' && attempts < maxAttempts) {
-                    console.log(`🔍 QRCodeライブラリの読み込み待機中... (${attempts + 1}/${maxAttempts})`);
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    attempts++;
-                }
-                
-                if (typeof QRCode === 'undefined') {
-                    console.warn('⚠️ QRCodeライブラリが読み込まれていません。代替手段を使用します。');
-                    this.showQRExportFallback(qrData);
-                    return;
-                }
-                
-                // QRコードを生成
-                await qrSyncManager.generateQRCode('qrCodeCanvas', qrData);
+                // 直接URLを表示（QRコード生成は省略）
+                this.showQRExportFallback(qrData);
                 
                 console.log('✅ QRコードエクスポートモーダルを表示しました');
             } catch (error) {
                 console.error('❌ QRコード生成エラー:', error);
-                this.showQRExportFallback(qrData);
+                alert('データのエクスポートに失敗しました');
             }
         }
     }
@@ -1844,11 +1843,13 @@ class HabitTracker {
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, 200, 200);
             ctx.fillStyle = '#000000';
-            ctx.font = '12px Arial';
+            ctx.font = '14px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('QRコード生成エラー', 100, 80);
-            ctx.fillText('下記のURLをコピーして', 100, 100);
+            ctx.fillText('📱 データ転送用URL', 100, 60);
+            ctx.fillText('下記のURLをコピーして', 100, 90);
             ctx.fillText('他のデバイスで開いてください', 100, 120);
+            ctx.fillText('(スマホのカメラでQRコード', 100, 150);
+            ctx.fillText('として読み取ることも可能)', 100, 170);
         }
         
         // テキストエリアにURLを表示
@@ -1858,15 +1859,32 @@ class HabitTracker {
             if (!textArea) {
                 textArea = document.createElement('textarea');
                 textArea.id = 'qrDataTextArea';
-                textArea.style.cssText = 'width: 100%; height: 80px; margin: 10px 0; padding: 10px; border: 1px solid #666; border-radius: 4px; background-color: #222; color: #fff; font-size: 12px; resize: vertical;';
-                textArea.placeholder = 'QRコード生成に失敗しました。下記のURLをコピーして他のデバイスで開いてください。';
+                textArea.style.cssText = 'width: 100%; height: 100px; margin: 15px 0; padding: 15px; border: 2px solid #28a745; border-radius: 8px; background-color: #222; color: #fff; font-size: 14px; resize: vertical; font-family: monospace;';
+                textArea.placeholder = 'データ転送用URLがここに表示されます';
                 modal.querySelector('.modal-content').insertBefore(textArea, modal.querySelector('.modal-content').lastElementChild);
             }
             textArea.value = qrData;
             textArea.select();
+            
+            // コピーボタンを追加
+            let copyBtn = modal.querySelector('#copyUrlBtn');
+            if (!copyBtn) {
+                copyBtn = document.createElement('button');
+                copyBtn.id = 'copyUrlBtn';
+                copyBtn.textContent = '📋 URLをコピー';
+                copyBtn.className = 'action-btn';
+                copyBtn.style.cssText = 'padding: 10px 20px; background-color: #17a2b8; margin: 5px; font-size: 14px;';
+                copyBtn.onclick = () => {
+                    textArea.select();
+                    document.execCommand('copy');
+                    copyBtn.textContent = '✅ コピー完了！';
+                    setTimeout(() => {
+                        copyBtn.textContent = '📋 URLをコピー';
+                    }, 2000);
+                };
+                modal.querySelector('.modal-content').insertBefore(copyBtn, modal.querySelector('.modal-content').lastElementChild);
+            }
         }
-        
-        alert('QRコード生成に失敗しました。\n\n代替手段として、表示されたURLをコピーして他のデバイスで開いてください。');
     }
 
     // QRコードエクスポートモーダルを非表示
