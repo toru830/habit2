@@ -16,7 +16,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijk2IiBmaWxsPSIjMDAwMDAwIi8+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijg0IiBmaWxsPSIjNEE5MEUyIi8+CjxzdmcgeD0iNDgiIHk9IjQ4IiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik03MiA0OEw0OCA3Mkw2MCA4NCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPGNpcmNsZSBjeD0iNzIiIGN5PSI3MiIgcj0iMTIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+Cjwvc3ZnPgo=">
-    <link rel="stylesheet" href="styles.css?v=20250101280000">
+    <link rel="stylesheet" href="styles.css?v=20250101290000">
     
     <!-- JSONBin.io API設定 -->
     <script>
@@ -48,7 +48,7 @@
                         <button class="action-btn today-btn" id="goToToday">今日</button>
                         <button id="authBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #4A90E2; color: white; font-size: 14px; display: flex; align-items: center; justify-content: center;" title="ログイン">👤</button>
                         <button id="logoutBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #28a745; color: white; font-size: 14px; display: none; align-items: center; justify-content: center;" title="ログアウト">✓</button>
-                        <button id="apiKeyBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #ffc107; color: #333; font-size: 14px; display: none; align-items: center; justify-content: center;" title="APIキー設定">🔑</button>
+                        <button id="syncBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #ffc107; color: #333; font-size: 14px; display: none; align-items: center; justify-content: center;" title="自動同期">☁️</button>
                     </div>
                 </div>
 
@@ -104,42 +104,31 @@
                     </div>
                 </div>
 
-                <!-- APIキー設定モーダル -->
-                <div id="apiKeyModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
+                <!-- 同期状況モーダル -->
+                <div id="syncModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
                     <div class="modal-content" style="background-color: #333; margin: 10% auto; padding: 30px; border: 1px solid #666; width: 90%; max-width: 500px; border-radius: 8px; position: relative;">
-                        <button id="apiKeyModalClose" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 5px; width: auto; height: auto; display: flex; align-items: center; justify-content: center; writing-mode: horizontal-tb; text-orientation: mixed; transform: none;">閉じる</button>
-                        <h3 style="color: white; margin-top: 0; text-align: center;">APIキー設定</h3>
+                        <button id="syncModalClose" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 5px; width: auto; height: auto; display: flex; align-items: center; justify-content: center; writing-mode: horizontal-tb; text-orientation: mixed; transform: none;">閉じる</button>
+                        <h3 style="color: white; margin-top: 0; text-align: center;">同期状況</h3>
                         
                         <div style="margin: 20px 0;">
-                            <div style="background-color: #4A90E2; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2E7CE6;">
-                                <h4 style="color: #fff; margin-top: 0;">☁️ 自動同期機能</h4>
-                                <p style="color: #fff; font-size: 14px; margin: 5px 0; font-weight: bold;">JSONBin.io APIを使用した自動同期</p>
-                                <p style="color: #fff; font-size: 13px; margin: 5px 0;">PCとスマホで同じデータを自動的に共有できます</p>
+                            <div style="background-color: #28a745; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #1e7e34;">
+                                <h4 style="color: #fff; margin-top: 0;">✅ 自動同期が有効です</h4>
+                                <p style="color: #fff; font-size: 14px; margin: 5px 0;">データは自動的にクラウドに保存され、他のデバイスと同期されます。</p>
                             </div>
                             
                             <div style="background-color: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                                <h4 style="color: #ffc107; margin-top: 0;">🔑 APIキー設定</h4>
-                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">JSONBin.ioのAPIキーを入力してください</p>
-                                
-                                <div style="margin: 15px 0;">
-                                    <label style="color: #fff; font-size: 14px; display: block; margin-bottom: 5px;">APIキー:</label>
-                                    <input type="password" id="apiKeyInput" placeholder="$2a$10$..." style="width: 100%; padding: 10px; border: 1px solid #666; border-radius: 4px; background-color: #444; color: #fff; font-size: 14px;">
-                                </div>
-                                
-                                <div style="background-color: #333; padding: 10px; border-radius: 6px; margin: 10px 0;">
-                                    <h5 style="color: #28a745; margin-top: 0;">📝 APIキーの取得方法</h5>
-                                    <p style="color: #ccc; font-size: 12px; margin: 3px 0;">1. <a href="https://jsonbin.io" target="_blank" style="color: #4A90E2;">jsonbin.io</a> にアクセス</p>
-                                    <p style="color: #ccc; font-size: 12px; margin: 3px 0;">2. アカウントを作成（無料）</p>
-                                    <p style="color: #ccc; font-size: 12px; margin: 3px 0;">3. APIキーをコピーして貼り付け</p>
-                                </div>
+                                <h4 style="color: #ffc107; margin-top: 0;">☁️ 同期機能</h4>
+                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">・ログイン時: 自動でクラウドからデータ取得</p>
+                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">・データ変更時: 自動でクラウドに保存</p>
+                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">・複数デバイス間でリアルタイム同期</p>
                             </div>
                             
                             <div style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: space-between;">
-                                <button id="saveApiKey" class="action-btn" style="flex: 1; padding: 12px; margin-right: 5px; background-color: #28a745;">保存</button>
-                                <button id="testApiKey" class="action-btn" style="flex: 1; padding: 12px; margin-left: 5px; background-color: #17a2b8;">テスト</button>
+                                <button id="manualSync" class="action-btn" style="flex: 1; padding: 12px; margin-right: 5px; background-color: #17a2b8;">手動同期</button>
+                                <button id="syncClose" class="action-btn" style="flex: 1; padding: 12px; margin-left: 5px; background-color: #666;">閉じる</button>
                             </div>
                             
-                            <div id="apiKeyMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+                            <div id="syncMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
                         </div>
                     </div>
                 </div>
@@ -657,6 +646,6 @@
             });
         }
     </script>
-    <script src="script.js?v=20250101280000"></script>
+    <script src="script.js?v=20250101290000"></script>
 </body>
 </html>

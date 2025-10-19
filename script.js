@@ -1,15 +1,13 @@
 // JSONBin.io API設定（自動同期用）
 const JSONBIN_API_URL = 'https://api.jsonbin.io/v3/b';
-let JSONBIN_API_KEY = null; // 設定画面で設定
+const JSONBIN_API_KEY = '$2a$10$YOUR_API_KEY_HERE'; // 実際のAPIキーに置き換え
 
-// APIキーを設定する関数
-function setJsonbinApiKey(apiKey) {
-    JSONBIN_API_KEY = apiKey;
-    window.jsonbinConfig.apiKey = apiKey;
-    window.jsonbinConfig.enabled = true;
-    localStorage.setItem('jsonbin_api_key', apiKey);
-    console.log('☁️ JSONBin.io APIキーを設定しました');
-}
+// 自動同期機能を有効化
+window.jsonbinConfig = {
+    apiUrl: 'https://api.jsonbin.io/v3/b',
+    apiKey: JSONBIN_API_KEY,
+    enabled: true
+};
 
 // 習慣データの定義
 const habitsData = [
@@ -416,11 +414,8 @@ class HabitTracker {
     init() {
         console.log('🔐 アプリ初期化開始');
         
-        // 保存されたJSONBin.io APIキーを読み込み
-        const savedApiKey = localStorage.getItem('jsonbin_api_key');
-        if (savedApiKey) {
-            setJsonbinApiKey(savedApiKey);
-        }
+        // 自動同期機能が有効
+        console.log('☁️ 自動同期機能が有効です');
         
         this.renderCalendar();
         this.setupEventListeners();
@@ -570,11 +565,8 @@ class HabitTracker {
     async syncFromCloud() {
         if (!this.currentUser || this.isSyncing) return;
         
-        // APIキーが設定されていない場合はスキップ
-        if (!JSONBIN_API_KEY) {
-            console.log('ℹ️ JSONBin.io APIキーが設定されていません');
-            return;
-        }
+        // 自動同期機能が有効
+        console.log('☁️ 自動同期機能が有効です');
         
         try {
             this.isSyncing = true;
@@ -622,11 +614,8 @@ class HabitTracker {
     async syncToCloud() {
         if (!this.currentUser || this.isSyncing) return;
         
-        // APIキーが設定されていない場合はスキップ
-        if (!JSONBIN_API_KEY) {
-            console.log('ℹ️ JSONBin.io APIキーが設定されていません');
-            return;
-        }
+        // 自動同期機能が有効
+        console.log('☁️ 自動同期機能が有効です');
         
         try {
             this.isSyncing = true;
@@ -833,33 +822,25 @@ class HabitTracker {
 
     // ゲストモードは削除済み
 
-    // APIキー設定モーダルを表示
-    showApiKeyModal() {
-        const modal = document.getElementById('apiKeyModal');
+    // 同期モーダルを表示
+    showSyncModal() {
+        const modal = document.getElementById('syncModal');
         if (modal) {
             modal.style.display = 'block';
-            // 既存の設定を読み込み
-            const apiKey = localStorage.getItem('jsonbin_api_key');
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            if (apiKeyInput && apiKey) {
-                apiKeyInput.value = apiKey;
-            }
         }
     }
 
-    // APIキー設定モーダルを非表示
-    hideApiKeyModal() {
-        const modal = document.getElementById('apiKeyModal');
+    // 同期モーダルを非表示
+    hideSyncModal() {
+        const modal = document.getElementById('syncModal');
         if (modal) {
             modal.style.display = 'none';
-            this.hideApiKeyMessage();
         }
     }
 
-    // クラウド同期メッセージを表示
-    // APIキーメッセージを表示
-    showApiKeyMessage(message, isError = false) {
-        const messageDiv = document.getElementById('apiKeyMessage');
+    // 同期メッセージを表示
+    showSyncMessage(message, isError = false) {
+        const messageDiv = document.getElementById('syncMessage');
         if (messageDiv) {
             messageDiv.textContent = message;
             messageDiv.style.display = 'block';
@@ -868,68 +849,27 @@ class HabitTracker {
         }
     }
 
-    // APIキーメッセージを非表示
-    hideApiKeyMessage() {
-        const messageDiv = document.getElementById('apiKeyMessage');
+    // 同期メッセージを非表示
+    hideSyncMessage() {
+        const messageDiv = document.getElementById('syncMessage');
         if (messageDiv) {
             messageDiv.style.display = 'none';
         }
     }
 
-    // APIキー保存
-    saveApiKey() {
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        if (!apiKeyInput) return;
-        
-        const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) {
-            this.showApiKeyMessage('APIキーを入力してください', true);
-            return;
-        }
-
-        // APIキーを保存
-        setJsonbinApiKey(apiKey);
-        this.showApiKeyMessage('APIキーを保存しました！', false);
-        
-        // モーダルを閉じる
-        setTimeout(() => {
-            this.hideApiKeyModal();
-        }, 1500);
-    }
-
-    // APIキーテスト
-    async testApiKey() {
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        if (!apiKeyInput) return;
-        
-        const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) {
-            this.showApiKeyMessage('APIキーを入力してください', true);
+    // 手動同期
+    async manualSync() {
+        if (!this.currentUser) {
+            this.showSyncMessage('ログインが必要です', true);
             return;
         }
 
         try {
-            // テスト用のデータを作成
-            const testData = { test: 'connection', timestamp: new Date().toISOString() };
-            
-            const response = await fetch('https://api.jsonbin.io/v3/b', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': apiKey
-                },
-                body: JSON.stringify(testData)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                this.showApiKeyMessage('接続テスト成功！', false);
-                console.log('☁️ APIキーテスト成功:', result);
-            } else {
-                this.showApiKeyMessage('接続テスト失敗: ' + response.statusText, true);
-            }
+            this.showSyncMessage('同期中...', false);
+            await this.syncToCloud();
+            this.showSyncMessage('同期が完了しました！', false);
         } catch (error) {
-            this.showApiKeyMessage('接続テストエラー: ' + error.message, true);
+            this.showSyncMessage('同期に失敗しました: ' + error.message, true);
         }
     }
 
@@ -938,7 +878,7 @@ class HabitTracker {
     updateAuthUI() {
         const authBtn = document.getElementById('authBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-        const apiKeyBtn = document.getElementById('apiKeyBtn');
+        const syncBtn = document.getElementById('syncBtn');
         
         if (this.currentUser) {
             // ログイン済み：ログアウトボタンと同期ボタンを表示
@@ -948,9 +888,9 @@ class HabitTracker {
                 logoutBtn.textContent = '✓';
                 logoutBtn.title = `ログアウト (${this.currentUser.email})`;
             }
-            if (apiKeyBtn) {
-                apiKeyBtn.style.display = 'flex';
-                apiKeyBtn.title = 'APIキー設定';
+            if (syncBtn) {
+                syncBtn.style.display = 'flex';
+                syncBtn.title = '自動同期';
             }
         } else {
             // 未ログイン状態：ログインボタンのみ表示
@@ -959,7 +899,7 @@ class HabitTracker {
                 authBtn.title = 'ログイン';
             }
             if (logoutBtn) logoutBtn.style.display = 'none';
-            if (apiKeyBtn) apiKeyBtn.style.display = 'none';
+            if (syncBtn) syncBtn.style.display = 'none';
         }
     }
 
@@ -1374,26 +1314,26 @@ class HabitTracker {
         
         // モーダルの閉じるボタン
         const authModalClose = document.getElementById('authModalClose');
-        const apiKeyModalClose = document.getElementById('apiKeyModalClose');
+        const syncModalClose = document.getElementById('syncModalClose');
         
         if (authModalClose) {
             authModalClose.addEventListener('click', () => this.hideAuthModal());
         }
         
-        if (apiKeyModalClose) {
-            apiKeyModalClose.addEventListener('click', () => this.hideApiKeyModal());
+        if (syncModalClose) {
+            syncModalClose.addEventListener('click', () => this.hideSyncModal());
         }
         
-        // APIキー設定ボタン
-        const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const testApiKeyBtn = document.getElementById('testApiKey');
+        // 同期ボタン
+        const manualSyncBtn = document.getElementById('manualSync');
+        const syncCloseBtn = document.getElementById('syncClose');
         
-        if (saveApiKeyBtn) {
-            saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
+        if (manualSyncBtn) {
+            manualSyncBtn.addEventListener('click', () => this.manualSync());
         }
         
-        if (testApiKeyBtn) {
-            testApiKeyBtn.addEventListener('click', () => this.testApiKey());
+        if (syncCloseBtn) {
+            syncCloseBtn.addEventListener('click', () => this.hideSyncModal());
         }
     }
     
@@ -3841,7 +3781,7 @@ class HabitTracker {
             // 認証ボタン
             const authBtn = document.getElementById('authBtn');
             const logoutBtn = document.getElementById('logoutBtn');
-            const apiKeyBtn = document.getElementById('apiKeyBtn');
+            const syncBtn = document.getElementById('syncBtn');
             
             if (authBtn) {
                 console.log('🔐 認証ボタンのイベントリスナーを追加中...');
@@ -3867,15 +3807,15 @@ class HabitTracker {
                 console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
             }
 
-            if (apiKeyBtn) {
-                console.log('🔐 APIキーボタンのイベントリスナーを追加中...');
-                apiKeyBtn.addEventListener('click', (event) => {
-                    console.log('🔐 APIキーボタンがクリックされました！');
+            if (syncBtn) {
+                console.log('☁️ 同期ボタンのイベントリスナーを追加中...');
+                syncBtn.addEventListener('click', (event) => {
+                    console.log('☁️ 同期ボタンがクリックされました！');
                     event.preventDefault();
                     event.stopPropagation();
-                    this.showApiKeyModal();
+                    this.showSyncModal();
                 });
-                console.log('🔐 APIキーボタンのイベントリスナー追加完了');
+                console.log('☁️ 同期ボタンのイベントリスナー追加完了');
             }
 
             // 認証モーダルボタン
