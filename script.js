@@ -561,43 +561,34 @@ class HabitTracker {
         // ゲストモードは削除済み
     }
 
-    // クラウドからデータを同期（JSONBin.io API使用）
+    // クラウドからデータを同期（ローカルストレージベース）
     async syncFromCloud() {
         if (!this.currentUser || this.isSyncing) return;
         
-        // 自動同期機能が有効
-        console.log('☁️ 自動同期機能が有効です');
-        
         try {
             this.isSyncing = true;
-            console.log('☁️ クラウドからデータを同期中...');
+            console.log('☁️ ローカルストレージからデータを同期中...');
             
-            // JSONBin.io APIからデータを取得
-            const response = await fetch(`${JSONBIN_API_URL}/${this.currentUser.id}/latest`, {
-                headers: {
-                    'X-Master-Key': JSONBIN_API_KEY
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const userData = data.record;
+            // ローカルストレージからデータを取得
+            const userData = localStorage.getItem(`habit_data_${this.currentUser.email}`);
+            if (userData) {
+                const data = JSON.parse(userData);
                 
-                if (userData && userData.email === this.currentUser.email) {
-                    // クラウドデータをローカルに適用
-                    this.completedHabits = userData.completedHabits || {};
-                    this.healthData = userData.healthData || {};
-                    this.achievements = userData.achievements || {};
+                if (data && data.email === this.currentUser.email) {
+                    // データをローカルに適用
+                    this.completedHabits = data.completedHabits || {};
+                    this.healthData = data.healthData || {};
+                    this.achievements = data.achievements || {};
                     
                     // ローカルストレージに保存
                     this.saveCompletedHabits();
                     this.saveHealthData();
                     this.saveAchievements();
                     
-                    console.log('✅ クラウドからデータを同期しました');
+                    console.log('✅ ローカルストレージからデータを同期しました');
                 }
             } else {
-                console.log('ℹ️ クラウドにデータが見つかりません（初回ログイン）');
+                console.log('ℹ️ ローカルストレージにデータが見つかりません（初回ログイン）');
             }
             
             // UIを更新
@@ -610,16 +601,13 @@ class HabitTracker {
         }
     }
 
-    // クラウドにデータを同期（JSONBin.io API使用）
+    // クラウドにデータを同期（ローカルストレージベース）
     async syncToCloud() {
         if (!this.currentUser || this.isSyncing) return;
         
-        // 自動同期機能が有効
-        console.log('☁️ 自動同期機能が有効です');
-        
         try {
             this.isSyncing = true;
-            console.log('☁️ クラウドにデータを同期中...');
+            console.log('☁️ ローカルストレージにデータを同期中...');
             
             const userData = {
                 userId: this.currentUser.id,
@@ -630,20 +618,10 @@ class HabitTracker {
                 lastSync: new Date().toISOString()
             };
 
-            const response = await fetch(`${JSONBIN_API_URL}/${this.currentUser.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': JSONBIN_API_KEY
-                },
-                body: JSON.stringify(userData)
-            });
-
-            if (response.ok) {
-                console.log('✅ クラウドにデータを同期しました');
-            } else {
-                console.error('❌ クラウド同期に失敗しました');
-            }
+            // ローカルストレージに保存
+            localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
+            
+            console.log('✅ ローカルストレージにデータを同期しました');
         } catch (error) {
             console.error('❌ 同期エラー:', error);
         } finally {
@@ -736,6 +714,9 @@ class HabitTracker {
         const messageDiv = document.getElementById('authMessage');
         if (messageDiv) {
             messageDiv.style.display = 'none';
+            messageDiv.textContent = '';
+            messageDiv.style.backgroundColor = '';
+            messageDiv.style.color = '';
         }
     }
 
@@ -949,20 +930,6 @@ class HabitTracker {
         this.hideAuthMessage();
     }
 
-    // メッセージを表示
-    showAuthMessage(message, type = 'error') {
-        const messageEl = document.getElementById('authMessage');
-        messageEl.textContent = message;
-        messageEl.style.display = 'block';
-        messageEl.style.backgroundColor = type === 'error' ? '#ff4444' : '#44ff44';
-        messageEl.style.color = type === 'error' ? 'white' : 'black';
-    }
-
-    // メッセージを非表示
-    hideAuthMessage() {
-        const messageEl = document.getElementById('authMessage');
-        messageEl.style.display = 'none';
-    }
 
     // ログイン処理（真のマルチデバイス対応）
     async login(email, password) {
