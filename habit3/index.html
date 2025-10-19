@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>習慣化アプリ v3 - 自動同期版</title>
+    <meta name="description" content="週間習慣トラッカー - 自動同期対応">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="習慣化v3">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijk2IiBmaWxsPSIjMDAwMDAwIi8+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijg0IiBmaWxsPSIjNEE5MEUyIi8+CjxzdmcgeD0iNDgiIHk9IjQ4IiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik03MiA0OEw0OCA3Mkw2MCA4NCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPGNpcmNsZSBjeD0iNzIiIGN5PSI3MiIgcj0iMTIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+Cjwvc3ZnPgo=">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- メインコンテンツ -->
+        <main class="main-content">
+            <!-- 週間ビュー -->
+            <section class="week-view" id="weekView">
+                <!-- 月選択 -->
+                <div class="month-selector">
+                    <button class="nav-arrow" id="prevWeek">‹</button>
+                    <div class="month-display">
+                        <span id="currentMonth">2025年1月</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="month-actions">
+                        <button class="nav-arrow" id="nextWeek">›</button>
+                        <button class="action-btn today-btn" id="goToToday">今日</button>
+                        <button id="authBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #4A90E2; color: white; font-size: 14px; display: flex; align-items: center; justify-content: center;" title="ログイン">👤</button>
+                        <button id="logoutBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #28a745; color: white; font-size: 14px; display: none; align-items: center; justify-content: center;" title="ログアウト">✓</button>
+                        <button id="syncBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #ffc107; color: #333; font-size: 14px; display: none; align-items: center; justify-content: center;" title="同期状況">☁️</button>
+                    </div>
+                </div>
+
+                <!-- 認証モーダル -->
+                <div id="authModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
+                    <div class="modal-content" style="background-color: #333; margin: 10% auto; padding: 30px; border: 1px solid #666; width: 90%; max-width: 400px; border-radius: 8px; position: relative;">
+                        <button id="authModalClose" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 5px; width: auto; height: auto; display: flex; align-items: center; justify-content: center; writing-mode: horizontal-tb; text-orientation: mixed; transform: none;">閉じる</button>
+                        <h3 style="color: white; margin-top: 0; text-align: center;">アカウント認証</h3>
+                        
+                        <!-- タブ切り替え -->
+                        <div style="display: flex; margin-bottom: 20px; border-bottom: 1px solid #555;">
+                            <button id="loginTab" class="auth-tab" style="flex: 1; padding: 10px; background-color: #4A90E2; color: white; border: none; border-radius: 4px 4px 0 0; cursor: pointer;">ログイン</button>
+                            <button id="signupTab" class="auth-tab" style="flex: 1; padding: 10px; background-color: #555; color: #ccc; border: none; border-radius: 4px 4px 0 0; cursor: pointer;">新規登録</button>
+                        </div>
+                        
+                        <!-- ログインフォーム -->
+                        <div id="loginForm" style="display: block;">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: white;">メールアドレス:</label>
+                                <input type="email" id="loginEmail" placeholder="example@email.com" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #555; background-color: #222; color: white; box-sizing: border-box;">
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; color: white;">パスワード:</label>
+                                <input type="password" id="loginPassword" placeholder="パスワード" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #555; background-color: #222; color: white; box-sizing: border-box;">
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: space-between;">
+                                <button id="loginSubmit" class="action-btn" style="flex: 1; padding: 12px; margin-right: 5px;">ログイン</button>
+                                <button id="authModalCancel" class="action-btn" style="flex: 1; padding: 12px; background-color: #666; margin-left: 5px;">キャンセル</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 新規登録フォーム -->
+                        <div id="signupForm" style="display: none;">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: white;">メールアドレス:</label>
+                                <input type="email" id="signupEmail" placeholder="example@email.com" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #555; background-color: #222; color: white; box-sizing: border-box;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: white;">パスワード:</label>
+                                <input type="password" id="signupPassword" placeholder="パスワード（6文字以上）" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #555; background-color: #222; color: white; box-sizing: border-box;">
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; color: white;">パスワード確認:</label>
+                                <input type="password" id="signupPasswordConfirm" placeholder="パスワード再入力" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #555; background-color: #222; color: white; box-sizing: border-box;">
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: space-between;">
+                                <button id="signupSubmit" class="action-btn" style="flex: 1; padding: 12px; margin-right: 5px;">新規登録</button>
+                                <button id="authModalCancel2" class="action-btn" style="flex: 1; padding: 12px; background-color: #666; margin-left: 5px;">キャンセル</button>
+                            </div>
+                        </div>
+                        
+                        <div id="authMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- 同期状況モーダル -->
+                <div id="syncModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
+                    <div class="modal-content" style="background-color: #333; margin: 10% auto; padding: 30px; border: 1px solid #666; width: 90%; max-width: 500px; border-radius: 8px; position: relative;">
+                        <button id="syncModalClose" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 5px; width: auto; height: auto; display: flex; align-items: center; justify-content: center; writing-mode: horizontal-tb; text-orientation: mixed; transform: none;">閉じる</button>
+                        <h3 style="color: white; margin-top: 0; text-align: center;">同期状況</h3>
+                        
+                        <div style="margin: 20px 0;">
+                            <div style="background-color: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <h4 style="color: #28a745; margin-top: 0;">✅ 自動同期が有効です</h4>
+                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">データは自動的にクラウドに保存され、他のデバイスと同期されます。</p>
+                            </div>
+                            
+                            <div style="background-color: #333; padding: 15px; border-radius: 8px;">
+                                <h4 style="color: #4A90E2; margin-top: 0;">📱 同期機能</h4>
+                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">• ログイン時：自動でクラウドからデータ取得</p>
+                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">• データ変更時：自動でクラウドに保存</p>
+                                <p style="color: #ccc; font-size: 14px; margin: 5px 0;">• 複数デバイス間でリアルタイム同期</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; justify-content: space-between;">
+                            <button id="manualSync" class="action-btn" style="flex: 1; padding: 12px; margin-right: 5px; background-color: #ffc107; color: #333;">手動同期</button>
+                            <button id="syncModalCancel" class="action-btn" style="flex: 1; padding: 12px; background-color: #666; margin-left: 5px;">閉じる</button>
+                        </div>
+                        
+                        <div id="syncMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- カレンダーグリッド -->
+                <div class="calendar-container">
+                    <div class="calendar-grid">
+                        <!-- ヘッダー行 -->
+                        <div class="grid-header">
+                            <div class="header-cell no-header">No.</div>
+                            <div class="header-cell item-header">項目</div>
+                            <div class="header-cell day-header">月</div>
+                            <div class="header-cell day-header">火</div>
+                            <div class="header-cell day-header">水</div>
+                            <div class="header-cell day-header">木</div>
+                            <div class="header-cell day-header">金</div>
+                            <div class="header-cell day-header">土</div>
+                            <div class="header-cell day-header">日</div>
+                            <div class="header-cell total-header">週計</div>
+                            <div class="header-cell total-header">合計</div>
+                        </div>
+                        
+                        <!-- 日付行 -->
+                        <div class="date-row" id="dateRow">
+                            <div class="date-cell empty-cell"></div>
+                            <div class="date-cell empty-cell"></div>
+                            <!-- 日付はJavaScriptで動的に生成 -->
+                            <div class="date-cell empty-cell"></div>
+                            <div class="date-cell empty-cell"></div>
+                        </div>
+
+                        <!-- 習慣グリッド -->
+                        <div class="habits-grid" id="habitsGrid">
+                            <!-- 習慣はJavaScriptで動的に生成 -->
+                        </div>
+                        
+                        <!-- 日計行 -->
+                        <div class="daily-total-row" id="dailyTotalRow">
+                            <!-- 日計はJavaScriptで動的に生成 -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ボトムナビゲーション -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" id="homeBtn">
+                <span class="nav-icon">🏠</span>
+                <span>ホーム</span>
+            </button>
+            <button class="nav-btn" id="statsBtn">
+                <span class="nav-icon">📊</span>
+                <span>統計</span>
+            </button>
+            <button class="nav-btn" id="settingsBtn">
+                <span class="nav-icon">⚙️</span>
+                <span>設定</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

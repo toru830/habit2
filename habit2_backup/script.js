@@ -1,16 +1,3 @@
-// JSONBin.io API設定（自動同期用）
-const JSONBIN_API_URL = 'https://api.jsonbin.io/v3/b';
-let JSONBIN_API_KEY = null; // 設定画面で設定
-
-// APIキーを設定する関数
-function setJsonbinApiKey(apiKey) {
-    JSONBIN_API_KEY = apiKey;
-    window.jsonbinConfig.apiKey = apiKey;
-    window.jsonbinConfig.enabled = true;
-    localStorage.setItem('jsonbin_api_key', apiKey);
-    console.log('☁️ JSONBin.io APIキーを設定しました');
-}
-
 // 習慣データの定義
 const habitsData = [
     // 習慣系
@@ -404,10 +391,6 @@ class HabitTracker {
         // 認証システム
         this.currentUser = null;
         this.apiBaseUrl = 'https://api.github.com';
-        
-        // 自動同期システム
-        this.isSyncing = false;
-        this.syncEnabled = true;
 
         this.setupAuth();
         this.init();
@@ -415,21 +398,14 @@ class HabitTracker {
 
     init() {
         console.log('🔐 アプリ初期化開始');
-        
-        // 保存されたJSONBin.io APIキーを読み込み
-        const savedApiKey = localStorage.getItem('jsonbin_api_key');
-        if (savedApiKey) {
-            setJsonbinApiKey(savedApiKey);
-        }
-        
         this.renderCalendar();
         this.setupEventListeners();
         
         // データエクスポート/インポート機能を設定
         this.setupDataTransfer();
         this.setupMonthlyCalendarEvents();
-        // 自動同期機能を有効化
-        console.log('☁️ 自動同期機能が有効です');
+        // 同期機能を完全に無効化（データ消失を防ぐため）
+        console.log('同期機能は完全に無効化されています');
         
         // 初期化時に認証UIを更新
         this.updateAuthUI();
@@ -566,99 +542,82 @@ class HabitTracker {
         // ゲストモードは削除済み
     }
 
-    // クラウドからデータを同期（JSONBin.io API使用）
+    // クラウドからデータを同期（真のマルチデバイス対応）
     async syncFromCloud() {
-        if (!this.currentUser || this.isSyncing) return;
-        
-        // APIキーが設定されていない場合はスキップ
-        if (!JSONBIN_API_KEY) {
-            console.log('ℹ️ JSONBin.io APIキーが設定されていません');
-            return;
-        }
+        if (!this.currentUser) return;
         
         try {
-            this.isSyncing = true;
-            console.log('☁️ クラウドからデータを同期中...');
+            // まずローカルデータを確認
+            const localData = localStorage.getItem(`habit_data_${this.currentUser.id}`);
+            if (localData) {
+                const userData = JSON.parse(localData);
+                this.completedHabits = userData.completedHabits || {};
+                this.healthData = userData.healthData || {};
+                this.achievements = userData.achievements || {};
+                console.log('🔐 ローカルデータを読み込みました');
+            }
             
-            // JSONBin.io APIからデータを取得
-            const response = await fetch(`${JSONBIN_API_URL}/${this.currentUser.id}/latest`, {
-                headers: {
-                    'X-Master-Key': JSONBIN_API_KEY
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const userData = data.record;
-                
-                if (userData && userData.email === this.currentUser.email) {
-                    // クラウドデータをローカルに適用
-                    this.completedHabits = userData.completedHabits || {};
-                    this.healthData = userData.healthData || {};
-                    this.achievements = userData.achievements || {};
+            // 真のクラウド同期：GitHub Gistからデータを取得
+            try {
+                const gistId = localStorage.getItem(`gist_id_${this.currentUser.email}`);
+                if (gistId) {
+                    const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                        headers: {
+                            'Authorization': `token ${localStorage.getItem('github_token')}`
+                        }
+                    });
                     
-                    // ローカルストレージに保存
-                    this.saveCompletedHabits();
-                    this.saveHealthData();
-                    this.saveAchievements();
-                    
-                    console.log('✅ クラウドからデータを同期しました');
+                    if (response.ok) {
+                        const gist = await response.json();
+                        const cloudData = JSON.parse(gist.files['habit_data.json'].content);
+                        
+                        if (cloudData.email === this.currentUser.email) {
+                            // クラウドデータをローカルに適用
+                            this.completedHabits = cloudData.completedHabits || {};
+                            this.healthData = cloudData.healthData || {};
+                            this.achievements = cloudData.achievements || {};
+                            
+                            // ローカルストレージに保存
+                            this.saveCompletedHabits();
+                            this.saveHealthData();
+                            this.saveAchievements();
+                            
+                            console.log('🔐 クラウドからデータを同期しました');
+                        }
+                    }
                 }
-            } else {
-                console.log('ℹ️ クラウドにデータが見つかりません（初回ログイン）');
+            } catch (cloudError) {
+                console.warn('クラウド同期失敗、ローカルデータを使用:', cloudError);
             }
             
             // UIを更新
             this.renderCalendar();
             this.updateStatsView();
         } catch (error) {
-            console.error('❌ 同期エラー:', error);
-        } finally {
-            this.isSyncing = false;
+            console.error('同期エラー:', error);
         }
     }
 
-    // クラウドにデータを同期（JSONBin.io API使用）
+    // クラウドにデータを同期
     async syncToCloud() {
-        if (!this.currentUser || this.isSyncing) return;
-        
-        // APIキーが設定されていない場合はスキップ
-        if (!JSONBIN_API_KEY) {
-            console.log('ℹ️ JSONBin.io APIキーが設定されていません');
-            return;
-        }
+        if (!this.currentUser) return;
         
         try {
-            this.isSyncing = true;
-            console.log('☁️ クラウドにデータを同期中...');
-            
-            const userData = {
-                userId: this.currentUser.id,
-                email: this.currentUser.email,
-                completedHabits: this.completedHabits,
-                healthData: this.healthData,
-                achievements: this.achievements,
-                lastSync: new Date().toISOString()
-            };
-
-            const response = await fetch(`${JSONBIN_API_URL}/${this.currentUser.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': JSONBIN_API_KEY
-                },
-                body: JSON.stringify(userData)
-            });
-
-            if (response.ok) {
-                console.log('✅ クラウドにデータを同期しました');
-            } else {
-                console.error('❌ クラウド同期に失敗しました');
+            if (window.cloudSync && window.cloudSync.loadConfig()) {
+                const data = {
+                    userId: this.currentUser.id,
+                    email: this.currentUser.email,
+                    completedHabits: this.completedHabits,
+                    healthData: this.healthData,
+                    achievements: this.achievements,
+                    lastSync: new Date().toISOString()
+                };
+                
+                await window.cloudSync.saveData(data);
+                console.log('🔐 クラウドにデータを同期しました');
             }
         } catch (error) {
-            console.error('❌ 同期エラー:', error);
-        } finally {
-            this.isSyncing = false;
+            console.error('クラウド同期エラー:', error);
         }
     }
 
@@ -833,33 +792,31 @@ class HabitTracker {
 
     // ゲストモードは削除済み
 
-    // APIキー設定モーダルを表示
-    showApiKeyModal() {
-        const modal = document.getElementById('apiKeyModal');
+    // クラウド同期モーダルを表示
+    showCloudSyncModal() {
+        const modal = document.getElementById('cloudSyncModal');
         if (modal) {
             modal.style.display = 'block';
             // 既存の設定を読み込み
             const apiKey = localStorage.getItem('jsonbin_api_key');
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            if (apiKeyInput && apiKey) {
-                apiKeyInput.value = apiKey;
+            if (apiKey) {
+                document.getElementById('jsonbinApiKey').value = apiKey;
             }
         }
     }
 
-    // APIキー設定モーダルを非表示
-    hideApiKeyModal() {
-        const modal = document.getElementById('apiKeyModal');
+    // クラウド同期モーダルを非表示
+    hideCloudSyncModal() {
+        const modal = document.getElementById('cloudSyncModal');
         if (modal) {
             modal.style.display = 'none';
-            this.hideApiKeyMessage();
+            this.hideCloudSyncMessage();
         }
     }
 
     // クラウド同期メッセージを表示
-    // APIキーメッセージを表示
-    showApiKeyMessage(message, isError = false) {
-        const messageDiv = document.getElementById('apiKeyMessage');
+    showCloudSyncMessage(message, isError = false) {
+        const messageDiv = document.getElementById('cloudSyncMessage');
         if (messageDiv) {
             messageDiv.textContent = message;
             messageDiv.style.display = 'block';
@@ -868,68 +825,40 @@ class HabitTracker {
         }
     }
 
-    // APIキーメッセージを非表示
-    hideApiKeyMessage() {
-        const messageDiv = document.getElementById('apiKeyMessage');
+    // クラウド同期メッセージを非表示
+    hideCloudSyncMessage() {
+        const messageDiv = document.getElementById('cloudSyncMessage');
         if (messageDiv) {
             messageDiv.style.display = 'none';
         }
     }
 
-    // APIキー保存
-    saveApiKey() {
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        if (!apiKeyInput) return;
-        
-        const apiKey = apiKeyInput.value.trim();
+    // クラウド同期接続テスト
+    async testCloudSyncConnection() {
+        const apiKey = document.getElementById('jsonbinApiKey').value;
         if (!apiKey) {
-            this.showApiKeyMessage('APIキーを入力してください', true);
-            return;
-        }
-
-        // APIキーを保存
-        setJsonbinApiKey(apiKey);
-        this.showApiKeyMessage('APIキーを保存しました！', false);
-        
-        // モーダルを閉じる
-        setTimeout(() => {
-            this.hideApiKeyModal();
-        }, 1500);
-    }
-
-    // APIキーテスト
-    async testApiKey() {
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        if (!apiKeyInput) return;
-        
-        const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) {
-            this.showApiKeyMessage('APIキーを入力してください', true);
+            this.showCloudSyncMessage('API Keyを入力してください。', true);
             return;
         }
 
         try {
-            // テスト用のデータを作成
-            const testData = { test: 'connection', timestamp: new Date().toISOString() };
+            // 一時的にAPI Keyを設定してテスト
+            const originalApiKey = window.cloudSync.apiKey;
+            window.cloudSync.apiKey = apiKey;
             
-            const response = await fetch('https://api.jsonbin.io/v3/b', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': apiKey
-                },
-                body: JSON.stringify(testData)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                this.showApiKeyMessage('接続テスト成功！', false);
-                console.log('☁️ APIキーテスト成功:', result);
+            const isConnected = await window.cloudSync.testConnection();
+            
+            if (isConnected) {
+                this.showCloudSyncMessage('接続テスト成功！', false);
             } else {
-                this.showApiKeyMessage('接続テスト失敗: ' + response.statusText, true);
+                this.showCloudSyncMessage('接続テスト失敗。API Keyを確認してください。', true);
             }
+            
+            // 元のAPI Keyに戻す
+            window.cloudSync.apiKey = originalApiKey;
         } catch (error) {
-            this.showApiKeyMessage('接続テストエラー: ' + error.message, true);
+            console.error('接続テストエラー:', error);
+            this.showCloudSyncMessage('接続テストエラー: ' + error.message, true);
         }
     }
 
@@ -981,7 +910,7 @@ class HabitTracker {
     updateAuthUI() {
         const authBtn = document.getElementById('authBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-        const apiKeyBtn = document.getElementById('apiKeyBtn');
+        const cloudSyncBtn = document.getElementById('cloudSyncBtn');
         
         if (this.currentUser) {
             // ログイン済み：ログアウトボタンと同期ボタンを表示
@@ -991,9 +920,9 @@ class HabitTracker {
                 logoutBtn.textContent = '✓';
                 logoutBtn.title = `ログアウト (${this.currentUser.email})`;
             }
-            if (apiKeyBtn) {
-                apiKeyBtn.style.display = 'flex';
-                apiKeyBtn.title = 'APIキー設定';
+            if (cloudSyncBtn) {
+                cloudSyncBtn.style.display = 'flex';
+                cloudSyncBtn.title = 'データ同期';
             }
         } else {
             // 未ログイン状態：ログインボタンのみ表示
@@ -1002,7 +931,7 @@ class HabitTracker {
                 authBtn.title = 'ログイン';
             }
             if (logoutBtn) logoutBtn.style.display = 'none';
-            if (apiKeyBtn) apiKeyBtn.style.display = 'none';
+            if (cloudSyncBtn) cloudSyncBtn.style.display = 'none';
         }
     }
 
@@ -1067,16 +996,20 @@ class HabitTracker {
     async login(email, password) {
         try {
             console.log('🔐 ログイン試行:', email);
+            alert('🔐 ログイン試行: ' + email);
             
             // ローカルストレージからユーザー情報を取得
             const users = JSON.parse(localStorage.getItem('habit_users') || '{}');
             console.log('🔐 登録済みユーザー:', Object.keys(users));
+            alert('🔐 登録済みユーザー: ' + Object.keys(users).join(', '));
             
             const userRecord = users[email];
             console.log('🔐 ユーザーレコード:', userRecord);
+            alert('🔐 ユーザーレコード: ' + (userRecord ? '存在' : '存在しない'));
             
             if (userRecord && userRecord.passwordHash === btoa(password)) {
                 console.log('🔐 パスワード認証成功');
+                alert('🔐 パスワード認証成功');
                 this.currentUser = { id: userRecord.id, email: userRecord.email };
                 localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
                 
@@ -1090,6 +1023,7 @@ class HabitTracker {
             } else {
                 // ユーザーが見つからない場合、新規登録を試行
                 console.log('🔐 ユーザーが見つからない、新規登録を試行');
+                alert('🔐 ユーザーが見つからない、新規登録を試行');
                 
                 // 新規登録処理
                 const userId = `user_${Date.now()}`;
@@ -1115,6 +1049,7 @@ class HabitTracker {
             }
         } catch (error) {
             console.error('ログインエラー:', error);
+            alert('ログインエラー: ' + error.message);
             this.showAuthMessage('ログインに失敗しました: ' + error.message);
             return false;
         }
@@ -1496,26 +1431,14 @@ class HabitTracker {
         
         // モーダルの閉じるボタン
         const authModalClose = document.getElementById('authModalClose');
-        const apiKeyModalClose = document.getElementById('apiKeyModalClose');
+        const cloudSyncModalClose = document.getElementById('cloudSyncModalClose');
         
         if (authModalClose) {
             authModalClose.addEventListener('click', () => this.hideAuthModal());
         }
         
-        if (apiKeyModalClose) {
-            apiKeyModalClose.addEventListener('click', () => this.hideApiKeyModal());
-        }
-        
-        // APIキー設定ボタン
-        const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const testApiKeyBtn = document.getElementById('testApiKey');
-        
-        if (saveApiKeyBtn) {
-            saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
-        }
-        
-        if (testApiKeyBtn) {
-            testApiKeyBtn.addEventListener('click', () => this.testApiKey());
+        if (cloudSyncModalClose) {
+            cloudSyncModalClose.addEventListener('click', () => this.hideCloudSyncModal());
         }
     }
     
@@ -2801,8 +2724,6 @@ class HabitTracker {
         // クラウドに自動保存（認証済みのみ）
         if (this.currentUser) {
             this.saveUserData();
-            // 自動同期を実行
-            this.syncToCloud();
         }
         
         // 達成チェックを実行
@@ -3963,7 +3884,7 @@ class HabitTracker {
             // 認証ボタン
             const authBtn = document.getElementById('authBtn');
             const logoutBtn = document.getElementById('logoutBtn');
-            const apiKeyBtn = document.getElementById('apiKeyBtn');
+            const cloudSyncBtn = document.getElementById('cloudSyncBtn');
             
             if (authBtn) {
                 console.log('🔐 認証ボタンのイベントリスナーを追加中...');
@@ -3989,15 +3910,15 @@ class HabitTracker {
                 console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
             }
 
-            if (apiKeyBtn) {
-                console.log('🔐 APIキーボタンのイベントリスナーを追加中...');
-                apiKeyBtn.addEventListener('click', (event) => {
-                    console.log('🔐 APIキーボタンがクリックされました！');
+            if (cloudSyncBtn) {
+                console.log('🔐 クラウド同期ボタンのイベントリスナーを追加中...');
+                cloudSyncBtn.addEventListener('click', (event) => {
+                    console.log('🔐 クラウド同期ボタンがクリックされました！');
                     event.preventDefault();
                     event.stopPropagation();
-                    this.showApiKeyModal();
+                    this.showCloudSyncModal();
                 });
-                console.log('🔐 APIキーボタンのイベントリスナー追加完了');
+                console.log('🔐 クラウド同期ボタンのイベントリスナー追加完了');
             }
 
             // 認証モーダルボタン
@@ -5403,11 +5324,6 @@ class HabitTracker {
         this.healthData[dateStr][type] = !this.healthData[dateStr][type];
         console.log('ヘルスデータ切り替え:', { dateStr, type, newValue: this.healthData[dateStr][type], allData: this.healthData });
         this.saveHealthData();
-        
-        // 自動同期を実行（認証済みのみ）
-        if (this.currentUser) {
-            this.syncToCloud();
-        }
     }
 
     // ヘルス表示の更新

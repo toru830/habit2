@@ -1,0 +1,3143 @@
+/* リセットとベーススタイル */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+    min-height: 100vh;
+    color: #fff;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #000 !important;
+    height: 100vh;
+    position: relative;
+    padding-bottom: 0;
+    overflow-y: auto;
+}
+
+/* ヘッダー */
+.header {
+    background: #1a1a1a;
+    color: white;
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #333;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.header-btn {
+    background: #333;
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 習慣名のスタイル */
+.habit-name {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.habit-number {
+    font-weight: bold;
+    color: #4A90E2;
+    font-size: 12px;
+    margin-bottom: 1px;
+}
+
+.habit-short-name {
+    font-size: 9px;
+    color: white;
+    text-align: center;
+    word-break: keep-all;
+}
+
+/* メインコンテンツ */
+.main-content {
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 120px);
+    background: #000 !important;
+}
+
+/* 週間ビュー */
+.week-view {
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+    background: #000 !important;
+}
+
+/* 月選択 */
+.month-selector {
+    background: #1a1a1a;
+    padding: 4px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.nav-arrow {
+    background: #333;
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.month-display {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    color: #666;
+}
+
+.month-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    background: #333;
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.today-btn {
+    background: #4A90E2;
+    font-weight: bold;
+    width: auto;
+    padding: 2px 8px;
+    font-size: 10px;
+}
+
+.today-btn:hover {
+    background: #357ABD;
+}
+
+/* カレンダーコンテナ */
+.calendar-container {
+    background: #000;
+    overflow-x: auto;
+    overflow-y: hidden;
+    transition: transform 0.2s ease-out;
+    touch-action: pan-y pinch-zoom; /* 縦スクロールとピンチズームは許可、横スクロールは制御 */
+}
+
+/* スワイプ時の視覚的フィードバック */
+.calendar-container.swiping-left {
+    transform: translateX(-5px);
+}
+
+.calendar-container.swiping-right {
+    transform: translateX(5px);
+}
+
+.calendar-grid {
+    display: flex;
+    flex-direction: column;
+    background: #000 !important;
+    min-height: 100vh;
+}
+
+/* グリッドヘッダー */
+.grid-header {
+    display: grid;
+    grid-template-columns: 30px 50px repeat(7, 1fr) 41px 41px;
+    min-height: 24px;
+    background: #000 !important;
+}
+
+.grid-header .header-cell {
+    height: 24px;
+    padding: 1px 2px;
+}
+
+.header-cell {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    color: white;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-header {
+    font-weight: bold;
+}
+
+.item-header {
+    font-weight: bold;
+}
+
+.day-header {
+    font-weight: bold;
+}
+
+.day-header:nth-child(8) {
+    color: #4A90E2; /* 土曜日を青色 */
+}
+
+.day-header:nth-child(9) {
+    color: #ff6b6b; /* 日曜日を赤色 */
+}
+
+.total-header {
+    font-weight: bold;
+    background: #2a2a2a;
+    color: #4A90E2;
+    font-size: 10.5px;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+    transform: none;
+}
+
+.day-label {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    border-right: 1px solid #333;
+}
+
+.day-label:first-child {
+    border-right: 1px solid #333;
+}
+
+/* 日付行 */
+.date-row {
+    display: grid;
+    grid-template-columns: 30px 50px repeat(7, 1fr) 41px 41px;
+    min-height: 24px;
+    background: #000 !important;
+}
+
+.date-row .date-cell {
+    height: 24px;
+    padding: 1px 2px;
+}
+
+.empty-cell {
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+}
+
+.date-cell {
+    padding: 4px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 35px;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.date-number {
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.date-cell.today {
+    background: #4A90E2;
+    color: white;
+    border-left: 2px solid #4A90E2;
+    border-right: 2px solid #4A90E2;
+    border-top: 2px solid #4A90E2;
+}
+
+
+.date-cell:first-child {
+    border-right: 1px solid #333;
+}
+
+/* 習慣グリッド */
+.habits-grid {
+    display: flex;
+    flex-direction: column;
+    background: #000 !important;
+}
+
+/* グループヘッダー行 */
+.group-header-row {
+    display: grid;
+    grid-template-columns: 40px 80px repeat(7, 1fr) 50px 50px;
+    border-bottom: 1px solid #333;
+    min-height: 35px;
+}
+
+.group-header-no-cell {
+    padding: 4px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 35px;
+}
+
+.group-header-cell {
+    padding: 4px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 35px;
+    white-space: pre-line;
+    line-height: 1;
+}
+
+.group-header-empty-cell {
+    padding: 4px 2px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    height: 35px;
+}
+
+.habit-row {
+    display: grid;
+    grid-template-columns: 30px 50px repeat(7, 1fr) 41px 41px;
+    border-bottom: 1px solid #333;
+    min-height: 32px;
+    background: #000 !important;
+}
+
+/* No.から5行目までを一つの黒四角で囲む */
+.grid-header,
+.date-row,
+.habit-row:nth-child(1),
+.habit-row:nth-child(2),
+.habit-row:nth-child(3),
+.habit-row:nth-child(4),
+.habit-row:nth-child(5) {
+    border-left: 3px solid #000;
+    border-right: 3px solid #000;
+    background: #1a1a1a;
+    min-height: 32px;
+}
+
+.grid-header {
+    border-top: 3px solid #000;
+    margin: 2px 0 0 0;
+}
+
+.date-row {
+    margin: 0;
+}
+
+.habit-row:nth-child(1),
+.habit-row:nth-child(2),
+.habit-row:nth-child(3),
+.habit-row:nth-child(4) {
+    margin: 0;
+}
+
+.habit-row:nth-child(5) {
+    border-bottom: 3px solid #000;
+    margin: 0 0 2px 0;
+}
+
+.habit-row:nth-child(1) .habit-cell,
+.habit-row:nth-child(2) .habit-cell,
+.habit-row:nth-child(3) .habit-cell,
+.habit-row:nth-child(4) .habit-cell,
+.habit-row:nth-child(5) .habit-cell,
+.habit-row:nth-child(1) .habit-no-cell,
+.habit-row:nth-child(2) .habit-no-cell,
+.habit-row:nth-child(3) .habit-no-cell,
+.habit-row:nth-child(4) .habit-no-cell,
+.habit-row:nth-child(5) .habit-no-cell,
+.habit-row:nth-child(1) .habit-item-cell,
+.habit-row:nth-child(2) .habit-item-cell,
+.habit-row:nth-child(3) .habit-item-cell,
+.habit-row:nth-child(4) .habit-item-cell,
+.habit-row:nth-child(5) .habit-item-cell,
+.habit-row:nth-child(1) .habit-total-cell,
+.habit-row:nth-child(2) .habit-total-cell,
+.habit-row:nth-child(3) .habit-total-cell,
+.habit-row:nth-child(4) .habit-total-cell,
+.habit-row:nth-child(5) .habit-total-cell {
+    height: 32px;
+    padding: 1px 2px;
+}
+
+/* 日計行 */
+.daily-total-row {
+    display: grid;
+    grid-template-columns: 30px 50px repeat(7, 1fr) 41px 41px;
+    border-bottom: 1px solid #333;
+    min-height: 32px;
+    background: #000 !important;
+}
+
+/* 習慣セル */
+.habit-no-cell {
+    padding: 1px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 32px;
+    min-width: 30px;
+    max-width: 30px;
+    box-sizing: border-box;
+}
+
+.habit-item-cell {
+    padding: 1px 2px;
+    text-align: left;
+    color: white;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 10px;
+    height: 32px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 50px;
+    max-width: 50px;
+    box-sizing: border-box;
+}
+
+.habit-total-cell {
+    padding: 1px 2px;
+    text-align: center;
+    color: white;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    height: 32px;
+    min-width: 41px;
+    max-width: 41px;
+    box-sizing: border-box;
+}
+
+.habit-name {
+    padding: 4px 2px;
+    font-size: 10px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a1a;
+    line-height: 1.1;
+    pointer-events: none;
+    border-bottom: 1px solid #333;
+}
+
+.habit-cell {
+    padding: 1px 2px;
+    text-align: center;
+    border-right: 1px solid #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    height: 32px;
+    /* クリック操作のみ */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    pointer-events: auto;
+    border-bottom: 1px solid #333;
+    background: #000 !important;
+}
+
+.habit-cell.today {
+    border-left: 2px solid #4A90E2;
+    border-right: 2px solid #4A90E2;
+}
+
+.habit-cell.today:last-of-type {
+    border-bottom: 2px solid #4A90E2;
+}
+
+.habit-cell:hover {
+    background: #1a1a1a;
+}
+
+.habit-cell.completed {
+    background: #000 !important;
+}
+
+.habit-cell.completed::after {
+    content: '✓';
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* チェックマークの色分け */
+.habit-cell.completed.priority-5::after {
+    color: #ff6b6b;
+}
+
+.habit-cell.completed.priority-4::after {
+    color: #ff6b6b;
+}
+
+.habit-cell.completed.priority-3::after {
+    color: #ff6b6b;
+}
+
+.habit-cell.completed.priority-2::after {
+    color: #ff6b6b;
+}
+
+.habit-cell.completed.priority-1::after {
+    color: #ff6b6b;
+}
+
+/* 統計ビュー */
+.stats-view {
+    padding: 20px;
+    background: #000;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* モンスタービュー */
+.monster-view {
+    padding: 15px;
+    background: #000;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.monster-view h2 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.monster-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.monster-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 14px 12px;
+    border: 1px solid #333;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.monster-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.4);
+}
+
+.monster-name {
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.monster-level {
+    color: #ffd700;
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.monster-image {
+    width: 64px;
+    height: 64px;
+    background: #333;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    border: 2px solid #555;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
+    animation: float 4.2s ease-in-out infinite;
+}
+
+.monster-image span {
+    display: inline-block;
+    animation: breathe 3.6s ease-in-out infinite;
+}
+
+.monster-description {
+    color: #ccc;
+    font-size: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.monster-title {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.monster-flavor {
+    color: #9ca3af;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+.monster-stats {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #4A90E2;
+    font-size: 9px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.monster-card--legendary {
+    border: 1px solid var(--monster-legendary-color, #4A90E2);
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.06), var(--monster-legendary-gradient, rgba(74, 144, 226, 0.16)));
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.45);
+    grid-column: 1 / -1;
+}
+
+.monster-card--legendary::after {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background: radial-gradient(circle at top, var(--monster-legendary-glow, rgba(74, 144, 226, 0.35)) 0%, transparent 65%);
+    opacity: 0.85;
+    mix-blend-mode: screen;
+    animation: aurora 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.monster-card--legendary > * {
+    position: relative;
+    z-index: 1;
+}
+
+.monster-image--legendary {
+    border-color: var(--monster-legendary-color, #4A90E2) !important;
+    background: radial-gradient(circle, var(--monster-legendary-glow, rgba(74, 144, 226, 0.45)) 0%, rgba(0, 0, 0, 0.75) 70%);
+    box-shadow: 0 0 22px var(--monster-legendary-glow, rgba(74, 144, 226, 0.45));
+    animation: float 3.5s ease-in-out infinite, pulseLegendary 4.5s ease-in-out infinite;
+}
+
+.monster-card--legendary .monster-image span {
+    font-size: 32px;
+}
+
+.monster-card--legendary .monster-name {
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes breathe {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+@keyframes aurora {
+    0% { transform: translateX(-15%) rotate(0deg); opacity: 0.65; }
+    50% { transform: translateX(15%) rotate(2deg); opacity: 1; }
+    100% { transform: translateX(-15%) rotate(0deg); opacity: 0.65; }
+}
+
+@keyframes pulseLegendary {
+    0% { box-shadow: 0 0 18px var(--monster-legendary-glow, rgba(74, 144, 226, 0.35)); }
+    50% { box-shadow: 0 0 30px var(--monster-legendary-glow, rgba(74, 144, 226, 0.6)); }
+    100% { box-shadow: 0 0 18px var(--monster-legendary-glow, rgba(74, 144, 226, 0.35)); }
+}
+
+/* 同期ステータスバー */
+.sync-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin: 10px 16px;
+    font-size: 12px;
+}
+
+.sync-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sync-status {
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.sync-status.connected {
+    color: #4CAF50;
+}
+
+.sync-status.syncing {
+    color: #FF9800;
+}
+
+.sync-status.error {
+    color: #F44336;
+}
+
+.sync-status.disconnected {
+    color: #9E9E9E;
+}
+
+.last-sync-time {
+    font-size: 10px;
+    color: #ccc;
+}
+
+.sync-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+}
+
+.sync-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.sync-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.sync-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* グラフセクション */
+.chart-section {
+    margin: 30px 0;
+}
+
+.chart-section h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.chart-container {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+    text-align: center;
+}
+
+/* レポートテーブルセクション */
+.report-table-section {
+    margin: 30px 0;
+}
+
+.report-table {
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+    overflow: hidden;
+}
+
+.report-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.report-table th {
+    background: #2a2a2a;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.report-table th:last-child,
+.report-table td:last-child {
+    border-right: none;
+}
+
+.report-table tr:last-child td {
+    border-bottom: none;
+}
+
+.report-table td {
+    color: white;
+    font-size: 12px;
+}
+
+/* レポートテーブル - 最上段のみ */
+.report-table {
+    background: #000;
+    border: 1px solid #333;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.report-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th {
+    background: #2a2a2a;
+    color: white;
+    padding: 6px 8px;
+    text-align: center;
+    border-right: 1px solid #333;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.report-table th:last-child {
+    border-right: none;
+}
+
+.report-table td {
+    background: #000;
+    color: white;
+    padding: 6px 8px;
+    text-align: center;
+    border-right: 1px solid #333;
+    border-bottom: 1px solid #333;
+    font-size: 12px;
+}
+
+.report-table td:last-child {
+    border-right: none;
+}
+
+.report-table td:nth-child(2) {
+    text-align: left;
+}
+
+/* ボトムナビゲーション */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    display: flex;
+    z-index: 1000;
+}
+
+.nav-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+.nav-btn.active {
+    color: #4A90E2;
+}
+
+.nav-btn.add-btn {
+    background: #4A90E2;
+    color: white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -10px 10px;
+    flex: none;
+}
+
+.nav-btn.add-btn .nav-icon {
+    font-size: 24px;
+}
+
+.nav-btn:hover {
+    color: white;
+}
+
+.nav-icon {
+    font-size: 20px;
+}
+
+.nav-btn span:last-child {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* スクロールバー */
+.calendar-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.calendar-container::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.calendar-container::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* カレンダーモーダル */
+.calendar-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.modal-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 18px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: #333;
+}
+
+.calendar-container-modal {
+    background: #000;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.calendar-header span {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.month-nav {
+    background: #333;
+    border: none;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.month-nav:hover {
+    background: #555;
+}
+
+.calendar-grid-modal {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-day-header {
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+.calendar-day {
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 14px;
+    color: white;
+    background: #1a1a1a;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.calendar-day:hover {
+    background: #333;
+}
+
+.calendar-day.today {
+    background: #4A90E2;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.selected {
+    background: #28a745;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.other-month {
+    color: #666;
+    background: #0a0a0a;
+}
+
+/* 連続日数の色分け */
+.habit-streak-cell.streak-0 {
+    color: white;
+}
+
+.habit-streak-cell.streak-1 {
+    color: white;
+}
+
+.habit-streak-cell.streak-2 {
+    color: #4A90E2;
+}
+
+.habit-streak-cell.streak-3 {
+    color: #28a745;
+}
+
+.habit-streak-cell.streak-4 {
+    color: #ff8c00;
+}
+
+.habit-streak-cell.streak-5 {
+    color: #ff6b6b;
+}
+
+.habit-streak-cell.streak-6 {
+    color: #8a2be2;
+}
+
+.habit-streak-cell.streak-7 {
+    color: #ffd700;
+}
+
+.habit-streak-cell.streak-8-or-more {
+    color: #ffd700;
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 6-8行目のグループ枠線（グレー） */
+.habit-row:nth-child(6) {
+    border-top: 3px solid #666;
+    border-left: 3px solid #666;
+    border-right: 3px solid #666;
+    margin: 2px 0 0 0;
+    background: #1a1a1a;
+    min-height: 32px;
+}
+
+.habit-row:nth-child(7) {
+    border-left: 3px solid #666;
+    border-right: 3px solid #666;
+    margin: 0;
+    background: #1a1a1a;
+    min-height: 32px;
+}
+
+.habit-row:nth-child(8) {
+    border-bottom: 3px solid #666;
+    border-left: 3px solid #666;
+    border-right: 3px solid #666;
+    margin: 0 0 2px 0;
+    background: #1a1a1a;
+    min-height: 32px;
+}
+
+
+/* 9-15行目のグループ枠線（濃い緑） */
+.habit-row:nth-child(9) {
+    border-top: 3px solid #1a5f1a;
+    border-left: 3px solid #1a5f1a;
+    border-right: 3px solid #1a5f1a;
+    margin: 2px 0 0 0;
+    background: #1a1a1a;
+}
+
+.habit-row:nth-child(10),
+.habit-row:nth-child(11),
+.habit-row:nth-child(12),
+.habit-row:nth-child(13),
+.habit-row:nth-child(14) {
+    border-left: 3px solid #1a5f1a;
+    border-right: 3px solid #1a5f1a;
+    margin: 0;
+    background: #1a1a1a;
+}
+
+.habit-row:nth-child(15) {
+    border-bottom: 3px solid #1a5f1a;
+    border-left: 3px solid #1a5f1a;
+    border-right: 3px solid #1a5f1a;
+    margin: 0 0 2px 0;
+    background: #1a1a1a;
+}
+
+
+
+/* 日計行は黒太枠で囲む */
+.daily-total-row {
+    margin: 2px 0 0 0;
+    border: 3px solid #000;
+    border-radius: 4px;
+    background: #1a1a1a;
+}
+
+/* 週計の数字の色分け */
+.habit-total-cell[data-total="0"] {
+    color: white;
+}
+
+.habit-total-cell[data-total="1"] {
+    color: #4A90E2;
+}
+
+.habit-total-cell[data-total="2"] {
+    color: #ffd700;
+}
+
+.habit-total-cell[data-total="3"] {
+    color: #28a745;
+}
+
+.habit-total-cell[data-total="4"] {
+    color: #ff8c00;
+}
+
+.habit-total-cell[data-total="5"] {
+    color: #ff6b6b;
+}
+
+.habit-total-cell[data-total="6"] {
+    color: #8a2be2;
+}
+
+.habit-total-cell[data-total="7"] {
+    color: #ff69b4;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 480px) {
+    .app-container {
+        box-shadow: none;
+        max-width: 100%;
+        height: 100vh;
+        background: #000 !important;
+    }
+    
+    .main-content {
+        height: calc(100vh - 80px);
+        background: #000 !important;
+    }
+    
+    /* 週間ナビゲーション */
+    .week-navigation {
+        padding: 4px 8px;
+        background: #000 !important;
+    }
+    
+    .week-nav-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+    
+    .week-display {
+        font-size: 12px;
+        padding: 0 6px;
+    }
+    
+    .today-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+    
+    /* グリッドの調整 */
+    .grid-header,
+    .date-row,
+    .habit-row,
+    .daily-total-row {
+        grid-template-columns: 25px 45px repeat(7, 1fr) 35px 35px;
+    }
+    
+    /* セルのサイズ調整 */
+    .habit-no-cell {
+        min-width: 25px;
+        max-width: 25px;
+        font-size: 10px;
+        height: 28px;
+        justify-content: center;
+        text-align: center;
+        background: #1a1a1a;
+    }
+    
+    .habit-item-cell {
+        min-width: 45px;
+        max-width: 45px;
+        font-size: 9px;
+        height: 28px;
+        justify-content: center;
+        text-align: center;
+        background: #1a1a1a;
+    }
+    
+    .habit-cell {
+        height: 28px;
+        font-size: 10px;
+        background: #000;
+    }
+    
+    .habit-total-cell {
+        min-width: 35px;
+        max-width: 35px;
+        font-size: 10px;
+        height: 28px;
+        background: #1a1a1a;
+    }
+    
+    .header-cell {
+        font-size: 9px;
+        height: 20px;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
+    
+    .date-cell {
+        font-size: 10px;
+        height: 20px;
+    }
+    
+    /* 行の高さ調整 */
+    .grid-header,
+    .date-row {
+        min-height: 20px;
+    }
+    
+    .habit-row,
+    .daily-total-row {
+        min-height: 28px;
+    }
+    
+    /* グリッド全体の背景 */
+    .calendar-grid {
+        background: #000 !important;
+    }
+    
+    .habits-grid {
+        background: #000 !important;
+    }
+    
+    /* カレンダーモーダル */
+    .calendar-modal {
+        padding: 20px 10px;
+    }
+    
+    .modal-content {
+        width: 90%;
+        max-width: 320px;
+    }
+    
+    .calendar-grid-modal {
+        gap: 2px;
+    }
+    
+    .calendar-day {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    /* レポートテーブルのモバイル対応 */
+    .report-table {
+        background: #000 !important;
+        border: 1px solid #333;
+    }
+    
+    .report-table th {
+        background: #1a1a1a !important;
+        color: white !important;
+        font-size: 10px;
+        padding: 6px 2px;
+    }
+    
+    .report-table td {
+        background: #000 !important;
+        color: white !important;
+        font-size: 10px;
+        padding: 6px 2px;
+    }
+    
+    /* モバイル版レポートテーブル - シンプル */
+    .report-table th,
+    .report-table td {
+        padding: 6px !important;
+        font-size: 10px !important;
+    }
+    
+    .report-table .habit-number {
+        color: white !important;
+        background: #000 !important;
+    }
+    
+    .report-table .habit-name {
+        color: white !important;
+        background: #000 !important;
+    }
+    
+    .report-table .stat-value {
+        color: white !important;
+        background: #000 !important;
+    }
+    
+    .report-table .best-streak-value {
+        color: white !important;
+        background: #000 !important;
+    }
+}
+
+/* より小さな画面対応 */
+@media (max-width: 360px) {
+    .grid-header,
+    .date-row,
+    .habit-row,
+    .daily-total-row {
+        grid-template-columns: 22px 40px repeat(7, 1fr) 30px 30px;
+    }
+    
+    .habit-no-cell {
+        min-width: 22px;
+        max-width: 22px;
+        font-size: 9px;
+        justify-content: center;
+        text-align: center;
+        background: #1a1a1a;
+    }
+    
+    .habit-item-cell {
+        min-width: 40px;
+        max-width: 40px;
+        font-size: 8px;
+        justify-content: center;
+        text-align: center;
+        background: #1a1a1a;
+    }
+    
+    .habit-total-cell {
+        min-width: 30px;
+        max-width: 30px;
+        font-size: 9px;
+        background: #1a1a1a;
+    }
+    
+    .header-cell {
+        font-size: 8px;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
+    
+    .date-cell {
+        font-size: 9px;
+    }
+    
+    .habit-cell {
+        background: #000;
+    }
+    
+    .week-display {
+        font-size: 10px;
+        padding: 0 4px;
+    }
+    
+    .today-btn {
+        padding: 3px 6px;
+        font-size: 9px;
+    }
+    
+    .week-navigation {
+        padding: 2px 6px;
+    }
+    
+    .week-nav-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    
+    /* レポートテーブルの小画面対応 */
+    .report-table th {
+        background: #1a1a1a !important;
+        color: white !important;
+        font-size: 9px;
+        padding: 5px 1px;
+    }
+    
+    .report-table td {
+        background: #000 !important;
+        color: white !important;
+        font-size: 9px;
+        padding: 5px 1px;
+    }
+    
+    /* 小画面版レポートテーブル - シンプル */
+    .report-table th,
+    .report-table td {
+        padding: 4px !important;
+        font-size: 9px !important;
+    }
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.habit-cell {
+    animation: fadeIn 0.2s ease;
+}
+
+/* No系習慣のスタイル */
+.no-habit-item {
+    color: white !important;
+    font-weight: 500;
+}
+
+.no-habit-cell {
+    background: #000 !important;
+}
+
+.no-habit-cell.completed {
+    background: #000 !important;
+}
+
+.no-habit-cell.completed::after {
+    content: '✓';
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* サプリ・食事系習慣のスタイル */
+.supplement-habit-item {
+    color: white !important;
+    font-weight: 500;
+}
+
+.supplement-habit-cell {
+    background: #000 !important;
+}
+
+.supplement-habit-cell.completed {
+    background: #000 !important;
+}
+
+.supplement-habit-cell.completed::after {
+    content: '✓';
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* 日計セル */
+.daily-total-cell {
+    padding: 4px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    height: 35px;
+}
+
+.daily-total-cell.today {
+    border-left: 2px solid #4A90E2;
+    border-right: 2px solid #4A90E2;
+}
+
+/* 連続列ヘッダー */
+.streak-header {
+    background: #1a1a1a;
+    color: white;
+    font-weight: bold;
+    font-size: 10.5px;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+    transform: none;
+}
+
+/* 習慣連続セル */
+.habit-streak-cell {
+    padding: 4px 2px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    height: 35px;
+    min-width: 41px;
+    max-width: 41px;
+    box-sizing: border-box;
+}
+
+
+/* 報酬システムのスタイル */
+.reward-info {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.reward-info h3 {
+    color: #4A90E2;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.current-reward {
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.reward-emoji {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.reward-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.reward-description {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.next-reward {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.next-reward-title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.next-reward-emoji {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.next-reward-name {
+    font-size: 16px;
+    color: white;
+    font-weight: 500;
+}
+
+/* 詳細レポートのスタイル */
+.detailed-report {
+    margin-top: 20px;
+}
+
+.detailed-report h3 {
+    color: #4A90E2;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.habit-report-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #333;
+}
+
+.habit-report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.habit-report-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+}
+
+.habit-report-type {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.habit-type {
+    background: #4A90E2;
+    color: white;
+}
+
+.no-type {
+    background: #ff6b6b;
+    color: white;
+}
+
+.supplement-type {
+    background: #48dbfb;
+    color: white;
+}
+
+.habit-report-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4A90E2;
+}
+
+.stat-value.best-streak {
+    color: #ffd700;
+}
+
+/* ダークモード対応（既にダークテーマ） */
+@media (prefers-color-scheme: light) {
+    body {
+        background: #f5f5f5;
+    }
+    
+    .app-container {
+        background: white;
+        color: #333;
+    }
+    
+    .header,
+    .tab-nav,
+    .month-selector {
+        background: white;
+        border-color: #e0e0e0;
+    }
+    
+    .calendar-grid {
+        background: white;
+    }
+    
+    .date-header,
+    .date-row {
+        background: #f8f9fa;
+    }
+    
+    .habit-name {
+        background: #f8f9fa;
+        color: #333;
+    }
+    
+    .habit-cell {
+        background: white;
+    }
+    
+    .habit-cell:hover {
+        background: #f8f9fa;
+    }
+    
+    .bottom-nav {
+        background: white;
+        border-color: #e0e0e0;
+    }
+    
+    .nav-btn {
+        color: #666;
+    }
+    
+    .nav-btn.active {
+        color: #4A90E2;
+    }
+    
+    .no-habit-row {
+        background: #f8f9fa;
+        border-left-color: #ff6b6b;
+    }
+    
+    .no-habit-cell {
+        background: #000 !important;
+        border-left-color: #ff6b6b;
+    }
+    
+    .supplement-habit-row {
+        background: #f8f9fa;
+        border-left-color: #4A90E2;
+    }
+    
+    .supplement-habit-cell {
+        background: #000 !important;
+        border-left-color: #4A90E2;
+    }
+    
+    
+    .reward-info {
+        background: #f8f9fa;
+        border-color: #e0e0e0;
+    }
+    
+    .next-reward {
+        background: #e9ecef;
+        border-color: #dee2e6;
+    }
+}
+
+/* 月間カレンダーのスタイル */
+.monthly-calendar-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.monthly-calendar-section h3 {
+    color: #fff;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.monthly-calendar-container {
+    background: #000;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.monthly-calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 10px;
+}
+
+.monthly-calendar-header .month-nav {
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.monthly-calendar-header .month-nav:hover {
+    background: #555;
+}
+
+.monthly-calendar-header span {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.monthly-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.monthly-calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #222;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.monthly-calendar-day:hover {
+    background: #444;
+}
+
+.monthly-calendar-day.other-month {
+    color: #666;
+    background: #111;
+}
+
+.monthly-calendar-day.today {
+    background: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+.monthly-calendar-day.has-health {
+    background: #28a745;
+    color: #fff;
+}
+
+.monthly-calendar-day.has-massage {
+    background: #b8860b; /* 濃い黄色（ダークゴールド）に統一 */
+    color: #fff; /* 白文字に統一 */
+}
+
+.monthly-calendar-day.has-both {
+    background: linear-gradient(45deg, #28a745 50%, #b8860b 50%);
+    color: #fff;
+}
+
+.monthly-calendar-day.has-dental {
+    background: #17a2b8;
+    color: #fff;
+}
+
+.monthly-calendar-day.has-sauna {
+    background: #dc3545;
+    color: #fff;
+}
+
+.monthly-calendar-day.has-catcafe {
+    background: #6f42c1;
+    color: #fff;
+}
+
+.monthly-calendar-day.has-friendparty {
+    background: #ff6f61;
+    color: #fff;
+}
+
+
+
+/* モチベーション表示のスタイル */
+.motivation-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+    border-radius: 12px;
+    border: 2px solid #3498db;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.motivation-section h3 {
+    margin: 0 0 20px 0;
+    color: #fff;
+    font-size: 20px;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.achievement-total {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+    color: #f1c40f;
+    font-weight: 700;
+}
+
+.achievement-total .total-label {
+    font-size: 16px;
+    letter-spacing: 0.08em;
+}
+
+.achievement-total .total-value {
+    font-size: 28px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.motivation-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.stat-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.stat-content {
+    color: #fff;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.3);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #fff !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.2);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+/* 設定ビュー / バッジビューのスタイル */
+.settings-view,
+.badge-view {
+    padding: 20px;
+    background: #000;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.settings-view h2,
+.badge-view h2 {
+    color: #fff;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 24px;
+}
+
+/* 成果システム説明のスタイル */
+.achievement-explanation-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.achievement-explanation-section h3 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.achievement-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.achievement-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: #2a2a2a;
+    border-radius: 8px;
+    border: 1px solid #444;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.achievement-left-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 30px;
+    max-width: 30px;
+    flex-shrink: 0;
+}
+
+.achievement-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.achievement-title-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    padding: 5px 2px;
+    line-height: 1.4;
+    white-space: nowrap;
+    min-width: 20px;
+    max-width: 30px;
+}
+
+.achievement-content {
+    flex: 1;
+}
+
+.achievement-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.achievement-detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px;
+    background: #333;
+    border-radius: 4px;
+    border-left: 3px solid #666;
+}
+
+.achievement-detail-label {
+    color: #fff;
+    font-weight: bold;
+    font-size: 12px;
+    min-width: 18px;
+    max-width: 18px;
+    flex-shrink: 0;
+    text-align: center;
+    padding: 8px 1px;
+    border-right: 1px solid #555;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.achievement-detail-content {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.5;
+    flex: 1;
+}
+
+/* バッジ一覧のスタイル */
+.badge-list-section {
+    margin-bottom: 30px;
+    padding: 24px;
+    background: #121212;
+    border-radius: 16px;
+    border: 1px solid #2a2a2a;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.badge-list-section h3 {
+    color: #fff;
+    margin-bottom: 18px;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 0.08em;
+}
+
+.badge-gil-note {
+    color: #ffdd57;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: -6px 0 22px;
+    text-align: center;
+}
+
+.badge-progress-overview {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 22px;
+    align-items: stretch;
+}
+
+.badge-owned-section {
+    margin-bottom: 26px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.92), rgba(18, 18, 18, 0.92));
+    border-radius: 14px;
+    border: 1px solid rgba(70, 70, 70, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.badge-owned-section h4 {
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 12px;
+    letter-spacing: 0.08em;
+}
+
+.badge-owned-note {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.badge-owned-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(48px, 1fr));
+    gap: 12px;
+    justify-items: center;
+}
+
+.badge-owned-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+}
+
+.badge-owned-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
+}
+
+.badge-owned-empty {
+    margin-top: 12px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
+}
+
+.badge-progress-card {
+    flex: 1 1 240px;
+    padding: 18px;
+    background: linear-gradient(135deg, rgba(40, 40, 40, 0.95), rgba(28, 28, 28, 0.95));
+    border-radius: 14px;
+    border: 1px solid rgba(80, 80, 80, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+}
+
+.badge-progress-card.highlight {
+    background: linear-gradient(135deg, rgba(86, 54, 161, 0.95), rgba(30, 128, 210, 0.95));
+    border: 1px solid rgba(120, 170, 255, 0.5);
+    box-shadow: 0 14px 32px rgba(67, 138, 255, 0.28);
+}
+
+.badge-progress-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.badge-progress-card.highlight .badge-progress-label {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.badge-progress-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.badge-progress-value {
+    color: #fff;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.badge-progress-total {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.badge-progress-divider {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 18px;
+}
+
+.badge-progress-sub {
+    color: #8cd3ff;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+}
+
+.badge-progress-bar {
+    width: 100%;
+    height: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.badge-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ffdd57 0%, #ff8f4b 100%);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.badge-progress-card.highlight .badge-progress-message {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.badge-progress-card.highlight .badge-inline-name {
+    color: #ffdd57;
+    font-weight: 700;
+}
+
+.badge-progress-card.highlight .badge-inline-condition {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+}
+
+.badge-category-board {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.badge-category-card {
+    padding: 18px 20px 20px;
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.92), rgba(16, 16, 16, 0.92));
+    border-radius: 14px;
+    border: 1px solid rgba(60, 60, 60, 0.6);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.badge-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.badge-category-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+}
+.badge-category-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+
+.badge-category-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge-category-progress-count {
+    color: #ffdd57;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+}
+
+.badge-category-progress-bar {
+    width: 140px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.badge-category-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #64d6ff 0%, #6e86ff 100%);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.badge-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 600px) {
+    .badge-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .badge-progress-overview {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .badge-card {
+        padding: 10px;
+    }
+
+    .badge-card-body {
+        gap: 10px;
+    }
+
+    .badge-icon {
+        font-size: 26px;
+    }
+
+    .badge-name {
+        font-size: 14px;
+    }
+
+    .badge-condition {
+        font-size: 11px;
+    }
+}
+
+.badge-card {
+    position: relative;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(70, 70, 70, 0.6);
+    background: rgba(30, 30, 30, 0.92);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 168px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.badge-card.streak-layout {
+    gap: 10px;
+    min-height: 120px;
+}
+
+.badge-card.unlocked {
+    background: linear-gradient(135deg, rgba(53, 39, 0, 0.92), rgba(96, 69, 0, 0.92));
+    border: 1px solid rgba(255, 221, 87, 0.6);
+    box-shadow: 0 18px 30px rgba(255, 205, 80, 0.25);
+}
+
+.badge-card.locked {
+    border: 1px dashed rgba(90, 90, 90, 0.8);
+    background: linear-gradient(135deg, rgba(22, 22, 22, 0.95), rgba(18, 18, 18, 0.9));
+    opacity: 0.88;
+}
+
+.badge-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
+}
+
+.badge-card.unlocked:hover {
+    box-shadow: 0 22px 38px rgba(255, 205, 80, 0.35);
+}
+
+.badge-card.locked:hover {
+    border-color: rgba(130, 130, 130, 0.8);
+}
+
+.badge-status {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    align-self: flex-start;
+}
+
+.badge-card.unlocked .badge-status {
+    background: rgba(255, 221, 87, 0.18);
+    border: 1px solid rgba(255, 221, 87, 0.45);
+    color: #ffdd57;
+}
+
+.badge-card.locked .badge-status {
+    background: rgba(120, 120, 120, 0.14);
+    border: 1px solid rgba(120, 120, 120, 0.3);
+    color: rgba(210, 210, 210, 0.75);
+}
+
+.badge-card-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.badge-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.badge-card.locked .badge-icon {
+    filter: grayscale(0.6);
+    opacity: 0.7;
+}
+
+.badge-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.badge-name {
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.badge-card.locked .badge-name {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.badge-condition {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.badge-card.locked .badge-condition {
+    color: rgba(200, 200, 200, 0.6);
+}
+
+.badge-card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.badge-card.streak-layout .badge-streak-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.badge-card.streak-layout .badge-status {
+    align-self: auto;
+}
+
+.badge-card.streak-layout .badge-reward {
+    font-size: 12px;
+}
+
+.badge-card.streak-layout .badge-streak-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.badge-card.streak-layout .badge-icon {
+    font-size: 30px;
+}
+
+.badge-card.streak-layout .badge-streak-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.badge-card.streak-layout .badge-streak-score {
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.badge-card.locked.streak-layout .badge-streak-score {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.badge-card.streak-layout .badge-streak-description {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.badge-card.locked.streak-layout .badge-streak-description {
+    color: rgba(200, 200, 200, 0.6);
+}
+
+.badge-reward {
+    color: #ffdd57;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.badge-card.locked .badge-reward {
+    color: #ffc974;
+}
+
+.badge-card-check {
+    font-size: 18px;
+    color: #ffdd57;
+    text-shadow: 0 0 8px rgba(255, 221, 87, 0.6);
+}
+
+.badge-card-hint {
+    font-size: 12px;
+    color: #8dd5ff;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .badge-progress-overview {
+        flex-direction: column;
+    }
+
+    .badge-category-progress-bar {
+        width: 100px;
+    }
+
+    .badge-card {
+        min-height: 120px;
+    }
+
+    .badge-owned-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .badge-owned-item {
+        padding: 10px 6px;
+        aspect-ratio: 1 / 1;
+    }
+
+    .badge-owned-icon {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 600px) {
+    .badge-card {
+        min-height: 110px;
+    }
+}
+/* アプリ情報のスタイル */
+.app-info-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.app-info-section h3 {
+    color: #fff;
+    margin-bottom: 15px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #333;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #ccc;
+    font-size: 14px;
+}
+
+.info-value {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 達成通知のスタイル */
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 10000;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.achievement-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.achievement-icon {
+    font-size: 24px;
+}
+
+.achievement-text {
+    flex: 1;
+}
+
+.achievement-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.achievement-description {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* データ管理のスタイル */
+.data-management-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.data-management-section h3 {
+    margin: 0 0 15px 0;
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+}
+
+.data-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.data-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.export-btn {
+    background: #28a745;
+    color: white;
+}
+
+.export-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.import-btn {
+    background: #17a2b8;
+    color: white;
+}
+
+.import-btn:hover {
+    background: #138496;
+    transform: translateY(-1px);
+}
+
+.restore-btn {
+    background: #ffc107;
+    color: #000;
+}
+
+.restore-btn:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+}
+
+/* ヘルス集計表のスタイル */
+.health-summary-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.health-summary-section h4 {
+    margin: 0 0 15px 0;
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+}
+
+.health-summary-table {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.health-summary-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    background: #444;
+    font-weight: bold;
+    color: #fff;
+}
+
+.health-summary-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    background: #2a2a2a;
+    color: #fff;
+}
+
+/* 各項目の背景色 */
+#healthKeepingSummary {
+    background: #28a745; /* 緑色 */
+    color: #fff;
+}
+
+#headMassageSummary {
+    background: #b8860b; /* 濃い黄色（ダークゴールド） */
+    color: #fff; /* 白文字に統一 */
+}
+
+#dentalCleaningSummary {
+    background: #17a2b8; /* 青色 */
+    color: #fff;
+}
+
+#saunaSummary {
+    background: #dc3545; /* 赤色 */
+    color: #fff;
+}
+
+#catcafeSummary {
+    background: #6f42c1; /* 紫色 */
+    color: #fff;
+}
+
+#friendPartySummary {
+    background: #ff6f61; /* コーラルオレンジ */
+    color: #fff;
+}
+
+/* 総回数セルの文字色を強調 */
+#healthKeepingSummary .count,
+#dentalCleaningSummary .count,
+#saunaSummary .count,
+#catcafeSummary .count,
+#friendPartySummary .count {
+    color: #fff !important;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+#headMassageSummary .count {
+    color: #fff !important;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.summary-cell {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.health-legend-color {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.35);
+}
+
+.health-legend-color.has-health {
+    background: #28a745;
+}
+
+.health-legend-color.has-massage {
+    background: #b8860b;
+}
+
+.health-legend-color.has-dental {
+    background: #17a2b8;
+}
+
+.health-legend-color.has-sauna {
+    background: #dc3545;
+}
+
+.health-legend-color.has-catcafe {
+    background: #6f42c1;
+}
+
+.health-legend-color.has-friendparty {
+    background: #ff6f61;
+}
+
+.summary-cell.count {
+    justify-content: center;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+.summary-cell.dates {
+    font-size: 12px;
+    color: #ccc;
+    flex-wrap: wrap;
+}
+
+/* プルダウンメニューのスタイル */
+.health-selection-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.health-selection-dropdown.show {
+    display: block;
+}
+
+.health-selection-option {
+    padding: 12px 16px;
+    color: #fff;
+    cursor: pointer;
+    border-bottom: 1px solid #555;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.health-selection-option:last-child {
+    border-bottom: none;
+}
+
+.health-selection-option:hover {
+    background: #555;
+}
+
+.health-selection-option.selected {
+    background: #007bff;
+    color: #fff;
+}
+
+.health-selection-option.selected.health-keeping {
+    background: #28a745;
+    color: #fff;
+}
+
+.health-selection-option.selected.head-massage {
+    background: #b8860b; /* 濃い黄色（ダークゴールド）に統一 */
+    color: #fff; /* 白文字に統一 */
+}
+
+.health-selection-option.selected.dental-cleaning {
+    background: #17a2b8;
+    color: #fff;
+}
+
+.health-selection-option.selected.sauna {
+    background: #dc3545;
+    color: #fff;
+}
+
+.health-selection-option.selected.catcafe {
+    background: #6f42c1;
+    color: #fff;
+}
+
+.health-selection-option.selected.friend-party {
+    background: #ff6f61;
+    color: #fff;
+}
