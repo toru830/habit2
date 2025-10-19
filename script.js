@@ -22,12 +22,12 @@ class QRSyncManager {
                 version: '1.0'
             };
 
-            // データをBase64エンコード
+            // データをJSON文字列として直接使用（URLエンコード）
             const jsonString = JSON.stringify(userData);
-            const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+            const encodedData = encodeURIComponent(jsonString);
             
-            // QRコード用のURLを生成
-            this.qrDataUrl = `https://toru830.github.io/habit2/?import=${base64Data}`;
+            // QRコード用のURLを生成（より短く）
+            this.qrDataUrl = `https://toru830.github.io/habit2/?data=${encodedData}`;
             
             console.log('📱 QRコードデータを生成:', this.qrDataUrl);
             return this.qrDataUrl;
@@ -85,21 +85,21 @@ class QRSyncManager {
     // QRコードデータからデータをインポート
     importFromQR(qrData) {
         try {
-            let base64Data = qrData.trim();
+            let jsonString = qrData.trim();
             
-            // URLの場合、importパラメータを抽出
-            if (base64Data.includes('?import=')) {
-                const url = new URL(base64Data);
-                base64Data = url.searchParams.get('import');
+            // URLの場合、dataパラメータを抽出
+            if (qrData.includes('?data=')) {
+                const url = new URL(qrData);
+                jsonString = url.searchParams.get('data');
             }
 
-            if (!base64Data) {
+            if (!jsonString) {
                 throw new Error('有効なQRコードデータではありません');
             }
 
-            // Base64デコード
-            const jsonString = decodeURIComponent(escape(atob(base64Data)));
-            const userData = JSON.parse(jsonString);
+            // URLデコードしてJSONをパース
+            const decodedString = decodeURIComponent(jsonString);
+            const userData = JSON.parse(decodedString);
 
             // データの検証
             if (!userData.email || !userData.completedHabits) {
@@ -669,6 +669,54 @@ class HabitTracker {
         }
         
         // ゲストモードは削除済み
+        
+        // URLパラメータからデータを自動インポート
+        this.checkForImportData();
+    }
+
+    // URLパラメータからデータを自動インポート
+    checkForImportData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const importData = urlParams.get('data');
+        
+        if (importData) {
+            console.log('📱 URLパラメータからデータを検出:', importData.substring(0, 50) + '...');
+            
+            // ユーザーに確認を求める
+            if (confirm('QRコードからデータを検出しました。\nこのデータをインポートしますか？')) {
+                try {
+                    const userData = qrSyncManager.importFromQR(importData);
+                    
+                    // 現在のユーザーと異なる場合、確認を求める
+                    if (this.currentUser && userData.email !== this.currentUser.email) {
+                        if (!confirm(`インポートするデータは「${userData.email}」のものです。\n現在のユーザー「${this.currentUser.email}」のデータを上書きしますか？`)) {
+                            return;
+                        }
+                    }
+
+                    // データを適用
+                    this.completedHabits = userData.completedHabits || {};
+                    this.healthData = userData.healthData || {};
+                    this.achievements = userData.achievements || {};
+
+                    // ローカルストレージに保存
+                    localStorage.setItem(`habit_data_${userData.email}`, JSON.stringify(userData));
+
+                    // UIを更新
+                    this.renderCalendar();
+                    this.updateStatsView();
+
+                    alert('✅ データをインポートしました！\n\n📱 同期完了：\n- 習慣データが復元されました\n- ヘルスデータが復元されました\n- 成果データが復元されました');
+                    
+                    // URLをクリーンアップ
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    
+                } catch (error) {
+                    console.error('❌ 自動インポートエラー:', error);
+                    alert('❌ データのインポートに失敗しました：\n' + error.message);
+                }
+            }
+        }
     }
 
     // メールアドレスからBin IDを生成
