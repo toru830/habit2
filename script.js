@@ -822,9 +822,21 @@ class HabitTracker {
 
         try {
             this.showSyncMessage('同期中...', false);
+            
+            // ローカルデータを保存
             this.saveLocalData();
-            this.showSyncMessage('同期が完了しました！', false);
+            
+            // 同期状況を表示
+            const lastSync = new Date().toLocaleString('ja-JP');
+            this.showSyncMessage(`同期が完了しました！\n最終同期: ${lastSync}`, false);
+            
+            // 3秒後にメッセージを非表示
+            setTimeout(() => {
+                this.hideSyncMessage();
+            }, 3000);
+            
         } catch (error) {
+            console.error('❌ 手動同期エラー:', error);
             this.showSyncMessage('同期に失敗しました: ' + error.message, true);
         }
     }
