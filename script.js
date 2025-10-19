@@ -1,19 +1,122 @@
-// JSONBin.io API設定（公式仕様準拠）
-const JSONBIN_API_BASE_URL = 'https://api.jsonbin.io/v3';
-const JSONBIN_API_KEY = '$2a$10$20WoL2UGPXzIFY1SxOaJaepK68nxCt3BqZ9u02O7nmRJ/RKSfE7By';
+// QRコード同期システム
+class QRSyncManager {
+    constructor() {
+        this.qrDataUrl = null;
+    }
 
-// APIキー設定関数
-function setJsonbinApiKey(apiKey) {
-    window.jsonbinApiKey = apiKey;
-    localStorage.setItem('jsonbin_api_key', apiKey);
-    console.log('☁️ JSONBin.io APIキーを設定しました');
+    // データをQRコードとしてエクスポート
+    async exportToQR() {
+        try {
+            if (!window.habitTracker || !window.habitTracker.currentUser) {
+                alert('ログインが必要です');
+                return;
+            }
+
+            const userData = {
+                userId: window.habitTracker.currentUser.id,
+                email: window.habitTracker.currentUser.email,
+                completedHabits: window.habitTracker.completedHabits,
+                healthData: window.habitTracker.healthData,
+                achievements: window.habitTracker.achievements,
+                lastSync: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            // データをBase64エンコード
+            const jsonString = JSON.stringify(userData);
+            const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+            
+            // QRコード用のURLを生成
+            this.qrDataUrl = `https://toru830.github.io/habit2/?import=${base64Data}`;
+            
+            console.log('📱 QRコードデータを生成:', this.qrDataUrl);
+            return this.qrDataUrl;
+        } catch (error) {
+            console.error('❌ QRコードエクスポートエラー:', error);
+            throw error;
+        }
+    }
+
+    // QRコードを生成してCanvasに描画
+    async generateQRCode(canvasId, data) {
+        try {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                throw new Error('Canvas要素が見つかりません');
+            }
+
+            // QRコードを生成
+            await QRCode.toCanvas(canvas, data, {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            });
+
+            console.log('✅ QRコードを生成しました');
+        } catch (error) {
+            console.error('❌ QRコード生成エラー:', error);
+            throw error;
+        }
+    }
+
+    // QRコード画像をダウンロード
+    downloadQRCode() {
+        try {
+            const canvas = document.getElementById('qrCodeCanvas');
+            if (!canvas) {
+                throw new Error('Canvas要素が見つかりません');
+            }
+
+            const link = document.createElement('a');
+            link.download = `habit2_data_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+
+            console.log('✅ QRコード画像をダウンロードしました');
+        } catch (error) {
+            console.error('❌ QRコードダウンロードエラー:', error);
+            throw error;
+        }
+    }
+
+    // QRコードデータからデータをインポート
+    importFromQR(qrData) {
+        try {
+            let base64Data = qrData.trim();
+            
+            // URLの場合、importパラメータを抽出
+            if (base64Data.includes('?import=')) {
+                const url = new URL(base64Data);
+                base64Data = url.searchParams.get('import');
+            }
+
+            if (!base64Data) {
+                throw new Error('有効なQRコードデータではありません');
+            }
+
+            // Base64デコード
+            const jsonString = decodeURIComponent(escape(atob(base64Data)));
+            const userData = JSON.parse(jsonString);
+
+            // データの検証
+            if (!userData.email || !userData.completedHabits) {
+                throw new Error('無効なデータ形式です');
+            }
+
+            console.log('📱 QRコードからデータをインポート:', userData);
+            return userData;
+        } catch (error) {
+            console.error('❌ QRコードインポートエラー:', error);
+            throw error;
+        }
+    }
 }
 
-// 保存されたAPIキーを読み込み
-const savedApiKey = localStorage.getItem('jsonbin_api_key');
-if (savedApiKey) {
-    setJsonbinApiKey(savedApiKey);
-}
+// QR同期マネージャーのインスタンス
+const qrSyncManager = new QRSyncManager();
 
 // 習慣データの定義
 const habitsData = [
@@ -561,7 +664,8 @@ class HabitTracker {
             this.updateAuthUI();
             console.log('🔐 保存されたユーザー情報を読み込みました:', this.currentUser.email);
             // ログイン済みの場合はクラウドからデータを同期
-            this.syncFromCloud();
+            // ローカルデータを読み込み
+            this.loadLocalData();
         }
         
         // ゲストモードは削除済み
@@ -579,218 +683,37 @@ class HabitTracker {
         return `habit2_${Math.abs(hash).toString(36)}`;
     }
 
-    // クラウドからデータを同期（JSONBin.io API公式仕様準拠）
-    async syncFromCloud() {
-        if (!this.currentUser || this.isSyncing) return;
+    // ローカルデータを読み込み（QRコード同期システム）
+    loadLocalData() {
+        if (!this.currentUser) return;
         
-        const apiKey = window.jsonbinApiKey || JSONBIN_API_KEY;
-        if (!apiKey || apiKey === '$2a$10$YOUR_ACTUAL_API_KEY_HERE') {
-            console.log('ℹ️ JSONBin.io APIキーが設定されていません');
-            // オフライン時はローカルデータを使用
-            const localData = localStorage.getItem(`habit_data_${this.currentUser.email}`);
-            if (localData) {
-                const userData = JSON.parse(localData);
-                this.completedHabits = userData.completedHabits || {};
-                this.healthData = userData.healthData || {};
-                this.achievements = userData.achievements || {};
-                this.renderCalendar();
-                this.updateStatsView();
-                console.log('✅ オフライン：ローカルデータを使用しました');
-            }
-            return;
-        }
-        
-        try {
-            this.isSyncing = true;
-            console.log('☁️ クラウドからデータを同期中...');
-            
-            // メールアドレスからBin IDを生成
-            const binId = this.generateBinId(this.currentUser.email);
-            
-            // JSONBin.io APIからデータを取得（公式仕様準拠）
-            const response = await fetch(`${JSONBIN_API_BASE_URL}/bins/${binId}/latest`, {
-                method: 'GET',
-                headers: {
-                    'X-Master-Key': apiKey
-                }
-            });
-
-            console.log('☁️ クラウド同期レスポンス:', {
-                status: response.status,
-                statusText: response.statusText,
-                ok: response.ok
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const userData = data.record;
-                
-                if (userData && userData.email === this.currentUser.email) {
-                    // クラウドデータをローカルに適用
-                    this.completedHabits = userData.completedHabits || {};
-                    this.healthData = userData.healthData || {};
-                    this.achievements = userData.achievements || {};
-                    
-                    // ローカルストレージにも保存（オフライン対応）
-                    localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
-                    
-                    console.log('✅ クラウドからデータを同期しました');
-                }
-            } else if (response.status === 404) {
-                console.log('ℹ️ クラウドにデータが見つかりません（初回ログイン）');
-                // ローカルデータを確認
-                const localData = localStorage.getItem(`habit_data_${this.currentUser.email}`);
-                if (localData) {
-                    const userData = JSON.parse(localData);
-                    this.completedHabits = userData.completedHabits || {};
-                    this.healthData = userData.healthData || {};
-                    this.achievements = userData.achievements || {};
-                    console.log('✅ ローカルデータを読み込みました');
-                }
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('❌ クラウド同期に失敗:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    errorData: errorData
-                });
-                
-                // オフライン時はローカルデータを使用
-                const localData = localStorage.getItem(`habit_data_${this.currentUser.email}`);
-                if (localData) {
-                    const userData = JSON.parse(localData);
-                    this.completedHabits = userData.completedHabits || {};
-                    this.healthData = userData.healthData || {};
-                    this.achievements = userData.achievements || {};
-                    console.log('✅ オフライン：ローカルデータを使用しました');
-                }
-            }
-            
-            // UIを更新
+        const localData = localStorage.getItem(`habit_data_${this.currentUser.email}`);
+        if (localData) {
+            const userData = JSON.parse(localData);
+            this.completedHabits = userData.completedHabits || {};
+            this.healthData = userData.healthData || {};
+            this.achievements = userData.achievements || {};
             this.renderCalendar();
             this.updateStatsView();
-        } catch (error) {
-            console.error('❌ 同期エラー:', error);
-            // エラー時はローカルデータを使用
-            const localData = localStorage.getItem(`habit_data_${this.currentUser.email}`);
-            if (localData) {
-                const userData = JSON.parse(localData);
-                this.completedHabits = userData.completedHabits || {};
-                this.healthData = userData.healthData || {};
-                this.achievements = userData.achievements || {};
-                console.log('✅ エラー時：ローカルデータを使用しました');
-            }
-        } finally {
-            this.isSyncing = false;
+            console.log('✅ ローカルデータを読み込みました');
         }
     }
 
-    // クラウドにデータを同期（JSONBin.io API公式仕様準拠）
-    async syncToCloud() {
-        if (!this.currentUser || this.isSyncing) return;
+    // ローカルデータを保存（QRコード同期システム）
+    saveLocalData() {
+        if (!this.currentUser) return;
         
-        const apiKey = window.jsonbinApiKey || JSONBIN_API_KEY;
-        if (!apiKey || apiKey === '$2a$10$YOUR_ACTUAL_API_KEY_HERE') {
-            console.log('ℹ️ JSONBin.io APIキーが設定されていません');
-            // オフライン時はローカルストレージに保存
-            const userData = {
-                userId: this.currentUser.id,
-                email: this.currentUser.email,
-                completedHabits: this.completedHabits,
-                healthData: this.healthData,
-                achievements: this.achievements,
-                lastSync: new Date().toISOString()
-            };
-            localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
-            console.log('✅ オフライン：ローカルストレージに保存しました');
-            return;
-        }
-
-        try {
-            this.isSyncing = true;
-            console.log('☁️ クラウドにデータを同期中...');
-            
-            const userData = {
-                userId: this.currentUser.id,
-                email: this.currentUser.email,
-                completedHabits: this.completedHabits,
-                healthData: this.healthData,
-                achievements: this.achievements,
-                lastSync: new Date().toISOString()
-            };
-
-            // メールアドレスからBin IDを生成
-            const binId = this.generateBinId(this.currentUser.email);
-
-            // まず既存のBinをチェック（公式仕様準拠）
-            let response = await fetch(`${JSONBIN_API_BASE_URL}/bins/${binId}/latest`, {
-                method: 'GET',
-                headers: {
-                    'X-Master-Key': apiKey
-                }
-            });
-
-            // Binが存在しない場合は作成、存在する場合は更新
-            if (response.status === 404) {
-                // 新しいBinを作成（公式仕様準拠）
-                response = await fetch(`${JSONBIN_API_BASE_URL}/bins`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': apiKey
-                    },
-                    body: JSON.stringify(userData)
-                });
-            } else if (response.ok) {
-                // 既存のBinを更新（公式仕様準拠）
-                response = await fetch(`${JSONBIN_API_BASE_URL}/bins/${binId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': apiKey
-                    },
-                    body: JSON.stringify(userData)
-                });
-            }
-
-            console.log('☁️ クラウド保存レスポンス:', {
-                status: response.status,
-                statusText: response.statusText,
-                ok: response.ok
-            });
-
-            if (response.ok) {
-                // ローカルストレージにも保存（オフライン対応）
-                localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
-                console.log('✅ クラウドにデータを同期しました');
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('❌ クラウド同期に失敗:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    errorData: errorData
-                });
-                
-                // エラー時はローカルストレージに保存
-                localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
-                console.log('✅ エラー時：ローカルストレージに保存しました');
-            }
-        } catch (error) {
-            console.error('❌ 同期エラー:', error);
-            // エラー時はローカルストレージに保存
-            const userData = {
-                userId: this.currentUser.id,
-                email: this.currentUser.email,
-                completedHabits: this.completedHabits,
-                healthData: this.healthData,
-                achievements: this.achievements,
-                lastSync: new Date().toISOString()
-            };
-            localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
-            console.log('✅ エラー時：ローカルストレージに保存しました');
-        } finally {
-            this.isSyncing = false;
-        }
+        const userData = {
+            userId: this.currentUser.id,
+            email: this.currentUser.email,
+            completedHabits: this.completedHabits,
+            healthData: this.healthData,
+            achievements: this.achievements,
+            lastSync: new Date().toISOString()
+        };
+        
+        localStorage.setItem(`habit_data_${this.currentUser.email}`, JSON.stringify(userData));
+        console.log('✅ ローカルデータを保存しました');
     }
 
     // 認証モーダルを表示
@@ -1018,7 +941,7 @@ class HabitTracker {
 
         try {
             this.showSyncMessage('同期中...', false);
-            await this.syncToCloud();
+            this.saveLocalData();
             this.showSyncMessage('同期が完了しました！', false);
         } catch (error) {
             this.showSyncMessage('同期に失敗しました: ' + error.message, true);
@@ -1348,7 +1271,7 @@ class HabitTracker {
                 this.achievements = {};
                 
                 // クラウドに初期データを保存
-                await this.syncToCloud();
+                this.saveLocalData();
                 
                 this.updateAuthUI();
                 this.hideAuthModal();
@@ -1397,7 +1320,7 @@ class HabitTracker {
             this.achievements = {};
             
             // クラウドに初期データを保存
-            await this.syncToCloud();
+            this.saveLocalData();
             
             this.updateAuthUI();
             this.hideAuthModal();
@@ -1685,31 +1608,48 @@ class HabitTracker {
             syncCloseBtn.addEventListener('click', () => this.hideSyncModal());
         }
         
-        // APIキー設定ボタン
-        const apiKeyBtn = document.getElementById('apiKeyBtn');
-        const apiKeyModalClose = document.getElementById('apiKeyModalClose');
-        const apiKeyModalCancel = document.getElementById('apiKeyModalCancel');
-        const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const testApiKeyBtn = document.getElementById('testApiKey');
-        
-        if (apiKeyBtn) {
-            apiKeyBtn.addEventListener('click', () => this.showApiKeyModal());
+        // QRコードエクスポートボタン
+        const qrExportBtn = document.getElementById('qrExportBtn');
+        if (qrExportBtn) {
+            qrExportBtn.addEventListener('click', () => this.showQRExportModal());
         }
-        
-        if (apiKeyModalClose) {
-            apiKeyModalClose.addEventListener('click', () => this.hideApiKeyModal());
+
+        // QRコードインポートボタン
+        const qrImportBtn = document.getElementById('qrImportBtn');
+        if (qrImportBtn) {
+            qrImportBtn.addEventListener('click', () => this.showQRImportModal());
         }
-        
-        if (apiKeyModalCancel) {
-            apiKeyModalCancel.addEventListener('click', () => this.hideApiKeyModal());
+
+        // QRコードエクスポートモーダル関連
+        const qrExportModalClose = document.getElementById('qrExportModalClose');
+        if (qrExportModalClose) {
+            qrExportModalClose.addEventListener('click', () => this.hideQRExportModal());
         }
-        
-        if (saveApiKeyBtn) {
-            saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
+
+        const qrExportModalCancel = document.getElementById('qrExportModalCancel');
+        if (qrExportModalCancel) {
+            qrExportModalCancel.addEventListener('click', () => this.hideQRExportModal());
         }
-        
-        if (testApiKeyBtn) {
-            testApiKeyBtn.addEventListener('click', () => this.testApiKey());
+
+        const downloadQrBtn = document.getElementById('downloadQrBtn');
+        if (downloadQrBtn) {
+            downloadQrBtn.addEventListener('click', () => this.downloadQRCode());
+        }
+
+        // QRコードインポートモーダル関連
+        const qrImportModalClose = document.getElementById('qrImportModalClose');
+        if (qrImportModalClose) {
+            qrImportModalClose.addEventListener('click', () => this.hideQRImportModal());
+        }
+
+        const qrImportModalCancel = document.getElementById('qrImportModalCancel');
+        if (qrImportModalCancel) {
+            qrImportModalCancel.addEventListener('click', () => this.hideQRImportModal());
+        }
+
+        const importDataBtn = document.getElementById('importDataBtn');
+        if (importDataBtn) {
+            importDataBtn.addEventListener('click', () => this.importQRData());
         }
     }
     
@@ -1790,6 +1730,145 @@ class HabitTracker {
             }
         };
         reader.readAsText(file);
+    }
+
+    // QRコードエクスポートモーダルを表示
+    async showQRExportModal() {
+        if (!this.currentUser) {
+            alert('ログインが必要です');
+            return;
+        }
+
+        const modal = document.getElementById('qrExportModal');
+        if (modal) {
+            modal.style.display = 'block';
+            
+            try {
+                // データをQRコード用にエクスポート
+                const qrData = await qrSyncManager.exportToQR();
+                
+                // QRコードを生成
+                await qrSyncManager.generateQRCode('qrCodeCanvas', qrData);
+                
+                console.log('✅ QRコードエクスポートモーダルを表示しました');
+            } catch (error) {
+                console.error('❌ QRコード生成エラー:', error);
+                alert('QRコードの生成に失敗しました');
+            }
+        }
+    }
+
+    // QRコードエクスポートモーダルを非表示
+    hideQRExportModal() {
+        const modal = document.getElementById('qrExportModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // QRコードインポートモーダルを表示
+    showQRImportModal() {
+        const modal = document.getElementById('qrImportModal');
+        if (modal) {
+            modal.style.display = 'block';
+            
+            // 入力フィールドをクリア
+            const input = document.getElementById('qrDataInput');
+            if (input) {
+                input.value = '';
+            }
+            
+            // メッセージをクリア
+            this.hideQRImportMessage();
+        }
+    }
+
+    // QRコードインポートモーダルを非表示
+    hideQRImportModal() {
+        const modal = document.getElementById('qrImportModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // QRコード画像をダウンロード
+    downloadQRCode() {
+        try {
+            qrSyncManager.downloadQRCode();
+        } catch (error) {
+            console.error('❌ QRコードダウンロードエラー:', error);
+            alert('QRコードのダウンロードに失敗しました');
+        }
+    }
+
+    // QRコードデータをインポート
+    async importQRData() {
+        try {
+            const input = document.getElementById('qrDataInput');
+            if (!input) {
+                throw new Error('入力フィールドが見つかりません');
+            }
+
+            const qrData = input.value.trim();
+            if (!qrData) {
+                this.showQRImportMessage('QRコードデータを入力してください', true);
+                return;
+            }
+
+            // QRコードデータからデータをインポート
+            const userData = qrSyncManager.importFromQR(qrData);
+
+            // 現在のユーザーと異なる場合、確認を求める
+            if (this.currentUser && userData.email !== this.currentUser.email) {
+                if (!confirm(`インポートするデータは「${userData.email}」のものです。\n現在のユーザー「${this.currentUser.email}」のデータを上書きしますか？`)) {
+                    return;
+                }
+            }
+
+            // データを適用
+            this.completedHabits = userData.completedHabits || {};
+            this.healthData = userData.healthData || {};
+            this.achievements = userData.achievements || {};
+
+            // ローカルストレージに保存
+            localStorage.setItem(`habit_data_${userData.email}`, JSON.stringify(userData));
+
+            // UIを更新
+            this.renderCalendar();
+            this.updateStatsView();
+
+            this.showQRImportMessage('データをインポートしました', false);
+            
+            // 3秒後にモーダルを閉じる
+            setTimeout(() => {
+                this.hideQRImportModal();
+            }, 2000);
+
+        } catch (error) {
+            console.error('❌ QRコードインポートエラー:', error);
+            this.showQRImportMessage(`インポートエラー: ${error.message}`, true);
+        }
+    }
+
+    // QRコードインポートメッセージを表示
+    showQRImportMessage(message, isError) {
+        const messageEl = document.getElementById('qrImportMessage');
+        if (messageEl) {
+            messageEl.textContent = message;
+            messageEl.style.display = 'block';
+            messageEl.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+            messageEl.style.color = '#fff';
+            messageEl.style.padding = '10px';
+            messageEl.style.borderRadius = '4px';
+        }
+    }
+
+    // QRコードインポートメッセージを非表示
+    hideQRImportMessage() {
+        const messageEl = document.getElementById('qrImportMessage');
+        if (messageEl) {
+            messageEl.style.display = 'none';
+        }
     }
 
     // 現在の週を取得（月曜日開始）
