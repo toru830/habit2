@@ -1,6 +1,6 @@
-// JSONBin.io API設定
-const JSONBIN_API_URL = 'https://api.jsonbin.io/v3/bins';
-const JSONBIN_API_KEY = '$2a$10$YOUR_ACTUAL_API_KEY_HERE'; // 実際のAPIキーに置き換え
+// JSONBin.io API設定（公式仕様準拠）
+const JSONBIN_API_BASE_URL = 'https://api.jsonbin.io/v3';
+const JSONBIN_API_KEY = '$2a$10$20WoL2UGPXzIFY1SxOaJaepK68nxCt3BqZ9u02O7nmRJ/RKSfE7By';
 
 // APIキー設定関数
 function setJsonbinApiKey(apiKey) {
@@ -579,7 +579,7 @@ class HabitTracker {
         return `habit2_${Math.abs(hash).toString(36)}`;
     }
 
-    // クラウドからデータを同期（JSONBin.io API使用）
+    // クラウドからデータを同期（JSONBin.io API公式仕様準拠）
     async syncFromCloud() {
         if (!this.currentUser || this.isSyncing) return;
         
@@ -607,8 +607,9 @@ class HabitTracker {
             // メールアドレスからBin IDを生成
             const binId = this.generateBinId(this.currentUser.email);
             
-            // JSONBin.io APIからデータを取得
-            const response = await fetch(`${JSONBIN_API_URL}/${binId}/latest`, {
+            // JSONBin.io APIからデータを取得（公式仕様準拠）
+            const response = await fetch(`${JSONBIN_API_BASE_URL}/bins/${binId}/latest`, {
+                method: 'GET',
                 headers: {
                     'X-Master-Key': apiKey
                 }
@@ -684,7 +685,7 @@ class HabitTracker {
         }
     }
 
-    // クラウドにデータを同期（JSONBin.io API使用）
+    // クラウドにデータを同期（JSONBin.io API公式仕様準拠）
     async syncToCloud() {
         if (!this.currentUser || this.isSyncing) return;
         
@@ -721,8 +722,8 @@ class HabitTracker {
             // メールアドレスからBin IDを生成
             const binId = this.generateBinId(this.currentUser.email);
 
-            // まず既存のBinをチェック
-            let response = await fetch(`${JSONBIN_API_URL}/${binId}/latest`, {
+            // まず既存のBinをチェック（公式仕様準拠）
+            let response = await fetch(`${JSONBIN_API_BASE_URL}/bins/${binId}/latest`, {
                 method: 'GET',
                 headers: {
                     'X-Master-Key': apiKey
@@ -731,8 +732,8 @@ class HabitTracker {
 
             // Binが存在しない場合は作成、存在する場合は更新
             if (response.status === 404) {
-                // 新しいBinを作成
-                response = await fetch(`${JSONBIN_API_URL}`, {
+                // 新しいBinを作成（公式仕様準拠）
+                response = await fetch(`${JSONBIN_API_BASE_URL}/bins`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -741,8 +742,8 @@ class HabitTracker {
                     body: JSON.stringify(userData)
                 });
             } else if (response.ok) {
-                // 既存のBinを更新
-                response = await fetch(`${JSONBIN_API_URL}/${binId}`, {
+                // 既存のBinを更新（公式仕様準拠）
+                response = await fetch(`${JSONBIN_API_BASE_URL}/bins/${binId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1117,123 +1118,98 @@ class HabitTracker {
         }
     }
 
-    // APIキー接続テスト
+    // JSONBin.io API接続テスト（公式仕様準拠）
     async testApiKeyConnection(apiKey) {
         try {
-            console.log('🔑 APIキーテスト開始:', apiKey.substring(0, 10) + '...');
+            console.log('🔑 JSONBin.io APIテスト開始:', apiKey.substring(0, 10) + '...');
             this.updateDebugInfo('APIキーテスト中...');
             
-            // まず、APIキーの形式をチェック
+            // APIキーの形式をチェック
             if (!apiKey.startsWith('$2a$10$')) {
                 this.updateDebugInfo('❌ APIキー形式が正しくありません');
                 this.showApiKeyMessage('❌ APIキーは「$2a$10$」で始まる必要があります', true);
                 return false;
             }
             
-            // より簡単なテストを実行 - 最小限のデータで
-            const testData = { 
+            // まず、簡単なGETリクエストでAPIキーをテスト
+            console.log('🔑 ステップ1: APIキーの認証テスト');
+            const authTestUrl = `${JSONBIN_API_BASE_URL}/bins`;
+            
+            const authResponse = await fetch(authTestUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Master-Key': apiKey
+                }
+            });
+            
+            console.log('🔑 認証テストレスポンス:', {
+                status: authResponse.status,
+                statusText: authResponse.statusText,
+                ok: authResponse.ok
+            });
+            
+            if (!authResponse.ok) {
+                if (authResponse.status === 401) {
+                    this.updateDebugInfo('❌ 401 Unauthorized: APIキーが無効です');
+                    this.showApiKeyMessage('❌ APIキーが無効です。正しいキーを入力してください。', true);
+                } else if (authResponse.status === 403) {
+                    this.updateDebugInfo('❌ 403 Forbidden: 権限が不足しています');
+                    this.showApiKeyMessage('❌ APIキーの権限が不足しています。', true);
+                } else {
+                    this.updateDebugInfo(`❌ エラー: ${authResponse.status} ${authResponse.statusText}`);
+                    this.showApiKeyMessage(`❌ APIエラー: ${authResponse.status} ${authResponse.statusText}`, true);
+                }
+                return false;
+            }
+            
+            // 認証が成功した場合、簡単なBinを作成してテスト
+            console.log('🔑 ステップ2: Bin作成テスト');
+            const testData = {
                 test: true,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                message: 'JSONBin.io API接続テスト'
             };
             
-            console.log('🔑 送信データ:', testData);
-            console.log('🔑 APIエンドポイント:', JSONBIN_API_URL);
-            console.log('🔑 使用ヘッダー:', {
-                'Content-Type': 'application/json',
-                'X-Master-Key': apiKey.substring(0, 10) + '...'
+            const createResponse = await fetch(`${JSONBIN_API_BASE_URL}/bins`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': apiKey
+                },
+                body: JSON.stringify(testData)
             });
             
-            // 複数のエンドポイントを試す
-            const endpoints = [
-                'https://api.jsonbin.io/v3/bins',
-                'https://api.jsonbin.io/v3/b',
-                'https://api.jsonbin.io/v3/bins/'
-            ];
+            console.log('🔑 Bin作成レスポンス:', {
+                status: createResponse.status,
+                statusText: createResponse.statusText,
+                ok: createResponse.ok
+            });
             
-            let response = null;
-            let workingEndpoint = null;
+            if (!createResponse.ok) {
+                const errorData = await createResponse.json().catch(() => ({}));
+                console.error('🔑 Bin作成エラー:', errorData);
+                this.updateDebugInfo(`❌ Bin作成失敗: ${createResponse.status} ${createResponse.statusText}`);
+                this.showApiKeyMessage(`❌ Bin作成に失敗しました: ${createResponse.status}`, true);
+                return false;
+            }
             
-            for (const endpoint of endpoints) {
-                try {
-                    console.log(`🔑 エンドポイントをテスト中: ${endpoint}`);
-                    response = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Master-Key': apiKey
-                        },
-                        body: JSON.stringify(testData)
-                    });
-                    
-                    console.log(`🔑 ${endpoint} レスポンス:`, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        ok: response.ok
-                    });
-                    
-                    if (response.ok) {
-                        workingEndpoint = endpoint;
-                        break;
+            const binData = await createResponse.json();
+            console.log('🔑 Bin作成成功:', binData);
+            
+            // 作成したBinを削除（クリーンアップ）
+            if (binData.metadata && binData.metadata.id) {
+                console.log('🔑 ステップ3: テストBinのクリーンアップ');
+                const deleteResponse = await fetch(`${JSONBIN_API_BASE_URL}/bins/${binData.metadata.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Master-Key': apiKey
                     }
-                } catch (error) {
-                    console.log(`🔑 ${endpoint} エラー:`, error.message);
-                }
-            }
-            
-            if (!workingEndpoint) {
-                this.updateDebugInfo('❌ すべてのエンドポイントでエラーが発生しました');
-                this.showApiKeyMessage('❌ APIエンドポイントに問題があります', true);
-                return false;
-            }
-            
-            console.log(`🔑 動作するエンドポイント: ${workingEndpoint}`);
-
-            console.log('🔑 APIレスポンス:', {
-                status: response.status,
-                statusText: response.statusText,
-                ok: response.ok,
-                headers: Object.fromEntries(response.headers.entries())
-            });
-
-            if (!response.ok) {
-                let errorData = {};
-                try {
-                    errorData = await response.json();
-                    console.log('🔑 エラーレスポンス詳細:', errorData);
-                } catch (e) {
-                    console.log('🔑 エラーレスポンスの解析に失敗:', e);
-                }
-                
-                console.error('🔑 APIエラー詳細:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    errorData: errorData
                 });
-                
-                // デバッグ情報を更新
-                this.updateDebugInfo(`❌ エラー: ${response.status} ${response.statusText}`);
-                
-                // 詳細なエラーメッセージを表示
-                if (response.status === 401) {
-                    this.showApiKeyMessage('❌ APIキーが無効です。JSONBin.ioで新しいキーを作成してください。', true);
-                    this.updateDebugInfo('❌ 401 Unauthorized: APIキーが無効または期限切れです');
-                } else if (response.status === 403) {
-                    this.showApiKeyMessage('❌ APIキーの権限が不足しています。', true);
-                    this.updateDebugInfo('❌ 403 Forbidden: 権限が不足しています');
-                } else if (response.status === 429) {
-                    this.showApiKeyMessage('❌ APIリクエスト制限に達しました。しばらく待ってから再試行してください。', true);
-                    this.updateDebugInfo('❌ 429 Too Many Requests: リクエスト制限に達しました');
-                } else {
-                    this.showApiKeyMessage(`❌ APIエラー: ${response.status} ${response.statusText}`, true);
-                    this.updateDebugInfo(`❌ ${response.status} ${response.statusText}: 予期しないエラー`);
-                }
-                
-                return false;
+                console.log('🔑 クリーンアップ結果:', deleteResponse.status);
             }
-
-            const data = await response.json();
-            console.log('🔑 APIテスト成功:', data);
+            
             this.updateDebugInfo('✅ API接続テスト成功！');
+            this.showApiKeyMessage('✅ API接続テストが成功しました！', false);
             return true;
             
         } catch (error) {
