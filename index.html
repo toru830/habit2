@@ -16,55 +16,8 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijk2IiBmaWxsPSIjMDAwMDAwIi8+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijg0IiBmaWxsPSIjNEE5MEUyIi8+CjxzdmcgeD0iNDgiIHk9IjQ4IiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik03MiA0OEw0OCA3Mkw2MCA4NCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPGNpcmNsZSBjeD0iNzIiIGN5PSI3MiIgcj0iMTIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+Cjwvc3ZnPgo=">
-    <link rel="stylesheet" href="styles.css?v=20250101430000">
+    <link rel="stylesheet" href="styles.css?v=20250101440000">
     
-    <!-- QRコード生成ライブラリ（複数CDN対応） -->
-    <script>
-        // QRCodeライブラリの読み込み確認とフォールバック
-        function loadQRCodeLibrary() {
-            return new Promise((resolve, reject) => {
-                if (typeof QRCode !== 'undefined') {
-                    resolve();
-                    return;
-                }
-                
-                const cdnUrls = [
-                    'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-                    'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
-                    'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js'
-                ];
-                
-                let currentIndex = 0;
-                
-                function tryLoadScript() {
-                    if (currentIndex >= cdnUrls.length) {
-                        reject(new Error('すべてのCDNからQRCodeライブラリの読み込みに失敗しました'));
-                        return;
-                    }
-                    
-                    const script = document.createElement('script');
-                    script.src = cdnUrls[currentIndex];
-                    script.onload = () => {
-                        console.log('✅ QRCodeライブラリを読み込みました:', cdnUrls[currentIndex]);
-                        resolve();
-                    };
-                    script.onerror = () => {
-                        console.warn('⚠️ CDN読み込み失敗:', cdnUrls[currentIndex]);
-                        currentIndex++;
-                        tryLoadScript();
-                    };
-                    document.head.appendChild(script);
-                }
-                
-                tryLoadScript();
-            });
-        }
-        
-        // ページ読み込み時にQRCodeライブラリを読み込み
-        loadQRCodeLibrary().catch(error => {
-            console.error('❌ QRCodeライブラリの読み込みに失敗:', error);
-        });
-    </script>
 </head>
 <body>
     <div class="app-container">
@@ -85,8 +38,6 @@
                         <button id="authBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #4A90E2; color: white; font-size: 14px; display: flex; align-items: center; justify-content: center;" title="ログイン">👤</button>
                         <button id="logoutBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #28a745; color: white; font-size: 14px; display: none; align-items: center; justify-content: center;" title="ログアウト">✓</button>
                         <button id="syncBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #ffc107; color: #333; font-size: 14px; display: none; align-items: center; justify-content: center;" title="自動同期">☁️</button>
-                        <button id="qrExportBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 10px; border-radius: 50%; background-color: #28a745; color: white; font-size: 14px; display: flex; align-items: center; justify-content: center;" title="QRコードでエクスポート">📱</button>
-                <button id="qrImportBtn" class="action-btn" style="width: 32px; height: 32px; padding: 0; margin-left: 5px; border-radius: 50%; background-color: #17a2b8; color: white; font-size: 14px; display: flex; align-items: center; justify-content: center;" title="QRコードでインポート">📷</button>
                     </div>
                 </div>
 
@@ -732,59 +683,7 @@
         }
     </script>
 
-    <!-- QRコードエクスポートモーダル -->
-    <div id="qrExportModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
-        <div class="modal-content" style="background-color: #333; margin: 5% auto; padding: 30px; border: 1px solid #666; width: 90%; max-width: 400px; border-radius: 8px; position: relative;">
-            <button id="qrExportModalClose" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 5px; width: auto; height: auto;">×</button>
-            <h3 style="color: white; margin-top: 0; text-align: center;">📱 QRコードでエクスポート</h3>
-            
-            <div style="text-align: center; margin: 20px 0;">
-                <div id="qrCodeContainer" style="background: white; padding: 20px; border-radius: 8px; display: inline-block; margin: 20px 0;">
-                    <canvas id="qrCodeCanvas" width="200" height="200"></canvas>
-                </div>
-                <p style="color: #ccc; font-size: 14px; margin: 10px 0;">他のデバイスでこのQRコードを読み取って<br>データをインポートできます</p>
-            </div>
-            
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button id="downloadQrBtn" class="action-btn" style="padding: 12px 20px; background-color: #28a745;">画像を保存</button>
-                <button id="qrExportModalCancel" class="action-btn" style="padding: 12px 20px; background-color: #666;">閉じる</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- QRコードインポートモーダル -->
-    <div id="qrImportModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
-        <div class="modal-content" style="background-color: #333; margin: 5% auto; padding: 30px; border: 1px solid #666; width: 90%; max-width: 400px; border-radius: 8px; position: relative;">
-            <button id="qrImportModalClose" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 5px; width: auto; height: auto;">×</button>
-            <h3 style="color: white; margin-top: 0; text-align: center;">📷 QRコードでインポート</h3>
-            
-            <div style="text-align: center; margin: 20px 0;">
-                <div style="background-color: #222; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h4 style="color: #ffc107; margin-top: 0;">📱 QRコード読み取り方法</h4>
-                    <p style="color: #ccc; font-size: 14px; margin: 10px 0;"><strong>方法1（推奨）:</strong> QRコードをスキャンして自動インポート</p>
-                    <p style="color: #ccc; font-size: 14px; margin: 10px 0;">1. スマホでQRコードをスキャン</p>
-                    <p style="color: #ccc; font-size: 14px; margin: 10px 0;">2. 表示されたURLを開く</p>
-                    <p style="color: #ccc; font-size: 14px; margin: 10px 0;">3. 自動的にデータがインポートされます</p>
-                    <hr style="border-color: #666; margin: 15px 0;">
-                    <p style="color: #ccc; font-size: 14px; margin: 10px 0;"><strong>方法2:</strong> 手動でデータを貼り付け</p>
-                    <p style="color: #ccc; font-size: 14px; margin: 10px 0;">下記のテキストエリアにQRコードから取得したURLを貼り付けてください</p>
-                </div>
-                
-                <div style="margin: 20px 0;">
-                    <label for="qrDataInput" style="display: block; color: #ccc; margin-bottom: 8px; font-weight: bold;">QRコードデータまたはURL:</label>
-                    <textarea id="qrDataInput" placeholder="QRコードから取得したデータを貼り付けてください" style="width: 100%; height: 100px; padding: 12px; border: 1px solid #666; border-radius: 4px; background-color: #222; color: #fff; font-size: 14px; resize: vertical;"></textarea>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: nowrap;">
-                <button id="importDataBtn" class="action-btn" style="padding: 12px 20px; background-color: #17a2b8; white-space: nowrap; min-width: 120px;">データをインポート</button>
-                <button id="qrImportModalCancel" class="action-btn" style="padding: 12px 20px; background-color: #666; white-space: nowrap; min-width: 80px;">閉じる</button>
-            </div>
-            
-            <div id="qrImportMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
-        </div>
-    </div>
-
-    <script src="script.js?v=20250101430000"></script>
+    <script src="script.js?v=20250101440000"></script>
 </body>
 </html>
