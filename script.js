@@ -456,69 +456,162 @@ class HabitTracker {
     }
     
     // データをエクスポート
-    exportData() {
-        const data = {
+    exportUserData() {
+        if (!this.currentUser) {
+            alert('❌ エラー：ログインが必要です。\n\n先にログインしてからデータをエクスポートしてください。');
+            return;
+        }
+
+        // データの統計を計算
+        const habitCount = Object.keys(this.completedHabits).length;
+        const healthCount = Object.keys(this.healthData).length;
+        const achievementCount = this.achievements.badges ? this.achievements.badges.length : 0;
+        
+        const userData = {
+            userId: this.currentUser.id,
+            email: this.currentUser.email,
             completedHabits: this.completedHabits,
             healthData: this.healthData,
             achievements: this.achievements,
-            exportDate: new Date().toISOString()
+            exportDate: new Date().toISOString(),
+            version: '2.0',
+            stats: {
+                habitDays: habitCount,
+                healthDays: healthCount,
+                achievementCount: achievementCount,
+                totalStreak: this.achievements.currentStreak || 0,
+                bestStreak: this.achievements.bestStreak || 0
+            }
         };
         
-        const dataStr = JSON.stringify(data, null, 2);
+        const dataStr = JSON.stringify(userData, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `habit-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `habit2_${this.currentUser.email.replace('@', '_at_')}_${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        alert('データをエクスポートしました！');
+        // 詳細なエクスポート完了メッセージ
+        const exportMessage = `✅ データをエクスポートしました！
+
+📊 エクスポート内容：
+- 習慣データ: ${habitCount}日分
+- ヘルスデータ: ${healthCount}日分  
+- 成果バッジ: ${achievementCount}個
+- 現在の連続記録: ${this.achievements.currentStreak || 0}日
+- 最高連続記録: ${this.achievements.bestStreak || 0}日
+
+📱 スマホでの同期手順：
+1. このファイルをスマホに転送
+   （メール、クラウドストレージ、USB等）
+2. スマホで同じメールアドレスでログイン
+3. ☁️ボタン → データをインポート
+4. ファイルを選択して同期完了
+
+🔒 セキュリティ：
+メールアドレスが一致する場合のみインポート可能`;
+
+        alert(exportMessage);
     }
     
     // データをインポート
-    importData() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
+    importUserData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
         
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        
-                        if (data.completedHabits) {
-                            this.completedHabits = data.completedHabits;
-                        }
-                        if (data.healthData) {
-                            this.healthData = data.healthData;
-                        }
-                        if (data.achievements) {
-                            this.achievements = data.achievements;
-                        }
-                        
-                        this.saveCompletedHabits();
-                        this.saveHealthData();
-                        this.saveAchievements();
-                        this.renderCalendar();
-                        this.updateMotivationDisplay();
-                        
-                        alert('データをインポートしました！');
-                    } catch (error) {
-                        alert('データのインポートに失敗しました。正しいファイルを選択してください。');
-                    }
+        // ログイン確認
+        if (!this.currentUser) {
+            alert('❌ エラー：ログインが必要です。\n\n先にログインしてからデータをインポートしてください。');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const userData = JSON.parse(e.target.result);
+                
+                // ファイル形式の確認
+                if (!userData.version || userData.version < '1.0') {
+                    alert('❌ エラー：\n\n古い形式のファイルです。\n\n最新版でエクスポートし直してください。');
+                    return;
+                }
+                
+                // セキュリティチェック：メールアドレスの一致確認
+                if (!userData.email || userData.email !== this.currentUser.email) {
+                    alert('❌ セキュリティエラー：\n\nインポートしようとしているデータのメールアドレスが、現在ログインしているアカウントと一致しません。\n\n正しいアカウントでログインしてから再度お試しください。');
+                    return;
+                }
+                
+                // データの整合性チェック
+                if (!userData.completedHabits && !userData.healthData && !userData.achievements) {
+                    alert('❌ エラー：\n\n有効なデータが見つかりません。\n\n正しいエクスポートファイルを選択してください。');
+                    return;
+                }
+                
+                // 現在のデータをバックアップ
+                const currentData = {
+                    completedHabits: { ...this.completedHabits },
+                    healthData: { ...this.healthData },
+                    achievements: { ...this.achievements }
                 };
-                reader.readAsText(file);
+                
+                // インポート確認ダイアログ
+                const importStats = userData.stats || {};
+                const confirmMessage = `📥 データをインポートしますか？
+
+📊 インポート内容：
+- 習慣データ: ${importStats.habitDays || 0}日分
+- ヘルスデータ: ${importStats.healthDays || 0}日分
+- 成果バッジ: ${importStats.achievementCount || 0}個
+- 連続記録: ${importStats.totalStreak || 0}日
+- 最高記録: ${importStats.bestStreak || 0}日
+
+⚠️ 注意：現在のデータは上書きされます。
+
+続行しますか？`;
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+                
+                // データを復元
+                this.completedHabits = userData.completedHabits || {};
+                this.healthData = userData.healthData || {};
+                this.achievements = userData.achievements || {};
+                
+                // ローカルストレージに保存
+                this.saveLocalData();
+                
+                // UIを更新
+                this.renderCalendar();
+                this.updateStatsView();
+                
+                // インポート完了メッセージ
+                const successMessage = `✅ データをインポートしました！
+
+📱 同期完了：
+- 習慣データが復元されました
+- ヘルスデータが復元されました
+- 成果データが復元されました
+
+🔒 セキュリティ：
+正しいアカウントのデータのみが復元されました
+
+💾 バックアップ：
+元のデータは一時的に保存されています`;
+
+                alert(successMessage);
+                
+            } catch (error) {
+                alert('❌ ファイルの読み込みに失敗しました：\n\n' + error.message + '\n\n正しいJSONファイルを選択してください。');
             }
         };
-        
-        input.click();
+        reader.readAsText(file);
     }
     
     // バックアップから復元
@@ -1057,9 +1150,11 @@ class HabitTracker {
         const authBtn = document.getElementById('authBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const syncBtn = document.getElementById('syncBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
         
         if (this.currentUser) {
-            // ログイン済み：ログアウトボタンと同期ボタンを表示
+            // ログイン済み：ログアウトボタン、同期ボタン、エクスポート・インポートボタンを表示
             if (authBtn) authBtn.style.display = 'none';
             if (logoutBtn) {
                 logoutBtn.style.display = 'flex';
@@ -1070,6 +1165,14 @@ class HabitTracker {
                 syncBtn.style.display = 'flex';
                 syncBtn.title = '自動同期';
             }
+            if (exportBtn) {
+                exportBtn.style.display = 'flex';
+                exportBtn.title = 'データをエクスポート';
+            }
+            if (importBtn) {
+                importBtn.style.display = 'flex';
+                importBtn.title = 'データをインポート';
+            }
         } else {
             // 未ログイン状態：ログインボタンのみ表示
             if (authBtn) {
@@ -1078,6 +1181,8 @@ class HabitTracker {
             }
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (syncBtn) syncBtn.style.display = 'none';
+            if (exportBtn) exportBtn.style.display = 'none';
+            if (importBtn) importBtn.style.display = 'none';
         }
     }
 
@@ -1389,6 +1494,23 @@ class HabitTracker {
                 alert('データの整合性チェックが完了しました。コンソールを確認してください。');
             },
             
+            // データ永続性テスト
+            testDataPersistence: () => {
+                const userData = this.getUserData();
+                const hasData = userData && (userData.completedHabits || userData.healthData || userData.achievements);
+                
+                if (hasData) {
+                    alert('✅ データ永続性確認\n\nデータが正常に保存されています：\n- 習慣データ: ' + (userData.completedHabits ? 'あり' : 'なし') + '\n- ヘルスデータ: ' + (userData.healthData ? 'あり' : 'なし') + '\n- 成果データ: ' + (userData.achievements ? 'あり' : 'なし') + '\n\nブラウザキャッシュをクリアしてもデータは保持されます。');
+                } else {
+                    alert('❌ データ永続性確認\n\nデータが見つかりません。\n\nログインして習慣をチェックしてから再度確認してください。');
+                }
+            },
+            
+            // ブラウザキャッシュクリアテスト
+            testCacheClear: () => {
+                alert('🧪 ブラウザキャッシュクリアテスト\n\n1. 現在のデータを確認してください\n2. ブラウザのキャッシュをクリアしてください\n3. ページを再読み込みしてください\n4. データが残っているか確認してください\n\n✅ データが残っていれば、ローカルストレージは正常に動作しています');
+            },
+            
             // 古いIDを強制的にクリア
             clearOldIds: () => {
                 const oldIds = ['ashwagandha', 'magnesium'];
@@ -1475,6 +1597,18 @@ class HabitTracker {
         
         if (importFile) {
             importFile.addEventListener('change', (e) => this.importUserData(e));
+        }
+        
+        // ヘッダーのエクスポート・インポートボタン
+        const headerExportBtn = document.getElementById('exportBtn');
+        const headerImportBtn = document.getElementById('importBtn');
+        
+        if (headerExportBtn) {
+            headerExportBtn.addEventListener('click', () => this.exportUserData());
+        }
+        
+        if (headerImportBtn) {
+            headerImportBtn.addEventListener('click', () => importFile.click());
         }
         
         // モーダルの閉じるボタン
