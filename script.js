@@ -721,15 +721,36 @@ class HabitTracker {
             // メールアドレスからBin IDを生成
             const binId = this.generateBinId(this.currentUser.email);
 
-            // JSONBin.io APIにデータを保存
-            const response = await fetch(`${JSONBIN_API_URL}/${binId}`, {
-                method: 'PUT',
+            // まず既存のBinをチェック
+            let response = await fetch(`${JSONBIN_API_URL}/${binId}/latest`, {
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-Master-Key': apiKey
-                },
-                body: JSON.stringify(userData)
+                }
             });
+
+            // Binが存在しない場合は作成、存在する場合は更新
+            if (response.status === 404) {
+                // 新しいBinを作成
+                response = await fetch(`${JSONBIN_API_URL}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': apiKey
+                    },
+                    body: JSON.stringify(userData)
+                });
+            } else if (response.ok) {
+                // 既存のBinを更新
+                response = await fetch(`${JSONBIN_API_URL}/${binId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': apiKey
+                    },
+                    body: JSON.stringify(userData)
+                });
+            }
 
             console.log('☁️ クラウド保存レスポンス:', {
                 status: response.status,
@@ -1102,11 +1123,8 @@ class HabitTracker {
             console.log('🔑 APIキーテスト開始:', apiKey.substring(0, 10) + '...');
             this.updateDebugInfo('APIキーテスト中...');
             
-            // テスト用のBin ID（ランダムなIDを使用）
-            const testBinId = 'test_connection_' + Date.now();
-            
-            const response = await fetch(`${JSONBIN_API_URL}/${testBinId}`, {
-                method: 'PUT',
+            const response = await fetch(`${JSONBIN_API_URL}`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Master-Key': apiKey
