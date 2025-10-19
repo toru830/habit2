@@ -933,49 +933,6 @@ class HabitTracker {
         }
     }
 
-    // クラウド同期設定を保存
-    async saveCloudSyncConfig() {
-        const apiKey = document.getElementById('jsonbinApiKey').value;
-        if (!apiKey) {
-            this.showCloudSyncMessage('API Keyを入力してください。', true);
-            return;
-        }
-
-        try {
-            // 接続テスト
-            const originalApiKey = window.cloudSync.apiKey;
-            window.cloudSync.apiKey = apiKey;
-            
-            const isConnected = await window.cloudSync.testConnection();
-            if (!isConnected) {
-                this.showCloudSyncMessage('接続テスト失敗。API Keyを確認してください。', true);
-                window.cloudSync.apiKey = originalApiKey;
-                return;
-            }
-
-            // 新しいBinを作成
-            const data = {
-                userId: this.currentUser.id,
-                email: this.currentUser.email,
-                completedHabits: this.completedHabits,
-                healthData: this.healthData,
-                achievements: this.achievements,
-                lastSync: new Date().toISOString()
-            };
-
-            const binId = await window.cloudSync.createBin(data);
-            
-            // 設定を保存
-            window.cloudSync.saveConfig(apiKey, binId);
-            
-            this.hideCloudSyncModal();
-            this.showAuthMessage('クラウド同期設定が完了しました！', false);
-            console.log('🔐 クラウド同期設定完了');
-        } catch (error) {
-            console.error('設定保存エラー:', error);
-            this.showCloudSyncMessage('設定保存エラー: ' + error.message, true);
-        }
-    }
 
     // 認証UIの更新
     updateAuthUI() {
@@ -1189,88 +1146,9 @@ class HabitTracker {
         }
     }
 
-    // クラウド同期設定モーダルを表示
-    showCloudSyncModal() {
-        const modal = document.getElementById('cloudSyncModal');
-        if (modal) {
-            modal.style.display = 'block';
-        }
-    }
 
-    // クラウド同期設定モーダルを非表示
-    hideCloudSyncModal() {
-        const modal = document.getElementById('cloudSyncModal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
 
-    // クラウド同期メッセージを表示
-    showCloudSyncMessage(message, type = 'error') {
-        const messageEl = document.getElementById('cloudSyncMessage');
-        messageEl.textContent = message;
-        messageEl.style.display = 'block';
-        messageEl.style.backgroundColor = type === 'error' ? '#ff4444' : '#44ff44';
-        messageEl.style.color = type === 'error' ? 'white' : 'black';
-    }
 
-    // クラウド同期メッセージを非表示
-    hideCloudSyncMessage() {
-        const messageEl = document.getElementById('cloudSyncMessage');
-        messageEl.style.display = 'none';
-    }
-
-    // 真のクラウド同期実行
-    async testCloudSyncConnection() {
-        try {
-            if (!this.currentUser) {
-                this.showCloudSyncMessage('ログインが必要です。');
-                return;
-            }
-            
-            // ローカルデータを取得
-            const userData = {
-                completedHabits: this.completedHabits,
-                healthData: this.healthData,
-                achievements: this.achievements,
-                userId: this.currentUser.id,
-                email: this.currentUser.email,
-                lastSync: new Date().toISOString()
-            };
-            
-            // ローカルストレージに保存
-            localStorage.setItem(`habit_data_${this.currentUser.id}`, JSON.stringify(userData));
-            localStorage.setItem(`habit_data_email_${this.currentUser.email}`, JSON.stringify(userData));
-            
-            // 真のクラウド同期：JSONBin.ioを使用（無料・認証不要）
-            try {
-                const response = await fetch('https://api.jsonbin.io/v3/b', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': '$2a$10$YOUR_API_KEY_HERE' // 実際のAPIキーに置き換え
-                    },
-                    body: JSON.stringify(userData)
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    localStorage.setItem(`cloud_bin_id_${this.currentUser.email}`, result.metadata.id);
-                    this.showCloudSyncMessage('クラウドに同期しました！', 'success');
-                    console.log('🔐 クラウド同期完了:', this.currentUser.email);
-                } else {
-                    throw new Error('クラウド同期失敗');
-                }
-            } catch (cloudError) {
-                console.warn('クラウド同期失敗、ローカルのみ保存:', cloudError);
-                this.showCloudSyncMessage('ローカルに保存しました（クラウド同期は設定が必要です）', 'success');
-            }
-            
-        } catch (error) {
-            console.error('同期エラー:', error);
-            this.showCloudSyncMessage('同期に失敗しました。');
-        }
-    }
 
     // データの保存（真のマルチデバイス対応）
     async saveUserData() {
@@ -4008,9 +3886,6 @@ class HabitTracker {
             const authModalCancel = document.getElementById('authModalCancel');
             const authModalCancel2 = document.getElementById('authModalCancel2');
             
-            // 簡単同期モーダルボタン
-            const cloudSyncTest = document.getElementById('cloudSyncTest');
-            const cloudSyncCancel = document.getElementById('cloudSyncCancel');
             
             // 認証モーダルイベントリスナー
             if (loginTab) {
@@ -4072,22 +3947,6 @@ class HabitTracker {
                 });
             }
 
-            // 簡単同期モーダルイベントリスナー
-            if (cloudSyncTest) {
-                cloudSyncTest.addEventListener('click', async (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    await this.testCloudSyncConnection();
-                });
-            }
-
-            if (cloudSyncCancel) {
-                cloudSyncCancel.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.hideCloudSyncModal();
-                });
-            }
 
             console.log('🔐 イベントリスナー設定完了');
 
