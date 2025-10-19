@@ -686,6 +686,9 @@ class HabitTracker {
             signupTab.style.backgroundColor = '#555';
             signupTab.style.color = '#ccc';
         }
+        
+        // メッセージをクリア
+        this.hideAuthMessage();
     }
 
     // 新規登録フォームを表示
@@ -814,6 +817,10 @@ class HabitTracker {
             localStorage.removeItem('habit_user');
             this.updateAuthUI();
             this.showAuthMessage('ログアウトしました。', false);
+            // 3秒後にメッセージを自動で非表示
+            setTimeout(() => {
+                this.hideAuthMessage();
+            }, 3000);
             console.log('🔐 ログアウト成功');
         } catch (error) {
             console.error('ログアウトエラー:', error);
@@ -919,13 +926,7 @@ class HabitTracker {
         }
     }
 
-    // ログインフォームを表示
-    showLoginForm() {
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('signupForm').style.display = 'none';
-        document.getElementById('loginTab').style.backgroundColor = '#4A90E2';
-        document.getElementById('signupTab').style.backgroundColor = '#555';
-    }
+    // ログインフォームを表示（重複メソッドを削除）
 
     // 新規登録フォームを表示
     showSignupForm() {
@@ -933,6 +934,9 @@ class HabitTracker {
         document.getElementById('signupForm').style.display = 'block';
         document.getElementById('loginTab').style.backgroundColor = '#555';
         document.getElementById('signupTab').style.backgroundColor = '#4A90E2';
+        
+        // メッセージをクリア
+        this.hideAuthMessage();
     }
 
     // フォームをクリア
@@ -1073,6 +1077,10 @@ class HabitTracker {
             localStorage.removeItem('habit_current_user');
             this.updateAuthUI();
             this.showAuthMessage('ログアウトしました。', false);
+            // 3秒後にメッセージを自動で非表示
+            setTimeout(() => {
+                this.hideAuthMessage();
+            }, 3000);
         }
     }
 
