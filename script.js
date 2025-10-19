@@ -1123,6 +1123,7 @@ class HabitTracker {
             console.log('🔑 APIキーテスト開始:', apiKey.substring(0, 10) + '...');
             this.updateDebugInfo('APIキーテスト中...');
             
+            // まず、より簡単なテストを実行
             const response = await fetch(`${JSONBIN_API_URL}`, {
                 method: 'POST',
                 headers: {
@@ -1139,11 +1140,18 @@ class HabitTracker {
             console.log('🔑 APIレスポンス:', {
                 status: response.status,
                 statusText: response.statusText,
-                ok: response.ok
+                ok: response.ok,
+                headers: Object.fromEntries(response.headers.entries())
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
+                let errorData = {};
+                try {
+                    errorData = await response.json();
+                } catch (e) {
+                    console.log('🔑 エラーレスポンスの解析に失敗:', e);
+                }
+                
                 console.error('🔑 APIエラー詳細:', {
                     status: response.status,
                     statusText: response.statusText,
@@ -1155,13 +1163,17 @@ class HabitTracker {
                 
                 // 詳細なエラーメッセージを表示
                 if (response.status === 401) {
-                    this.showApiKeyMessage('❌ APIキーが無効です。正しいキーを入力してください。', true);
+                    this.showApiKeyMessage('❌ APIキーが無効です。JSONBin.ioで新しいキーを作成してください。', true);
+                    this.updateDebugInfo('❌ 401 Unauthorized: APIキーが無効または期限切れです');
                 } else if (response.status === 403) {
                     this.showApiKeyMessage('❌ APIキーの権限が不足しています。', true);
+                    this.updateDebugInfo('❌ 403 Forbidden: 権限が不足しています');
                 } else if (response.status === 429) {
                     this.showApiKeyMessage('❌ APIリクエスト制限に達しました。しばらく待ってから再試行してください。', true);
+                    this.updateDebugInfo('❌ 429 Too Many Requests: リクエスト制限に達しました');
                 } else {
                     this.showApiKeyMessage(`❌ APIエラー: ${response.status} ${response.statusText}`, true);
+                    this.updateDebugInfo(`❌ ${response.status} ${response.statusText}: 予期しないエラー`);
                 }
                 
                 return false;
