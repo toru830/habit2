@@ -1236,8 +1236,8 @@ class HabitTracker {
                 this.currentUser = { id: userRecord.id, email: userRecord.email };
                 localStorage.setItem('habit_current_user', JSON.stringify(this.currentUser));
                 
-                // クラウドからデータを同期
-                await this.syncFromCloud();
+                // ローカルからデータを読み込み
+                this.loadLocalData();
                 
                 this.updateAuthUI();
                 this.hideAuthModal();
@@ -2900,11 +2900,10 @@ class HabitTracker {
         console.log('変更後のデータ:', this.completedHabits);
         this.saveCompletedHabits();
         
-        // クラウドに自動保存（認証済みのみ）
+        // 認証済みの場合はユーザーローカルに保存
         if (this.currentUser) {
             this.saveUserData();
-            // 自動同期を実行
-            this.syncToCloud();
+            // 旧クラウド同期は無効化
         }
         
         // 達成チェックを実行
@@ -5049,10 +5048,7 @@ class HabitTracker {
                 // メイン保存
                 localStorage.setItem('habitTrackerData', dataToSave);
                 
-                // 認証済みの場合はクラウドに同期
-                if (this.currentUser && !this.isGuestMode) {
-                    this.syncToCloud();
-                }
+                // 旧クラウド同期は無効化
                 
                 // バックアップ保存（タイムスタンプ付き）
                 const timestamp = new Date().toISOString();
@@ -5477,10 +5473,7 @@ class HabitTracker {
         console.log('ヘルスデータ切り替え:', { dateStr, type, newValue: this.healthData[dateStr][type], allData: this.healthData });
         this.saveHealthData();
         
-        // 自動同期を実行（認証済みのみ）
-        if (this.currentUser) {
-            this.syncToCloud();
-        }
+        // 旧クラウド同期は無効化
     }
 
     // ヘルス表示の更新
