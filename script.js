@@ -855,6 +855,11 @@ class HabitTracker {
     // ログアウト処理
     async logout() {
         try {
+            // ログアウト確認ダイアログ
+            if (!confirm('ログアウトしますか？\n\nログアウト後は、データの同期ができなくなります。')) {
+                return;
+            }
+            
             this.currentUser = null;
             localStorage.removeItem('habit_user');
             this.updateAuthUI();
@@ -871,25 +876,25 @@ class HabitTracker {
 
     // ゲストモードは削除済み
 
-    // 同期モーダルを表示
-    showSyncModal() {
-        const modal = document.getElementById('syncModal');
+    // 設定モーダルを表示（ヘッダー⚙️）
+    showSettingsModal() {
+        const modal = document.getElementById('settingsModal');
         if (modal) {
             modal.style.display = 'block';
         }
     }
 
-    // 同期モーダルを非表示
-    hideSyncModal() {
-        const modal = document.getElementById('syncModal');
+    // 設定モーダルを非表示
+    hideSettingsModal() {
+        const modal = document.getElementById('settingsModal');
         if (modal) {
             modal.style.display = 'none';
         }
     }
 
-    // 同期メッセージを表示
-    showSyncMessage(message, isError = false) {
-        const messageDiv = document.getElementById('syncMessage');
+    // 設定メッセージを表示
+    showSettingsMessage(message, isError = false) {
+        const messageDiv = document.getElementById('settingsMessage');
         if (messageDiv) {
             messageDiv.textContent = message;
             messageDiv.style.display = 'block';
@@ -898,9 +903,9 @@ class HabitTracker {
         }
     }
 
-    // 同期メッセージを非表示
-    hideSyncMessage() {
-        const messageDiv = document.getElementById('syncMessage');
+    // 設定メッセージを非表示
+    hideSettingsMessage() {
+        const messageDiv = document.getElementById('settingsMessage');
         if (messageDiv) {
             messageDiv.style.display = 'none';
         }
@@ -909,28 +914,28 @@ class HabitTracker {
     // 手動同期
     async manualSync() {
         if (!this.currentUser) {
-            this.showSyncMessage('ログインが必要です', true);
+            this.showSettingsMessage('ログインが必要です', true);
             return;
         }
 
         try {
-            this.showSyncMessage('同期中...', false);
+            this.showSettingsMessage('同期中...', false);
             
             // ローカルデータを保存
             this.saveLocalData();
             
             // 同期状況を表示
             const lastSync = new Date().toLocaleString('ja-JP');
-            this.showSyncMessage(`同期が完了しました！\n最終同期: ${lastSync}`, false);
+            this.showSettingsMessage(`同期が完了しました！\n最終同期: ${lastSync}`, false);
             
             // 3秒後にメッセージを非表示
             setTimeout(() => {
-                this.hideSyncMessage();
+                this.hideSettingsMessage();
             }, 3000);
             
         } catch (error) {
             console.error('❌ 手動同期エラー:', error);
-            this.showSyncMessage('同期に失敗しました: ' + error.message, true);
+            this.showSettingsMessage('同期に失敗しました: ' + error.message, true);
         }
     }
 
@@ -1149,29 +1154,19 @@ class HabitTracker {
     updateAuthUI() {
         const authBtn = document.getElementById('authBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-        const syncBtn = document.getElementById('syncBtn');
-        const exportBtn = document.getElementById('exportBtn');
-        const importBtn = document.getElementById('importBtn');
+        const settingsBtn = document.getElementById('settingsIconBtn');
         
         if (this.currentUser) {
-            // ログイン済み：ログアウトボタン、同期ボタン、エクスポート・インポートボタンを表示
+            // ログイン済み：ログアウトボタンと設定ボタンを表示
             if (authBtn) authBtn.style.display = 'none';
             if (logoutBtn) {
                 logoutBtn.style.display = 'flex';
                 logoutBtn.textContent = '✓';
                 logoutBtn.title = `ログアウト (${this.currentUser.email})`;
             }
-            if (syncBtn) {
-                syncBtn.style.display = 'flex';
-                syncBtn.title = '自動同期';
-            }
-            if (exportBtn) {
-                exportBtn.style.display = 'flex';
-                exportBtn.title = 'データをエクスポート';
-            }
-            if (importBtn) {
-                importBtn.style.display = 'flex';
-                importBtn.title = 'データをインポート';
+            if (settingsBtn) {
+                settingsBtn.style.display = 'flex';
+                settingsBtn.title = '設定・同期';
             }
         } else {
             // 未ログイン状態：ログインボタンのみ表示
@@ -1180,9 +1175,7 @@ class HabitTracker {
                 authBtn.title = 'ログイン';
             }
             if (logoutBtn) logoutBtn.style.display = 'none';
-            if (syncBtn) syncBtn.style.display = 'none';
-            if (exportBtn) exportBtn.style.display = 'none';
-            if (importBtn) importBtn.style.display = 'none';
+            if (settingsBtn) settingsBtn.style.display = 'none';
         }
     }
 
@@ -1599,40 +1592,30 @@ class HabitTracker {
             importFile.addEventListener('change', (e) => this.importUserData(e));
         }
         
-        // ヘッダーのエクスポート・インポートボタン
-        const headerExportBtn = document.getElementById('exportBtn');
-        const headerImportBtn = document.getElementById('importBtn');
+        // 設定ボタン
+        const settingsBtn = document.getElementById('settingsIconBtn');
         
-        if (headerExportBtn) {
-            headerExportBtn.addEventListener('click', () => this.exportUserData());
-        }
-        
-        if (headerImportBtn) {
-            headerImportBtn.addEventListener('click', () => importFile.click());
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => this.showSettingsModal());
         }
         
         // モーダルの閉じるボタン
         const authModalClose = document.getElementById('authModalClose');
-        const syncModalClose = document.getElementById('syncModalClose');
+        const settingsModalClose = document.getElementById('settingsModalClose');
         
         if (authModalClose) {
             authModalClose.addEventListener('click', () => this.hideAuthModal());
         }
         
-        if (syncModalClose) {
-            syncModalClose.addEventListener('click', () => this.hideSyncModal());
+        if (settingsModalClose) {
+            settingsModalClose.addEventListener('click', () => this.hideSettingsModal());
         }
         
-        // 同期ボタン
+        // 設定モーダル内のボタン
         const manualSyncBtn = document.getElementById('manualSync');
-        const syncCloseBtn = document.getElementById('syncClose');
         
         if (manualSyncBtn) {
             manualSyncBtn.addEventListener('click', () => this.manualSync());
-        }
-        
-        if (syncCloseBtn) {
-            syncCloseBtn.addEventListener('click', () => this.hideSyncModal());
         }
         
     }
@@ -4065,7 +4048,7 @@ class HabitTracker {
         document.getElementById('statsBtn').addEventListener('click', () => this.showStatsView());
         document.getElementById('monsterBtn').addEventListener('click', () => this.showMonsterView());
         document.getElementById('badgeBtn').addEventListener('click', () => this.showBadgeView());
-        document.getElementById('settingsBtn').addEventListener('click', () => this.showSettingsView());
+        // 設定ビュー切替は不要。ヘッダーの⚙️はモーダルを開く
         
         // 認証ボタン
         console.log('🔐 認証ボタンの設定開始');
@@ -4082,7 +4065,6 @@ class HabitTracker {
             // 認証ボタン
             const authBtn = document.getElementById('authBtn');
             const logoutBtn = document.getElementById('logoutBtn');
-            const syncBtn = document.getElementById('syncBtn');
             
             if (authBtn) {
                 console.log('🔐 認証ボタンのイベントリスナーを追加中...');
@@ -4108,16 +4090,7 @@ class HabitTracker {
                 console.log('🔐 ログアウトボタンのイベントリスナー追加完了');
             }
 
-            if (syncBtn) {
-                console.log('☁️ 同期ボタンのイベントリスナーを追加中...');
-                syncBtn.addEventListener('click', (event) => {
-                    console.log('☁️ 同期ボタンがクリックされました！');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.showSyncModal();
-                });
-                console.log('☁️ 同期ボタンのイベントリスナー追加完了');
-            }
+            // 旧同期ボタンは廃止
 
             // 認証モーダルボタン
             const loginTab = document.getElementById('loginTab');
